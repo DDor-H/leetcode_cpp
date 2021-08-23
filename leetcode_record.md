@@ -49,7 +49,7 @@
 
 
 
-**方法一：**暴力解法  O(n^2)
+**方法一：**暴力解法  O(n^2)  O(1)
 
 ```c++
 vector<int> twoSum(vector<int>& nums, int target) 
@@ -72,7 +72,7 @@ vector<int> twoSum(vector<int>& nums, int target)
 }
 ```
 
-**方法二：**hash表法  O(n)
+**方法二：**hash表法  时：O(n)  空：O(n)
 
 ```c++
 vector<int> twoSum(vector<int>& nums, int target) 
@@ -711,7 +711,7 @@ for (int i = 0; i < len; i++) {
 
 
 
-**方法一：**
+**方法一：**时：O(n)  空：O(1)
 
 ```c++
 class Solution {
@@ -732,7 +732,7 @@ public:
 };
 ```
 
-**方法二：**
+**方法二：**时：O(n)  空：O(1)
 
 ```c++
 class Solution {
@@ -806,7 +806,7 @@ public:
 
 
 
-**方法一：**
+**方法一：**时：O(n)  空：O(1)
 
 ```c++
 class Solution {
@@ -828,7 +828,7 @@ public:
 };
 ```
 
-**方法二：**
+**方法二：**时：O(n)  空：O(1)
 
 ```c++
 class Solution {
@@ -1386,7 +1386,7 @@ candidates 中的数字可以无限制重复被选取。如果至少一个所选
 
 
 
-**方法：**
+**方法：**时：O(nlogn)  空：O(n)
 
 ```c++
 class Solution {
@@ -1417,6 +1417,218 @@ public:
             backtracking(candidates, target - candidates[i], res, combine, i);
             combine.pop_back();  // 回溯
         }
+    }
+};
+```
+
+
+
+
+
+## 0040. 数组总和Ⅱ
+
+### 题目：
+
+给定一个数组 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。
+
+candidates 中的每个数字在每个组合中只能使用一次。
+
+注意：解集不能包含重复的组合。 
+
+**示例 1:**
+
+```
+输入: candidates = [10,1,2,7,6,1,5], target = 8,
+输出:
+[
+[1,1,6],
+[1,2,5],
+[1,7],
+[2,6]
+]
+```
+
+**示例 2:**
+
+```
+输入: candidates = [2,5,2,1,2], target = 5,
+输出:
+[
+[1,2,2],
+[5]
+]
+```
+
+**提示:**
+
+- 1 <= candidates.length <= 100
+- 1 <= candidates[i] <= 50
+- 1 <= target <= 30
+
+
+
+**解题思路：**
+
+类似于39题，但与39题不同的是，每个数字只能使用一次，所以下次递归需要 **i + 1**，并且还需要**排序去重**；
+
+
+
+**方法：**搜索回溯 + 剪枝   时：O(nlogn)  空：O(n)
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
+        sort(candidates.begin(), candidates.end());
+        vector<vector<int>> res;
+        vector<int> combine;
+        backtracking(candidates, res, combine, target, 0);
+        return res;
+    }
+    void backtracking(vector<int>& candidates, vector<vector<int>>& res, vector<int>& combine, int target, int idx)
+    {
+        if (target <= 0)
+        {
+            if (target == 0)
+                res.push_back(combine);
+            return;
+        }
+
+        for (int i = idx; i < candidates.size(); ++i)
+        {
+            if (i > idx && candidates[i] == candidates[i - 1])  // 去重
+                continue;
+            if (candidates[i] > target)  // 剪枝
+                return;
+            combine.push_back(candidates[i]);
+            backtracking(candidates, res, combine, target - candidates[i], i + 1);
+            combine.pop_back();
+        }
+    }
+};
+```
+
+
+
+
+
+## 0041. 缺失的第一个正整数
+
+### 题目：
+
+给你一个未排序的整数数组 nums ，请你找出其中没有出现的最小的正整数。
+
+请你实现时间复杂度为 O(n) 并且**只使用常数级别额外空间**的解决方案。
+
+**示例 1：**
+
+```
+输入：nums = [1,2,0]
+输出：3
+```
+
+**示例 2：**
+
+```
+输入：nums = [3,4,-1,1]
+输出：2
+```
+
+**示例 3：**
+
+```
+输入：nums = [7,8,9,11,12]
+输出：1
+```
+
+**提示：**
+
+- 1 <= nums.length <= 5 * 105
+- -231 <= nums[i] <= 231 - 1
+
+
+
+**解题思路：**
+
+思路1：对数组进行遍历，对于遍历到的数 x，如果它在 [1, N]的范围内，那么就将数组中的第 x-1 个位置（注意：数组下标从 0 开始）打上「标记」。在遍历结束之后，如果所有的位置都被打上了标记，那么答案是 N+1，否则答案是最小的没有打上标记的位置加 1。
+
+由于我们只在意 [1, N] 中的数，因此我们可以先对数组进行遍历，把不在 [1, N] 范围内的数修改成任意一个大于 N 的数（例如 N+1 ）。这样一来，数组中的所有数就都是正数了，因此我们就可以将「标记」表示为「负号」。算法的流程如下：
+
+- 我们将数组中所有小于等于 0 的数修改为 N+1；
+
+
+- 遍历数组中的每一个数 x，它可能已经被打了标记，因此原本对应的数为 |x|，其中 ∣∣ 为绝对值符号。如果 ∣x∣∈[1,N]，那么我们给数组中的第 |x| - 1 个位置的数添加一个负号。注意如果它已经有负号，不需要重复添加；
+
+
+- 在遍历完成之后，如果数组中的每一个数都是负数，那么答案是 N+1，否则答案是第一个正数的位置加 1。
+
+![leetcode_41](F:\C++\刷题\Img\leetcode_41.png)
+
+思路2：如果数组中包含 x∈[1,N]，那么恢复后，数组的第 x−1 个元素为 x。
+
+在恢复后，数组应当有 [1, 2, ..., N] 的形式，但其中有若干个位置上的数是错误的，每一个错误的位置就代表了一个缺失的正数。以题目中的示例二 [3, 4, -1, 1] 为例，恢复后的数组应当为 [1, -1, 3, 4]，我们就可以知道缺失的数为 22。
+
+那么我们如何将数组进行恢复呢？我们可以对数组进行一次遍历，对于遍历到的数 x=nums[i]，如果 x∈[1,N]，我们就知道 x 应当出现在数组中的 x−1 的位置，因此交换 nums[i] 和 nums[x−1]，这样 xx 就出现在了正确的位置。在完成交换后，新的nums[i] 可能还在 [1,N] 的范围内，我们需要继续进行交换操作，直到 x不属于[1,N]。
+
+如果 nums[i] 恰好与 nums[x−1] 相等，那么就会无限交换下去。此时我们有 nums[i] = x = nums[x−1]，说明 x 已经出现在了正确的位置。因此我们可以跳出循环，开始遍历下一个数。
+
+由于每次的交换操作都会使得某一个数交换到正确的位置，因此交换的次数最多为 N，整个方法的时间复杂度为 O(N)。
+
+思路3：空间换时间，hash表法（数组也行）；
+
+
+
+**方法一：**直接在原数组上修改标记  时:  O(n)  空：O(1)
+
+```c++
+class Solution {
+public:
+    int firstMissingPositive(vector<int>& nums) {
+        // 先检查是否包含 1 ，如果没有 1，则直接返回
+        auto idx = find(nums.begin(), nums.end(), 1);
+        if (idx == nums.end())
+            return 1;
+		
+        // 将 <= 0 及 > n 的值全置为 1
+        for (auto& num : nums)
+            if (num <= 0 || num > n)
+                num = 1;
+		
+        // 将每个数字 num 对应的下标为 num - 1 位置的值，置为相反数
+        int i = -1;
+        int n = nums.size();
+        for (i = 0; i < n; ++i)
+            nums[abs(nums[i]) - 1] = -abs(nums[abs(nums[i]) - 1]);
+
+        // 查找第一个没有被 没有被置为负数的 位置，返回 i + 1
+        for (i = 0; i < n; ++i)
+            if (nums[i] > 0)
+                return i + 1;
+
+        return n + 1;
+    }
+};
+```
+
+**方法二：**将对应的数字，交换到对应 - 1的位置上  时:  O(n)  空：O(1)
+
+```c++
+class Solution {
+public:
+    int firstMissingPositive(vector<int>& nums) {
+        int n = nums.size();
+        int i = -1;
+        for (i = 0; i < n; ++i)
+        {
+            while (nums[i] > 0 && nums[i] <= n && nums[i] != nums[nums[i] - 1])
+                swap(nums[i], nums[nums[i] - 1]);
+        }
+
+        for (i = 0; i < n; ++i)
+            if (nums[i] != i + 1)
+                return i + 1;
+
+        return n + 1;
     }
 };
 ```
