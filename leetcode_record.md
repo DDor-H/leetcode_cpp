@@ -1633,3 +1633,298 @@ public:
 };
 ```
 
+
+
+
+
+## 0042. 接雨水
+
+### 题目：
+
+给定 *n* 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+
+**示例 1：**
+
+![leetcode_42](F:\C++\刷题\Img\leetcode_42.png)
+
+```
+输入：height = [0,1,0,2,1,0,1,3,2,1,2,1]
+输出：6
+解释：上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的高度图，在这种情况下，可以接 6 个单位的雨水（蓝色部分表示雨水）。 
+```
+
+**示例 2：**
+
+```
+输入：height = [4,2,0,3,2,5]
+输出：9
+```
+
+**提示：**
+
+- n == height.length
+- 0 <= n <= 3 * 10^4
+- 0 <= height[i] <= 10^5
+
+
+
+**解题思路：**
+
+思路一：依次遍历每个柱子，找到每个柱子两侧的最大值中的最小值；然后和当前值作比较，大于当前值，则有积水；
+
+​				时：O(n^2)  空：O(1);
+
+思路二：动态规划，先用两个数组记录每个位置两侧的最大最小值，后续如思路一；
+
+​				时：O(n)  空：O(n);
+
+思路三：递减栈，维护一个单调栈，单调栈存储的是下标，满足从栈底到栈顶的下标对应的数组 height 中的元素递减。
+
+从左到右遍历数组，遍历到下标 i 时，如果栈内至少有两个元素，记栈顶元素为 top，top 的下面一个元素是 left，则一定有 height[left]≥height[top]。如果 height[i]>height[top]，则得到一个可以接雨水的区域，该区域的宽度是 i−left−1，高度是 min(height[left],height[i])−height[top]，根据宽度和高度即可计算得到该区域能接的雨水量。
+
+为了得到 left，需要将 top 出栈。在对 top 计算能接的雨水量之后，left 变成新的 top，重复上述操作，直到栈变为空，或者栈顶下标对应的 height 中的元素大于或等于 height[i]。
+
+在对下标 i 处计算能接的雨水量之后，将 i 入栈，继续遍历后面的下标，计算能接的雨水量。遍历结束之后即可得到能接的雨水总量。
+
+​				时：O(n)  空：O(n);
+
+![leetcode_42_1](F:\C++\刷题\Img\leetcode_42_1.png)
+
+思路四：双指针法
+
+
+
+**方法一：**暴力解法  超时
+
+```c++
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int len = height.size();
+        int count = 0;
+        for (int i = 1; i < len - 1; ++i)
+        {
+            int leftMax = height[0];
+            int rightMax = height[len - 1];
+            for (int j = 1; j < i; ++j)
+            {
+                if (height[j] > leftMax)
+                    leftMax = height[j];
+            }   
+            for (int j = len - 2; j > i; --j)
+            {
+                if (height[j] > rightMax)
+                    rightMax = height[j];
+            }
+
+            int minMax = (leftMax < rightMax ? leftMax : rightMax);
+            if (height[i] < minMax)
+                count += (minMax - height[i]);
+        }
+        return count;
+    }
+};
+```
+
+**方法二：**动态规划
+
+```c++
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int len = height.size();
+        if (len <= 2)
+            return 0;
+        int count = 0;
+
+        vector<int> leftMax(len);
+        leftMax[0] = height[0];
+        for (int i = 1; i < len; ++i)
+            leftMax[i] = max(leftMax[i - 1], height[i]);
+
+        vector<int> rightMax(len);
+        rightMax[len - 1] = height[len - 1];
+        for (int i = len - 2; i >= 0; --i)
+            rightMax[i] = max(rightMax[i + 1], height[i]);
+
+        for (int i = 1; i < len - 1; ++i)
+        {
+            int minMax = (leftMax[i] < rightMax[i] ? leftMax[i] : rightMax[i]);
+            if (minMax > height[i])
+                count += minMax - height[i];
+        }
+
+        return count;
+    }
+};
+```
+
+**方法三：**递减栈  
+
+```c++
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int len = height.size();
+        if (len <= 2)
+            return 0;
+        int count = 0;
+
+        stack<int> st;
+        for (int i = 0;i < len ; ++i)
+        {
+            while (!st.empty() && height[i] > height[st.top()])
+            {
+                int top = st.top();
+                st.pop();
+
+                // 1 号柱子比 0 号柱子高，所以不会存雨
+                if (st.empty())
+                    break;
+                
+                int left = st.top();
+                count += (min(height[left], height[i]) - height[top]) * (i - left - 1);
+            }
+            st.push(i);
+        }
+        return count;
+    }
+};
+```
+
+**方法四：**双指针法
+
+```c++
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int len = height.size();
+        if (len <= 2)
+            return 0;
+        int count = 0;
+
+        int left = 0, right = len - 1;
+        int leftMax = 0, rightMax = 0;
+        while (left < right)
+        {
+            leftMax = max(leftMax, height[left]);
+            rightMax = max(rightMax, height[right]);
+
+            if (height[left] < height[right])
+            {
+                count += leftMax - height[left];
+                ++left;
+            }
+            else
+            {
+                count += rightMax - height[right];
+                --right;
+            }
+        }
+        return count;
+    }
+};
+```
+
+
+
+
+
+## 0045. 跳跃游戏 Ⅱ
+
+### 题目：
+
+给你一个非负整数数组 nums ，你最初位于数组的第一个位置。数组中的每个元素代表你在该位置可以跳跃的最大长度。
+
+你的目标是使用最少的跳跃次数到达数组的最后一个位置。假设你总是可以到达数组的最后一个位置。
+
+**示例 1:**
+
+```
+输入: nums = [2,3,1,1,4]
+输出: 2
+解释: 跳到最后一个位置的最小跳跃数是 2。
+     从下标为 0 跳到下标为 1 的位置，跳 1 步，然后跳 3 步到达数组的最后一个位置。
+```
+
+**示例 2:**
+
+```
+输入: nums = [2,3,0,1,4]
+输出: 2
+```
+
+**提示:**
+
+- 1 <= nums.length <= 10^4
+- 0 <= nums[i] <= 1000
+
+
+
+**解题思路：**贪心算法的优化
+
+思路一：我们的目标是到达数组的最后一个位置，因此我们可以考虑最后一步跳跃前所在的位置，该位置通过跳跃能够到达最后一个位置。
+
+如果有多个位置通过跳跃都能够到达最后一个位置，那么我们应该如何进行选择呢？直观上来看，我们可以「贪心」地选择距离最后一个位置最远的那个位置，也就是对应下标最小的那个位置。因此，我们可以从左到右遍历数组，选择第一个满足要求的位置。
+
+找到最后一步跳跃前所在的位置之后，我们继续贪心地寻找倒数第二步跳跃前所在的位置，以此类推，直到找到数组的开始位置。
+
+思路二：如果我们「贪心」地进行正向查找，每次找到可到达的最远位置，就可以在线性时间内得到最少的跳跃次数。
+
+例如，对于数组 [2,3,1,2,4,2,3]，初始位置是下标 0，从下标 0 出发，最远可到达下标 2。下标 0 可到达的位置中，下标 1 的值是 3，从下标 1 出发可以达到更远的位置，因此第一步到达下标 1。
+
+从下标 1 出发，最远可到达下标 4。下标 1 可到达的位置中，下标 4 的值是 4 ，从下标 4 出发可以达到更远的位置，因此第二步到达下标 4。
+
+![leetcode_45](F:\C++\刷题\Img\leetcode_45.png)
+
+
+
+**方法一：** 时：O(n^2)  空：O(1)
+
+```c++
+class Solution {
+public:
+    int jump(vector<int>& nums) {
+        int position = nums.size() - 1;
+        int steps = 0;
+        while (position > 0)
+        {
+            for (int i = 0; i < position; ++i)
+            {
+                if (i + nums[i] >= position)
+                {
+                    position = i;
+                    ++steps;
+                    break;
+                }
+            }
+        }
+        return steps;
+    }
+};
+```
+
+**方法二：** 时：O(n)  空：O(1)
+
+```c++
+class Solution {
+public:
+    int jump(vector<int>& nums) {
+        int len = nums.size();
+        int steps = 0;
+        int maxPos = 0;
+        int end = 0;
+        for (int i = 0; i < len - 1; ++i)
+        {
+            maxPos = max(maxPos, nums[i] + i);
+            if (i == end)
+            {
+                end = maxPos;
+                ++steps;
+            }
+        }
+        return steps;
+    }
+};
+```
+
