@@ -1928,3 +1928,314 @@ public:
 };
 ```
 
+
+
+
+
+## 0048. 旋转图像
+
+### 题目：
+
+给定一个 n × n 的二维矩阵 matrix 表示一个图像。请你将图像**顺时针**旋转 90 度。
+
+你必须在 **原地** 旋转图像，这意味着你需要直接修改输入的二维矩阵。请不要 使用另一个矩阵来旋转图像。
+
+**示例 1：**
+
+![leetcode_48_1](F:\C++\刷题\Img\leetcode_48_1.jpg)
+
+```
+输入：matrix = [[1,2,3],[4,5,6],[7,8,9]]
+输出：[[7,4,1],[8,5,2],[9,6,3]]
+```
+
+**示例 2：**
+
+![leetcode_48_2](F:\C++\刷题\Img\leetcode_48_2.jpg)
+
+```
+输入：matrix = [[5,1,9,11],[2,4,8,10],[13,3,6,7],[15,14,12,16]]
+输出：[[15,13,2,5],[14,3,4,1],[12,6,8,9],[16,7,10,11]]
+```
+
+**示例 3：**
+
+```
+输入：matrix = [[1]]
+输出：[[1]]
+```
+
+**示例 4：**
+
+```
+输入：matrix = [[1,2],[3,4]]
+输出：[[3,1],[4,2]]
+```
+
+**提示：**
+
+- matrix.length == n
+- matrix[i].length == n
+- 1 <= n <= 20
+- -1000 <= matrix[i][j] <= 1000
+
+**解题思路：**
+
+思路一：两层for循环，控制下标，存下当前值，四次值的交换。
+
+思路二：水平轴对称 + 主轴对称  或  主轴对称 + 水平轴对称。
+
+拓展：逆时针、主对角线、副对角线、水平轴、竖直轴；
+
+
+
+**方法一：**时：O(n^2)  空O(1)
+
+```c++
+class Solution {
+public:
+    void rotate(vector<vector<int>>& matrix) {
+        int n = matrix.size();
+        if (n <= 1)
+            return;
+        int tmp = -1;
+        for (int i = 0; i < n / 2; ++i)
+        {
+            for (int j = 0; j < (n + 1) / 2; ++j)
+            {
+                tmp = matrix[i][j];
+                matrix[i][j] = matrix[n - j - 1][i];
+                matrix[n - j - 1][i] = matrix[n - i - 1][n - j - 1];
+                matrix[n - i - 1][n - j - 1] = matrix[j][n - i - 1];
+                matrix[j][n - i - 1] = tmp;
+            }
+        }
+    }
+};
+```
+
+方法二：时：O(n^2)  空O(1)
+
+```c++
+class Solution {
+public:
+    void rotate(vector<vector<int>>& matrix) {
+        int n = matrix.size();
+        if (n <= 1)
+            return;
+        int tmp = -1;
+        for (int i = 0; i < n / 2; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                tmp = matrix[i][j];
+                matrix[i][j] = matrix[n - i - 1][j];
+                matrix[n - i - 1][j] = tmp;
+            }
+        }
+
+        for (int i = 0; i < n; ++i)
+        {
+            for (int j = i; j < n; ++j)
+            {
+                if (i == j)
+                    continue;
+                tmp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = tmp;
+            }
+        }
+    }
+};
+```
+
+
+
+
+
+## 0053. 最大子序和
+
+### 题目：
+
+给定一个整数数组 nums ，找到一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
+
+**示例 1：**
+
+```
+输入：nums = [-2,1,-3,4,-1,2,1,-5,4]
+输出：6
+解释：连续子数组 [4,-1,2,1] 的和最大，为 6 。
+```
+
+**示例 2：**
+
+```
+输入：nums = [1]
+输出：1
+```
+
+**示例 3：**
+
+```
+输入：nums = [0]
+输出：0
+```
+
+**示例 4：**
+
+```
+输入：nums = [-1]
+输出：-1
+```
+
+**示例 5：**
+
+```
+输入：nums = [-100000]
+输出：-100000
+```
+
+**提示：**
+
+- 1 <= nums.length <= 3 * 10^4
+- -10^5 <= nums[i] <= 10^5
+
+
+
+**解题思路：**
+
+思路一：暴力解法  时：O(n^2)  空O(1)
+
+​				求解每一段子序列的长度，求出最大值
+
+思路二：动态规划  时：O(n)  空O(n)
+
+​				使用一个等长数组，每一个位置所保存的值，都是当前位置之前的最大子序列和
+
+思路三：贪心算法  时：O(n)  空O(1)
+
+​				从头遍历，对每一个位置，保存一个当前和，当前和加上当前位置的值，若大于最大值，则存储，若小于，则不变，若为负数，则curSum = 0；
+
+思路四：分治法  时：O(nlogn)  空O(logn)
+
+​				取数组中心为中心，最大子序要么全在中心左边，要么在右边，要么跨中心。分三种情况，跨中心的情况，再分治成中心点左侧和右侧的最大子序列问题。也就是先分治为最小单位求子序和，合并后求各段的最大子序长。
+
+
+
+**方法一：**时：O(n^2)  空O(1)
+
+```c++
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        int len = nums.size();
+        if (len == 1)
+            return nums[0];
+        int maxSum = INT_MIN;
+        for (int i = 0; i < len; ++i)
+        {
+            int curSum = 0;
+            for (int j = i; j < len; ++j)
+            {
+                curSum += nums[j];
+                if (curSum > maxSum)
+                    maxSum = curSum;
+            }
+        }
+        return maxSum;
+    }
+};
+```
+
+**方法二：**时：O(n)  空O(n)
+
+```c++
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        int len = nums.size();
+        if (len == 1)
+            return nums[0];
+        vector<int> dp(len);
+        
+        dp[0] = nums[0];
+        int maxNum = dp[0];
+        for (int i = 1; i < len; ++i)
+        {
+            dp[i] = max(dp[i - 1] + nums[i], nums[i]);
+            maxNum = max(dp[i], maxNum);
+        }
+        return maxNum;
+    }
+};
+```
+
+**方法三：**时：O(n)  空O(1)
+
+```c++
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        int len = nums.size();
+        if (len == 1)
+            return nums[0];
+        
+        int maxNum = INT_MIN;
+        int curSum = 0;
+        for (int i = 0; i < len; ++i)
+        {
+            curSum = curSum + nums[i];
+            maxNum = max(curSum, maxNum);
+            curSum = max(curSum, 0);
+        }
+        return maxNum;
+    }
+};
+```
+
+**方法四：**分治法  时：O(nlogn)  空O(logn)
+
+```c++
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        int len = nums.size();
+        if (len == 1)
+            return nums[0];
+        
+        return maxSubArrayHelper(nums, 0, len - 1);
+    }
+
+    int maxSubArrayHelper(vector<int>& nums, int left, int right)
+    {
+        if (left == right)
+            return nums[left];
+        int mid = (left + right) / 2;
+        int leftSum = maxSubArrayHelper(nums, left, mid);
+        int rightSum = maxSubArrayHelper(nums, mid + 1, right);
+        int midSum = findMaxCrossingSubarray(nums, left, mid, right);
+        return max(max(leftSum, rightSum), midSum);
+    }
+
+    int findMaxCrossingSubarray(vector<int>& nums, int left, int mid, int right)
+    {
+        int leftSum = INT_MIN;
+        int sum = 0;
+        for (int i = mid; i >= left; --i)
+        {
+            sum = sum + nums[i];
+            leftSum = max(sum, leftSum);
+        }
+
+        int rightSum = INT_MIN;
+        sum = 0;
+        for (int i = mid + 1; i <= right; ++i)
+        {
+            sum = sum + nums[i];
+            rightSum = max(sum, rightSum);
+        }
+        return leftSum + rightSum;
+    }
+};
+```
+
