@@ -2239,3 +2239,222 @@ public:
 };
 ```
 
+
+
+
+
+## 0054. 螺旋矩阵
+
+### 题目：
+
+给你一个 m 行 n 列的矩阵 matrix ，请按照 顺时针螺旋顺序 ，返回矩阵中的所有元素。
+
+ 
+
+**示例 1：**
+
+```
+输入：matrix = [[1,2,3],[4,5,6],[7,8,9]]
+输出：[1,2,3,6,9,8,7,4,5]
+```
+
+![leetcode_54_1](F:\C++\刷题\Img\leetcode_54_1.jpg)
+
+**示例 2：**
+
+```
+输入：matrix = [[1,2,3,4],[5,6,7,8],[9,10,11,12]]
+输出：[1,2,3,4,8,12,11,10,9,5,6,7]
+```
+
+![leetcode_54_2](F:\C++\刷题\Img\leetcode_54_2.jpg)
+
+**提示：**
+
+- m == matrix.length
+- n == matrix[i].length
+- 1 <= m, n <= 10
+- -100 <= matrix [i][j] <= 100
+
+
+
+**解题思路：**
+
+顺着周边一圈一圈往里走，控制好下标，先记录恒，再记录竖，注意最里层只有一行，或者一列的情况；
+
+**方法：**时：O(mn)  空：O(1)  除了输出数组外，其他的都是常数阶
+
+```c++
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        int height = matrix.size();
+        int width = matrix[0].size();
+        int len = min(height, width);
+        vector<int> res;
+        for (int i = 0; i < (len + 1) / 2; ++i)
+        {
+            int j = 0;
+            for (j = i; j < width - i; ++j)
+                res.push_back(matrix[i][j]);
+            for (j = i + 1; j < height - i; ++j)
+                res.push_back(matrix[j][width - i - 1]);
+            for (j = width - i - 2; j >= i && i < height - i - 1; --j)
+			    res.push_back(matrix[height - i - 1][j]);
+            for (j = height - i - 2; j > i && i < width - i - 1; --j)
+                res.push_back(matrix[j][i]);
+        }
+        return res;
+    }
+};
+```
+
+
+
+
+
+
+
+## 0055. 跳跃游戏
+
+### 题目：
+
+给定一个非负整数数组 `nums` ，你最初位于数组的 第一个下标 。
+
+数组中的每个元素代表你在该位置可以跳跃的最大长度。
+
+判断你是否能够到达最后一个下标。
+
+**示例 1：**
+
+```
+输入：nums = [2,3,1,1,4]
+输出：true
+解释：可以先跳 1 步，从下标 0 到达下标 1, 然后再从下标 1 跳 3 步到达最后一个下标。
+```
+
+**示例 2：**
+
+```
+输入：nums = [3,2,1,0,4]
+输出：false
+解释：无论怎样，总会到达下标为 3 的位置。但该下标的最大跳跃长度是 0 ， 所以永远不可能到达最后一个下标。
+```
+
+**提示：**
+
+- 1 <= nums.length <= 3 * 10^4
+- 0 <= nums[i] <= 10^5
+
+
+
+**解题思路：**
+
+存储一个可到达的最大位置，自左向右依次遍历每个数字，记录下当前位置可到达的最远位置，若最远位置已经可到达最后一个，则直接返回，若最远位置是当前位置，则表示走不下去了；
+
+
+
+**方法：**时：O(n) 空：O(1)
+
+```c++
+class Solution {
+public:
+    bool canJump(vector<int>& nums) {
+        int len = nums.size();
+        if (len == 0)
+            return false;
+        if (len == 1)
+            return true;
+        
+        int maxJumpIndex = 0;
+        for (int i = 0; i < len; ++i)
+        {
+            maxJumpIndex = max(i + nums[i], maxJumpIndex);
+            if (maxJumpIndex >= len - 1)
+                return true;
+            if (maxJumpIndex == i)
+                return false;
+        }
+        return false;
+    }
+};
+```
+
+
+
+
+
+## 0056. 合并区间
+
+### 题目：
+
+以数组 intervals 表示若干个区间的集合，其中单个区间为 intervals[i] = [starti, endi] 。请你合并所有重叠的区间，并返回一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间。
+
+**示例 1：**
+
+```
+输入：intervals = [[1,3],[2,6],[8,10],[15,18]]
+输出：[[1,6],[8,10],[15,18]]
+解释：区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].
+```
+
+**示例 2：**
+
+```
+输入：intervals = [[1,4],[4,5]]
+输出：[[1,5]]
+解释：区间 [1,4] 和 [4,5] 可被视为重叠区间。
+```
+
+**提示：**
+
+- 1 <= intervals.length <= 10^4
+- intervals[i].length == 2
+- 0 <= starti <= endi <= 10^4
+
+
+
+**解题思路：**
+
+![leetcode_56](F:\C++\刷题\Img\leetcode_56.png)
+
+先按每个子集合的左边界排序，则重叠区域就会聚集在一起；
+
+先将第一个子集合存储下来，下一个子集合，若是左边界在当前 res 最后一个之中，则判断右边界是否大于 res 最后一个的右边界；
+
+- 时间复杂度：O(nlogn)，主要的时间开销是排序的 O(nlogn)。
+
+
+- 空间复杂度：O(logn)，其中 n 为区间的数量。这里计算的是存储答案之外，使用的额外空间。O(logn) 即为排序所需要的空间复杂度。
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        int len = intervals.size();
+        if (len <= 0)
+            return intervals;
+        sort(intervals.begin(), intervals.end());
+
+        vector<vector<int>> res;
+        res.push_back(intervals[0]);
+        for (int i = 1; i < len; ++i)
+        {
+            int L = intervals[i][0];
+            int R = intervals[i][1];
+            if (L <= res.back()[1])
+            {
+                if (R > res.back()[1])
+                    res.back()[1] = R;
+            }
+            else
+                res.push_back(intervals[i]);
+        }
+        return res;
+    }
+};
+```
+
