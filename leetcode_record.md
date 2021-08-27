@@ -2458,3 +2458,171 @@ public:
 };
 ```
 
+
+
+
+
+## 0057. 插入区间
+
+### 题目：
+
+给你一个 **无重叠的** *，*按照区间起始端点排序的区间列表。
+
+在列表中插入一个新的区间，你需要确保列表中的区间仍然有序且不重叠（如果有必要的话，可以合并区间）。
+
+**示例 1：**
+
+```
+输入：intervals = [[1,3],[6,9]], newInterval = [2,5]
+输出：[[1,5],[6,9]]
+```
+
+**示例 2：**
+
+```
+输入：intervals = [[1,2],[3,5],[6,7],[8,10],[12,16]], newInterval = [4,8]
+输出：[[1,2],[3,10],[12,16]]
+解释：这是因为新的区间 [4,8] 与 [3,5],[6,7],[8,10] 重叠。
+```
+
+**示例 3：**
+
+```
+输入：intervals = [], newInterval = [5,7]
+输出：[[5,7]]
+```
+
+**示例 4：**
+
+```
+输入：intervals = [[1,5]], newInterval = [2,3]
+输出：[[1,5]]
+```
+
+**示例 5：**
+
+```
+输入：intervals = [[1,5]], newInterval = [2,7]
+输出：[[1,7]]
+```
+
+**提示：**
+
+- 0 <= intervals.length <= 10^4
+- intervals[i].length == 2
+- 0 <= intervals[i][0] <= intervals[i][1] <= 10^5
+- intervals **根据** intervals[i][0] **按 升序 排列**
+- newInterval.length == 2
+- 0 <= newInterval[0] <= newInterval[1] <= 10^5
+
+
+
+**解题思路：**
+
+依次遍历intervals集合，判断newInterval左右两个数应该放的位置；
+
+时间复杂度：O(n)，其中 n 是数组 intervals 的长度，即给定的区间个数。
+
+空间复杂度：O(1)。除了存储返回答案的空间以外，我们只需要额外的常数空间即可。
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> insert(vector<vector<int>>& intervals, vector<int>& newInterval) {
+        int len = intervals.size();
+        if (len == 0)
+            return vector<vector<int>>{newInterval};
+
+        vector<vector<int>> res;
+        int i = 0;
+        for (; i < len; ++i)
+        {
+            if (newInterval[0] >= intervals[i][0])
+                res.push_back(intervals[i]);
+            else 
+                break;
+        }
+
+        if (res.empty() || res.back()[1] < newInterval[0])   // res.empty()这一句很重要
+            res.push_back(newInterval);
+        else if (res.back()[1] < newInterval[1])
+            res.back()[1] = newInterval[1];
+        
+        for (; i < len; ++i)
+        {
+            if (intervals[i][0] <= res.back()[1])
+            {
+                if (intervals[i][1] > res.back()[1])
+                    res.back()[1] = intervals[i][1];
+            }
+            else
+                res.push_back(intervals[i]);
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+
+
+## 0059. 螺旋矩阵 Ⅱ
+
+### 题目：
+
+给你一个正整数 `n` ，生成一个包含 `1` 到 `n^2` 所有元素，且元素按顺时针顺序螺旋排列的 `n x n` 正方形矩阵 `matrix` 。
+
+**示例 1：**
+
+![leetcode_59](F:\C++\刷题\Img\leetcode_59.jpg)
+
+```
+输入：n = 3
+输出：[[1,2,3],[8,9,4],[7,6,5]]
+```
+
+**示例 2：**
+
+```
+输入：n = 1
+输出：[[1]]
+```
+
+**提示：**
+
+- 1 <= n <= 20
+
+**解题思路：**
+
+等效于54题
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> generateMatrix(int n) {
+        vector<vector<int>> res(n, vector<int>(n));
+        int num = 0;
+        for (int i = 0; i < (n + 1) / 2; ++i)
+        {
+            for (int j = i; j < n - i; ++j)
+                res[i][j] = ++num;
+            for (int j = i + 1; j < n - i; ++j)
+                res[j][n - i - 1] = ++num;
+            for (int j = n - i - 2; j >= i && i < n - i - 1; --j)
+                res[n - i - 1][j] = ++num;
+            for (int j = n - i - 2; j > i && i < n - i - 1; --j)
+                res[j][i] = ++num;
+        }
+        return res;
+    }
+};
+```
+
