@@ -2626,3 +2626,276 @@ public:
 };
 ```
 
+
+
+
+
+## 0062. 不同路径
+
+### 题目：
+
+一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为 “Start” ）。
+
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为 “Finish” ）。
+
+问总共有多少条不同的路径？
+
+**示例1：**
+
+![leetcode_62](F:\C++\刷题\Img\leetcode_62.png)
+
+```
+输入：m = 3, n = 7
+输出：28
+```
+
+**示例 2：**
+
+```
+输入：m = 3, n = 2
+输出：3
+解释：
+从左上角开始，总共有 3 条路径可以到达右下角。
+
+1. 向右 -> 向下 -> 向下
+2. 向下 -> 向下 -> 向右
+3. 向下 -> 向右 -> 向下
+```
+
+**示例 3：**
+
+```
+输入：m = 7, n = 3
+输出：28
+```
+
+**示例 4：**
+
+```
+输入：m = 3, n = 3
+输出：6
+```
+
+**提示：**
+
+- 1 <= m, n <= 100
+- 题目数据保证答案小于等于 2 * 10^9
+
+
+
+**解题思路：**
+
+思路一：递归求解
+
+思路二：动态规划
+
+状态转移方程：$dp[i][j] = dp[i-1][j] + dp[i][j-1]$
+
+​		需要注意的是，如果 i=0，那么 f(i-1,j) 并不是一个满足要求的状态，我们需要忽略这一项；同理，如果 j=0，那么 f(i,j-1) 并不是一个满足要求的状态，需要忽略这一项。
+
+​		**复杂度分析**
+
+- 时间复杂度：O(mn)。
+- 空间复杂度：O(mn)，即为存储所有状态需要的空间。
+
+思路三：组合数学带公式
+
+从左上角到右下角的过程中，我们需要移动 m+n-2m+n−2 次，其中有 m-1m−1 次向下移动，n-1n−1 次向右移动。因此路径的总数，就等于从 m+n-2m+n−2 次移动中选择 m-1m−1 次向下移动的方案数，即组合数：
+
+$${\Large C}_{m+n-2}^{m-1} = \binom{m+n-2}{m-1} = \frac{(m+n-2)(m+n-3)\cdots n}{(m-1)!} = \frac{(m+n-2)!}{(m-1)!(n-1)!}$$
+
+​	**复杂度分析**
+
+- 时间复杂度：O(min(m, n))。
+- 空间复杂度：O(1)。
+
+**方法一：**递归（超时）
+
+```c++
+class Solution {
+public:
+    int uniquePaths(int m, int n) {
+        return 1 + _uniquePaths(1, 1, m, n);
+    }
+    int _uniquePaths(int curm, int curn, int m, int n)
+    {
+        if (curm < m && curn < n)
+            return 1 + _uniquePaths(curm + 1, curn, m, n) + _uniquePaths(curm, curn + 1, m, n);
+        else
+            return 0;
+    }
+};
+```
+
+方法二：动态规划
+
+```c++
+// dp[i][j] = dp[i-1][j] + dp[i][j-1]
+class Solution {
+public:
+    int uniquePaths(int m, int n) {
+        vector<vector<int>> status(m, vector<int>(n, 1));
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (i == 0 || j == 0)
+                    continue;
+                status[i][j] = status[i - 1][j] + status[i][j - 1];
+            }
+        }
+        return status[m - 1][n - 1];
+    }
+};
+```
+
+**方法三：**组合数学
+
+```c++
+class Solution {
+public:
+    int uniquePaths(int m, int n) {
+        long long res = 1;
+        for (int i = m - 2; i >= 0; --i)
+            res = res * (m + n - 2 - i) / (m - 1 - i);
+        return res;
+    }
+};
+```
+
+
+
+
+
+## 0063. 不同路径 Ⅱ
+
+### 题目：
+
+一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为“Start” ）。
+
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为“Finish”）。
+
+现在考虑网格中有障碍物。那么从左上角到右下角将会有多少条不同的路径？
+
+![leetcode_63](F:\C++\刷题\Img\leetcode_63.png)
+
+网格中的障碍物和空位置分别用 `1` 和 `0` 来表示。
+
+**示例1：**
+
+![leetcode_63_1](F:\C++\刷题\Img\leetcode_63_1.jpg)
+
+```
+输入：obstacleGrid = [[0,0,0],[0,1,0],[0,0,0]]
+输出：2
+解释：
+3x3 网格的正中间有一个障碍物。
+从左上角到右下角一共有 2 条不同的路径：
+1. 向右 -> 向右 -> 向下 -> 向下
+2. 向下 -> 向下 -> 向右 -> 向右
+```
+
+**示例2：**
+
+![leetcode_63_2](F:\C++\刷题\Img\leetcode_63_2.jpg)
+
+```
+输入：obstacleGrid = [[0,1],[0,0]]
+输出：1
+```
+
+**提示：**
+
+- m == obstacleGrid.length
+- n == obstacleGrid[i].length
+- 1 <= m, n <= 100
+- obstacleGrid [i] [j] 为 0 或 1
+
+
+
+**解题思路：**
+
+思路一：动态规划，不过要注意各种边界值
+
+   			1. 若障碍在 i == 0 或 j == 0 的边界上，则障碍下面障碍后面所有的位置都不可达；
+   			2. 若障碍在 起点 或 终点，则直接为 0；
+
+思路二：动态规划 + 滚动数组
+
+使用一个一维数组即可；
+
+动态规划的题目分为两大类，**一种是求最优解类**，典型问题是背包问题，**另一种就是计数类**，比如这里的统计方案数的问题，它们都存在一定的递推性质。前者的递推性质还有一个名字，叫做 「**最优子结构**」 ——即当前问题的最优解取决于子问题的最优解，后者类似，当前问题的方案数取决于子问题的方案数。所以在遇到求方案数的问题时，我们可以往动态规划的方向考虑。
+
+
+
+**方法一：**时：O(mn)  空：O(mn)
+
+```c++
+class Solution {
+public:
+    int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+        int m = obstacleGrid.size();
+        int n = obstacleGrid[0].size();
+        if (obstacleGrid[m - 1][n - 1] == 1 || obstacleGrid[0][0] == 1)
+            return 0;
+        vector<vector<int>> status(m, vector<int>(n, 1));
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (i == 0 || j == 0)
+                {
+                    if (obstacleGrid[i][j] == 1)
+                        status[i][j] = 0;
+                    if ((i != 0 && j == 0 && status[i - 1][j] == 0) || (i == 0 && j != 0 && status[i][j - 1] == 0))
+                        status[i][j] = 0;
+                    continue;
+                }
+                    
+                if (obstacleGrid[i - 1][j] == 1 && obstacleGrid[i][j - 1] == 0)
+                    status[i][j] = status[i][j - 1];
+                else if (obstacleGrid[i - 1][j] == 0 && obstacleGrid[i][j - 1] == 1)
+                    status[i][j] = status[i - 1][j];
+                else if (obstacleGrid[i - 1][j] == 0 && obstacleGrid[i][j - 1] == 0)
+                    status[i][j] = status[i - 1][j] + status[i][j - 1];
+                else
+                    status[i][j] = 0;
+            }
+        }
+        return status[m - 1][n - 1];
+    }
+};
+```
+
+**方法二：**时：O(mn)  空：O(n)
+
+```c++
+class Solution {
+public:
+    int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+        int m = obstacleGrid.size();
+        int n = obstacleGrid[0].size();
+        if (obstacleGrid[m - 1][n - 1] == 1 || obstacleGrid[0][0] == 1)
+            return 0;
+        
+        vector<int> status(n, 0);
+        status[0] = (obstacleGrid[0][0] == 0);
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (obstacleGrid[i][j] == 1)
+                {
+                    status[j] = 0;
+                    continue;
+                }
+                // obstacleGrid[i][j - 1] == 0 剪枝操作:若左边位置是障碍，则当前位置直接就是上面的值，不需要计算
+                if (j > 0 && obstacleGrid[i][j - 1] == 0)
+                    status[j] += status[j - 1];
+            }
+        }
+        return status[n - 1];
+    }
+};
+```
+
