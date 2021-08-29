@@ -2899,3 +2899,332 @@ public:
 };
 ```
 
+
+
+
+
+## 0064. 最小路径和
+
+### 题目：
+
+给定一个包含非负整数的 m x n 网格 grid ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
+
+说明：每次只能向下或者向右移动一步。
+
+ **示例1：**
+
+![leetcode_64](F:\C++\刷题\Img\leetcode_64.jpg)
+
+```
+输入：grid = [[1,3,1],[1,5,1],[4,2,1]]
+输出：7
+解释：因为路径 1→3→1→1→1 的总和最小。
+```
+
+**示例 2：**
+
+```
+输入：grid = [[1,2,3],[4,5,6]]
+输出：12
+```
+
+**提示：**
+
+- m == grid.length
+- n == grid[i].length
+- 1 <= m, n <= 200
+- 0 <= grid[i] [j] <= 100
+
+
+
+**解题思路：**
+
+方法同样等同于62.63题，使用动态规划，但注意的地方是单独对第一行和第一列处理。
+
+时间复杂度：O(mn)
+
+空间复杂度：O(n)
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int minPathSum(vector<vector<int>>& grid) {
+        int m = grid.size();
+        int n = grid[0].size();
+        vector<int> status(n, 0);
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (i == 0 && j == 0)
+                    status[j] = grid[i][j];
+                else if (i == 0 && j != 0)
+                    status[j] = grid[i][j] + status[j - 1];
+                else if (i != 0 && j == 0)
+                    status[j] = grid[i][j] + status[j];
+                else
+                    status[j] = grid[i][j] + min(status[j], status[j - 1]);
+            }
+        }
+        return status[n - 1];
+    }
+};
+```
+
+
+
+
+
+## 0066. 加一
+
+### 题目：
+
+给定一个由 **整数** 组成的 **非空** 数组所表示的非负整数，在该数的基础上加一。
+
+最高位数字存放在数组的首位， 数组中每个元素只存储**单个**数字。
+
+你可以假设除了整数 0 之外，这个整数不会以零开头。
+
+**示例 1：**
+
+```
+输入：digits = [1,2,3]
+输出：[1,2,4]
+解释：输入数组表示数字 123。
+```
+
+**示例 2：**
+
+```
+输入：digits = [4,3,2,1]
+输出：[4,3,2,2]
+解释：输入数组表示数字 4321。
+```
+
+**示例 3：**
+
+```
+输入：digits = [0]
+输出：[1]
+```
+
+**提示：**
+
+- 1 <= digits.length <= 100
+- 0 <= digits[i] <= 9
+
+
+
+**解题思路：**
+
+从后向前遍历，没什么方法，但有一个技巧，若当前++之后，还 <= 9的话，就可以直接返回；
+
+若循环结束还没返回，说明最高位进一；
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<int> plusOne(vector<int>& digits) {
+        int len = digits.size();
+        for (int i = len - 1; i >= 0; --i)
+        {
+            digits[i]++;
+            digits[i] %= 10;
+            if (digits[i] != 0)
+                return digits;
+        }
+        digits.insert(digits.begin(), 1);
+        return digits;
+    }
+};
+```
+
+
+
+
+
+## 0073. 矩阵置零
+
+### 题目：
+
+给定一个 `m x n` 的矩阵，如果一个元素为 **0** ，则将其所在行和列的所有元素都设为 **0** 。请使用 **原地** 算法。
+
+**进阶：**
+
+- 一个直观的解决方案是使用  O(mn) 的额外空间，但这并不是一个好的解决方案。
+
+- 一个简单的改进方案是使用 O(m + n) 的额外空间，但这仍然不是最好的解决方案。
+- 你能想出一个仅使用常量空间的解决方案吗？
+
+**示例1：**
+
+![leetcode_73_1](F:\C++\刷题\Img\leetcode_73_1.jpg)
+
+```
+输入：matrix = [[1,1,1],[1,0,1],[1,1,1]]
+输出：[[1,0,1],[0,0,0],[1,0,1]]
+```
+
+**示例2：**
+
+![leetcode_73_2](F:\C++\刷题\Img\leetcode_73_2.jpg)
+
+```
+输入：matrix = [[0,1,2,0],[3,4,5,2],[1,3,1,5]]
+输出：[[0,0,0,0],[0,4,5,0],[0,3,1,0]]
+```
+
+**提示：**
+
+- m == matrix.length
+- n == matrix[0].length
+- 1 <= m, n <= 200
+- -2^31 <= matrix[i][j] <= 2^31 - 1
+
+
+
+**解题思路：**
+
+永远的思路：先标记，最后再改 0 ，防止因修改导致更多的0的存在。
+
+时间复杂度：O(mn)
+
+空间复杂度：O(1)
+
+思路一：使用两个标志位。
+
+- 先标记第一行或第一列是否有0的存在；
+- 找[1, m）和[1, n）是否有 0 的存在，若有，将对应行首和列首置为0；
+- 按照行首和列首是否为0，将对应行列置0；
+- 按照首行或首列的0标志位，将首行首列置0；
+
+思路二：使用一个列标志位
+
+- 依次遍历每一行，记录第一列是否有 0 ，以及每一行的[1, n）列是否有 0，若有将对应位置行首或列首置 0；
+- 从后向前依次遍历每一行，循环内嵌[1, n）每一列，若当前位置行首或列首有一个为 0，则置0。顺带判断首列是否有0，若存在，顺带将当前行第一个位置置0。
+
+实际运行两个标志位比一个标志为要快一点；
+
+
+
+**方法一：**使用一个标志位
+
+```c++
+class Solution {
+public:
+    void setZeroes(vector<vector<int>>& matrix) {
+        if (matrix.size() == 0 || matrix[0].size() == 0)
+            return;
+        int m = matrix.size(), n = matrix[0].size();
+        bool isFirstColExistZero = false;
+        int i = 0, j = 0;
+
+        for (i = 0; i < m; ++i)
+        {
+            if (matrix[i][0] == 0)
+                isFirstColExistZero = true;
+            for (j = 1; j < n; ++j)
+            {
+                if (matrix[i][j] == 0)
+                {
+                    matrix[i][0] = matrix[0][j] = 0;
+                }
+            }
+        }
+
+        for (i = m - 1; i >= 0; --i)
+        {
+            for (j = 1; j < n; ++j)
+            {
+                if (matrix[i][0] == 0 || matrix[0][j] == 0)
+                    matrix[i][j] = 0;
+            }
+            if (isFirstColExistZero)
+                matrix[i][0] = 0;
+        }
+    }
+};
+```
+
+**方法二：**使用两个标志位
+
+```c++
+class Solution {
+public:
+    void setZeroes(vector<vector<int>>& matrix) {
+        if (matrix.size() == 0 || matrix[0].size() == 0)
+            return;
+        int m = matrix.size(), n = matrix[0].size();
+        bool isFirstRowExistZero = false, isFirstColExistZero = false;
+        int i = 0, j = 0;
+        for (j = 0; j < n; ++j)
+        {
+            if (matrix[0][j] == 0)
+            {
+                isFirstRowExistZero = true;
+                break;
+            }
+        }
+
+        for (i = 0; i < m; ++i)
+        {
+            if (matrix[i][0] == 0)
+            {
+                isFirstColExistZero = true;
+                break;
+            }
+        }
+
+        for (i = 1; i < m; ++i)
+        {
+            for (j = 1; j < n ; ++j)
+            {
+                if (matrix[i][j] == 0)
+                {
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+
+        for (i = 1; i < m; ++i)
+        {
+            if (matrix[i][0] == 0)
+            {
+                for (j = 1; j < n; ++j)
+                    matrix[i][j] = 0;
+            }
+        }
+
+        for (j = 1; j < n; ++j)
+        {
+            if (matrix[0][j] == 0)
+            {
+                for (i = 1; i < m; ++i)
+                    matrix[i][j] = 0;
+            }
+        }
+
+        if (isFirstColExistZero)
+        {
+            for (i = 0; i < m; ++i)
+                matrix[i][0] = 0;
+        }
+
+        if (isFirstRowExistZero)
+        {
+            for (j = 0; j < n; ++j)
+                matrix[0][j] = 0;
+        }
+    }
+};
+```
+
