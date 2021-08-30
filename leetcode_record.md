@@ -3228,3 +3228,311 @@ public:
 };
 ```
 
+
+
+
+
+
+
+## 0074. 搜索二维矩阵
+
+### 题目：
+
+编写一个高效的算法来判断 `m x n` 矩阵中，是否存在一个目标值。该矩阵具有如下特性：
+
+- 每行中的整数从左到右按升序排列。
+- 每行的第一个整数大于前一行的最后一个整数。
+
+**示例1：**
+
+![leetcode_74_1](F:\C++\刷题\Img\leetcode_74_1.jpg)
+
+```
+输入：matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 3
+输出：true
+```
+
+**示例2：**
+
+![leetcode_74_2jpg](F:\C++\刷题\Img\leetcode_74_2jpg.jpg)
+
+```
+输入：matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 13
+输出：false
+```
+
+**提示：**
+
+- m == matrix.length
+- n == matrix[i].length
+- 1 <= m, n <= 100
+- -10^4 <= matrix[i] [j], target <= 10^4
+
+
+
+**解题思路：**
+
+不能直接用矩阵特性，即从[0] [n - 1]位置出发，因为那个思想前提是target存在；
+
+可以将二维数组看作是一个整体递增序列的数列，使用二分查找；
+
+时间复杂度：O(logmn)
+
+空间复杂度：O(1)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        int m = matrix.size();
+        int n = matrix[0].size();
+        int low = 0, high = m * n - 1;
+        int mid = -1;
+        while (low <= high)
+        {
+            mid = low + ((high - low) >> 1);
+            int tmp = matrix[mid / n][mid % n];
+            if (tmp > target)
+                high = mid - 1;
+            else if (tmp < target)
+                low = mid + 1;
+            else
+                return true;
+        }
+        return false;
+    }
+};
+```
+
+
+
+
+
+
+
+## 0075. 颜色分类
+
+### 题目：
+
+给定一个包含红色、白色和蓝色，一共 `n` 个元素的数组，**原地**对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。
+
+此题中，使用整数 0、 1 和 2 分别表示红色、白色和蓝色。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [2,0,2,1,1,0]
+输出：[0,0,1,1,2,2]
+```
+
+**示例 2：**
+
+```
+输入：nums = [2,0,1]
+输出：[0,1,2]
+```
+
+**示例 3：**
+
+```
+输入：nums = [0]
+输出：[0]
+```
+
+**示例 4：**
+
+```
+输入：nums = [1]
+输出：[1]
+```
+
+**提示：**
+
+- n == nums.length
+- 1 <= n <= 300
+- nums[i] 为 0、1 或 2
+
+**进阶：**
+
+- 你可以不使用代码库中的排序函数来解决这道题吗？
+- 你能想出一个仅使用常数空间的一趟扫描算法吗？
+
+
+
+**解题思路：**
+
+思路一：等价于快排；
+
+​			时间复杂度：O(nlogn)
+
+​			空间复杂度：O(1)
+
+
+
+思路二：单指针法；
+
+​				使用一个指针，分两次遍历，一次从前往后，将0交换到前面，一次从后往前，将2将换到后面;
+
+​			时间复杂度：O(n)
+
+​			空间复杂度：O(1)
+
+
+
+思路三：双指针法（两端向内走）；
+
+​				使用两个指针，一次遍历，两个指针分别从前后向内部走，将0交换到前面，将2换到后面；**注意 i < right**，即2换到后面就不用再换了，并且将2换到后面后，还要继续循环判断换到前面这个值还是不是2，若是，就得继续换;
+
+​			时间复杂度：O(n)
+
+​			空间复杂度：O(1)
+
+
+
+思路三：双指针法（都是从前往后走）；
+
+​				使用两个指针，一次遍历，两个指针分别从前后向内部走，将0交换到前面，将1换到前面；若是 1，则直接与p1指针换，若是0，分两种情况，倘若p0 == p1，则直接换并且0、1指针都往后移，若 p0 < p1，则交换0指针后，就会有一个1被换出来，则需要在做一次 p1交换;
+
+​			时间复杂度：O(n)
+
+​			空间复杂度：O(1)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    void sortColors(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1)
+            return;
+        _sortColors(nums, 0, n - 1);
+    }
+    void _sortColors(vector<int>& nums, int left, int right)
+    {
+        if (left >= right)
+            return;
+        int tmpVal = nums[left];
+        int low = left, high = right;
+        while (low < high)
+        {
+            while (low < high && tmpVal <= nums[high])
+                --high;
+            nums[low] = nums[high];
+
+            while (low < high && tmpVal >= nums[low])
+                ++low;
+            nums[high] = nums[low];
+        }
+        nums[low] = tmpVal;
+
+        _sortColors(nums, left, low - 1);
+        _sortColors(nums, low + 1, right);
+    }
+};
+```
+
+
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    void sortColors(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1)
+            return;
+        int ptr = 0;
+        int i = 0;
+        for (i = 0; i < n; ++i)
+        {
+            if (nums[i] == 0)
+                swap(nums, i, ptr++);
+        }
+        ptr = n - 1;
+        for (i = n - 1; i >= 0; --i)
+        {
+            if (nums[i] == 2)
+                swap(nums, i, ptr--);
+        }
+    }
+    void swap(vector<int>& nums, int i, int j)
+    {
+        int tmp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = tmp;
+    }
+};
+```
+
+
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    void sortColors(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1)
+            return;
+        int left = 0, right = n - 1;
+        for (int i = 0; i < n; ++i)
+        {
+            while (nums[i] == 2 && i < right)
+                swap(nums, i, right--);
+            if (nums[i] == 0)
+                swap(nums, i, left++);
+        }
+    }
+    void swap(vector<int>& nums, int i, int j)
+    {
+        int tmp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = tmp;
+    }
+};
+```
+
+
+
+**方法四：**
+
+```c++
+class Solution {
+public:
+    void sortColors(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1)
+            return;
+        int p0 = 0, p1 = 0;
+        for (int i = 0; i < n; ++i)
+        {
+            if (nums[i] == 1)
+                swap(nums, i, p1++);
+            else if (nums[i] == 0)
+            {
+                swap(nums, i, p0);
+                if (p0 < p1)
+                    swap(nums, i, p1);
+                ++p0;
+                ++p1;
+            }
+        }
+    }
+    void swap(vector<int>& nums, int i, int j)
+    {
+        int tmp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = tmp;
+    }
+};
+```
+
