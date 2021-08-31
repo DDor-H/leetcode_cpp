@@ -3639,3 +3639,372 @@ public:
 };
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 动态规划
+
+## 0005. 最长回文子串
+
+### 题目：
+
+给你一个字符串 `s`，找到 `s` 中最长的回文子串。
+
+**示例 1：**
+
+```
+输入：s = "babad"
+输出："bab"
+解释："aba" 同样是符合题意的答案。
+```
+
+**示例 2：**
+
+```
+输入：s = "cbbd"
+输出："bb"
+```
+
+**示例 3：**
+
+```
+输入：s = "a"
+输出："a"
+```
+
+**示例 4：**
+
+```
+输入：s = "ac"
+输出："a"
+```
+
+**提示：**
+
+- 1 <= s.length <= 1000
+- s 仅由数字和英文字母（大写和/或小写）组成
+
+
+
+**解题思路：**
+
+思路一：暴力解法
+
+​		依次遍历每一个字串，判断是否回文，并判断是否大于当前最长记录；
+
+​		时间复杂度：O(n^3)
+
+​		空间复杂度：O(1)
+
+思路二：中间扩散法
+
+​		依次从每一个下表的 i  i  位置和 i  i+1 位置向两边扩散，寻找最长回文
+
+​		时间复杂度：O(n^2)
+
+​		空间复杂度：O(1)
+
+思路三：动态规划
+
+​		dp[i] [j] = dp[i + 1] [j - 1] && s[i] = s[j]
+
+​		使用一个二维数组，可以先将对角线置为回文标记，然后判断每个元素与他后面紧接着的那个元素，即一共两个元素是否构成回文，再按照长度，从 3 到 len 依次判断是否有回文；
+
+​		即，先记录单个位置回文，再记录长度为 2 的是否为回文，然后状态转移方程的边界条件就得到满足了，就可以依次判断 3 -- len长度的子串是否满足回文；
+
+​		时间复杂度：O(n^2)
+
+​		空间复杂度：O(n^2)
+
+思路四：Manacher 算法
+
+
+
+**方法一：**暴力解法
+
+```c++
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int len = s.length();
+        if (len < 2)
+            return s;
+        
+        int maxLen = 1;
+        int begin = 0;
+
+        for (int i = 0; i < len - 1; ++i)
+        {
+            for ( int j = i + 1; j < len; ++j)
+            {
+                if (isPalindrome(s, i, j) && (j - i + 1) > maxLen)
+                {
+                    maxLen = j - i + 1;
+                    begin = i;
+                }
+            }
+        }
+        return s.substr(begin, maxLen);
+    }
+    bool isPalindrome(string& s, int left, int right)
+    {
+        while (left < right && s[left] == s[right])
+        {
+            ++left;
+            --right;
+        }
+        return (left >= right);
+    }
+};
+```
+
+**方法二：**中间扩散法
+
+```c++
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int len = s.length();
+        if (len < 2)
+            return s;
+        
+        int begin = 0;
+        int end = 0;
+        for (int i = 0; i < len - 1; ++i)
+        {
+            auto [left1, right1] = isPalindrome(s, i, i);
+            auto [left2, right2] = isPalindrome(s, i, i + 1);
+            if (right1 - left1 > end - begin)
+            {
+                begin = left1;
+                end = right1;
+            }
+            if (right2 - left2 > end - begin)
+            {
+                begin = left2;
+                end = right2;
+            }
+        }
+        return s.substr(begin, end - begin + 1);
+    }
+    pair<int, int> isPalindrome(const string& s, int left, int right)
+    {
+        while (left >= 0 && right < s.size() && s[left] == s[right])
+        {
+            --left;
+            ++right;
+        }
+        return {left + 1, right - 1};
+    }
+};
+```
+
+**方法三：**动态规划
+
+```c++
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int len = s.length();
+        if (len < 2)
+            return s;
+        
+        int maxLen = 1;
+        int begin = 0;
+        vector<vector<bool>> vv(len, vector<bool>(len, false));
+        for (int i = 0; i < len; ++i)
+        {
+            vv[i][i] = true;
+            if (i < len - 1 && s[i] == s[i + 1])
+            {
+                vv[i][i + 1] = true;
+                maxLen = 2;
+                begin = i;
+            }
+        }
+
+        for (int l = 3; l <= len; ++l)
+        {
+            for (int i = 0; i + l - 1 < len; ++i)
+            {
+                int j = i + l - 1;
+                if (s[i] == s[j] && vv[i + 1][j - 1])
+                {
+                    vv[i][j] = true;
+                    maxLen = l;
+                    begin = i;
+                }
+            }
+        }
+        
+        return s.substr(begin, maxLen);
+    }
+};
+```
+
+**方法四：**Manacher 算法
+
+```c++
+
+```
+
+
+
+
+
+## 0010. 正则表达式匹配
+
+### 题目：
+
+给你一个字符串 `s` 和一个字符规律 `p`，请你来实现一个支持 `'.'` 和 `'*'` 的正则表达式匹配。
+
+- `'.'` 匹配任意单个字符
+- `'*'` 匹配零个或多个前面的那一个元素
+  所谓匹配，是要涵盖 **整个** 字符串 `s`的，而不是部分字符串。
+
+**示例1：**
+
+```
+输入：s = "aa" p = "a"
+输出：false
+解释："a" 无法匹配 "aa" 整个字符串。
+```
+
+**示例2：**
+
+```
+输入：s = "aa" p = "a*"
+输出：true
+解释：因为 '*' 代表可以匹配零个或多个前面的那一个元素, 在这里前面的元素就是 'a'。因此，字符串 "aa" 可被视为 'a' 重复了一次。
+```
+
+**示例3：**
+
+```
+输入：s = "ab" p = ".*"
+输出：true
+解释：".*" 表示可匹配零个或多个（'*'）任意字符（'.'）。
+```
+
+**示例4：**
+
+```
+输入：s = "aab" p = "c*a*b"
+输出：true
+解释：因为 '*' 表示零个或多个，这里 'c' 为 0 个, 'a' 被重复一次。因此可以匹配字符串 "aab"。
+```
+
+**示例5：**
+
+```
+输入：s = "mississippi" p = "mis*is*p*."
+输出：false
+```
+
+**提示：**
+
+- 0 <= s.length <= 20
+- 0 <= p.length <= 30
+- s 可能为空，且只包含从 a-z 的小写字母。
+- p 可能为空，且只包含从 a-z 的小写字母，以及字符 . 和 *。
+- 保证每次出现字符 * 时，前面都匹配到有效的字符
+
+
+
+**解题思路：**
+
+思路一：动态规划
+
+[正则表达式匹配](https://leetcode-cn.com/problems/regular-expression-matching/solution/shi-pin-tu-jie-dong-tai-gui-hua-zheng-ze-biao-da-s/)
+
+- 时间复杂度：O(mn)O(mn)，其中 mm 和 nn 分别是字符串 ss 和 pp 的长度。我们需要计算出所有的状态，并且每个状态在进行转移时的时间复杂度为 O(1)O(1)。
+- 空间复杂度：O(mn)O(mn)，即为存储所有状态使用的空间。
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        int m = s.length();
+        int n = p.length();
+        vector<vector<bool>> statusTransTable(m + 1, vector<bool>(n + 1));
+        statusTransTable[0][0] = true;
+
+        for (int i = 1; i <= m; ++i)
+            statusTransTable[i][0] = false;
+
+        for (int j = 1; j <= n; ++j)
+            statusTransTable[0][j] = (p[j - 1] == '*' && statusTransTable[0][j - 2]);
+        
+        for (int i = 1; i <= m; ++i)
+        {
+            for (int j = 1; j <= n; ++j)
+            {
+                if (p[j - 1] == s[i - 1] || p[j - 1] == '.')
+                    statusTransTable[i][j] = statusTransTable[i - 1][j - 1];
+                else if (p[j - 1] == '*')
+                {
+                    if (statusTransTable[i][j - 2] == true)
+                        statusTransTable[i][j] = true;
+                    else if (p[j - 2] == s[i - 1] || p[j - 2] == '.')
+                        statusTransTable[i][j] = statusTransTable[i - 1][j];
+                }
+                else
+                    statusTransTable[i][j] = false;
+            }
+        }
+        return statusTransTable[m][n];
+    }
+};
+```
+
