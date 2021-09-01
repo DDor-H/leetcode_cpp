@@ -4008,3 +4008,187 @@ public:
 };
 ```
 
+
+
+
+
+## 0022. 括号生成
+
+### 题目：
+
+数字 n 代表生成括号的对数，请你设计一个函数，用于能够生成所有可能的并且 有效的 括号组合。有效括号组合需满足：左括号必须以正确的顺序闭合。
+
+**示例 1：**
+
+```
+输入：n = 3
+输出：["((()))","(()())","(())()","()(())","()()()"]
+```
+
+**示例 2：**
+
+```
+输入：n = 1
+输出：["()"]
+```
+
+**提示：**
+
+- 1 <= n <= 8
+
+**解题思路：**
+
+思路一：暴力解法
+
+​			依次使用递归生成各个序列，然后判断是否为合法的括号对；
+
+- 时间复杂度：$O(2^{2n}n)$，对于 $2^{2n}$ 个序列中的每一个，我们用于建立和验证该序列的复杂度为 $O(n)$。
+- 空间复杂度：$O(n)$，除了答案数组之外，我们所需要的空间取决于递归栈的深度，每一层递归函数需要 $O(1)$ 的空间，最多递归 $2n $层，因此空间复杂度为 $O(n)$。
+
+
+
+思路二：回溯法
+
+​	方法一还有改进的余地：我们可以只在序列仍然保持有效时才添加 '(' or ')'，而不是像 方法一 那样每次添加。我们可以通过跟踪到目前为止放置的左括号和右括号的数目来做到这一点，如果左括号数量不大于 n，我们可以放一个左括号。如果右括号数量小于左括号的数量，我们可以放一个右括号。
+
+卡特兰数分析时间复杂度：
+
+- 时间复杂度：$O(\dfrac{4^n}{\sqrt{n}})$，在回溯过程中，每个答案需要 $O(n)$ 的时间复制到答案数组中。
+- 空间复杂度：$O(n)$，除了答案数组之外，我们所需要的空间取决于递归栈的深度，每一层递归函数需要 $O(1)$ 的空间，最多递归 $2n$ 层，因此空间复杂度为 $O(n)$。
+
+
+
+思路三：动态规划
+
+当我们清楚所有 `i<n` 时括号的可能生成排列后，对与 `i=n` 的情况，我们考虑整个括号排列中最左边的括号。
+
+它一定是一个左括号，那么它可以和它对应的右括号组成一组完整的括号 `"( )"`，我们认为这一组是相比 `n-1` 增加进来的括号。
+
+那么，剩下 `n-1` 组括号有可能在哪呢？
+
+**【这里是重点，请着重理解】**
+
+剩下的括号要么在这一组新增的括号内部，要么在这一组新增括号的外部**（右侧）**。
+
+既然知道了 `i<n` 的情况，那我们就可以对所有情况进行遍历：
+
+"(" + 【i=p时所有括号的排列组合】 + ")" + 【i=q时所有括号的排列组合】
+
+其中 `p + q = n-1`，且 `p q` 均为非负整数。
+
+事实上，当上述 `p` 从 `0` 取到 `n-1`，`q` 从 `n-1` 取到 `0` 后，所有情况就遍历完了。
+
+注：上述遍历是没有重复情况出现的，即当 `(p1,q1)≠(p2,q2)` 时，按上述方式取的括号组合一定不同。
+
+**方法一：**暴力解法
+
+```c++
+class Solution {
+public:
+    vector<string> generateParenthesis(int n) {
+        vector<string> res;
+        string parenthesis;
+        _generateParenthesis(res, parenthesis, n * 2, 0);
+        return res;
+    }
+
+    void _generateParenthesis(vector<string>& res, string& parenthesis, int n, int idx)
+    {
+        if (idx == n)
+        {
+            if (check(parenthesis))
+                res.push_back(parenthesis);
+            return;
+        }
+        
+        parenthesis += '(';
+        _generateParenthesis(res, parenthesis, n, idx + 1);
+        parenthesis.pop_back();
+        parenthesis += ')';
+        _generateParenthesis(res, parenthesis, n, idx + 1);
+        parenthesis.pop_back();
+    }
+
+    bool check(string& parenthesis)
+    {
+        int len = parenthesis.length();
+        int num = 0;
+        if (parenthesis[0] == ')' || parenthesis[len - 1] == '(')
+            return false;
+        for (int i = 0; i < len; ++i)
+        {
+            if (parenthesis[i] == '(')
+                ++num;
+            else if (parenthesis[i] == ')')
+                --num;
+            if (num < 0)
+                return false;
+        }
+        return num == 0;
+    }
+};
+```
+
+**方法二：**回溯法
+
+```c++
+class Solution {
+public:
+    vector<string> generateParenthesis(int n) {
+        vector<string> res;
+        string parenthesis;
+        _generateParenthesis(res, parenthesis, n, 0, 0);
+        return res;
+    }
+
+    void _generateParenthesis(vector<string>& res, string& parenthesis, int n, int idx, int jdx)
+    {
+        if (idx == n && jdx == n)
+        {
+            res.push_back(parenthesis);
+            return;
+        }
+        
+        if (idx < n)
+        {
+            parenthesis += '(';
+            _generateParenthesis(res, parenthesis, n, idx + 1, jdx);
+            parenthesis.pop_back();
+        }
+
+        if (jdx < idx)
+        {
+            parenthesis += ')';
+            _generateParenthesis(res, parenthesis, n, idx, jdx + 1);
+            parenthesis.pop_back();
+        }
+    }
+};
+```
+
+**方法三：**动态规划
+
+```c++
+class Solution {
+public:
+    vector<string> generateParenthesis(int n) {
+        if (n == 0)
+            return {};
+        if (n == 1)
+            return {"()"};
+
+        vector<vector<string>> res(n + 1);
+        res[0] = {""};
+        res[1] = {"()"};
+
+        for (int i = 2; i <= n; ++i)
+            for (int j = 0; j < i; ++j)
+                for (auto p : res[j])
+                    for (auto q : res[i - j - 1])
+                        res[i].push_back(('(' + q + ')' + p));
+        
+        return res[n];
+    }
+};
+```
+
