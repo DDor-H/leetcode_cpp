@@ -4565,3 +4565,322 @@ public:
 };
 ```
 
+
+
+
+
+## 0509. 斐波那契数列
+
+### 题目：
+
+**斐波那契数**，通常用 `F(n)` 表示，形成的序列称为 **斐波那契数列** 。该数列由 `0` 和 `1` 开始，后面的每一项数字都是前面两项数字的和。也就是：
+
+```
+F(0) = 0，F(1) = 1
+F(n) = F(n - 1) + F(n - 2)，其中 n > 1
+```
+
+给你 `n` ，请计算 `F(n)` 。
+
+
+
+**示例 1：**
+
+```
+输入：2
+输出：1
+解释：F(2) = F(1) + F(0) = 1 + 0 = 1
+```
+
+**示例 2：**
+
+```
+输入：3
+输出：2
+解释：F(3) = F(2) + F(1) = 1 + 1 = 2
+```
+
+**示例 3：**
+
+```
+输入：4
+输出：3
+解释：F(4) = F(3) + F(2) = 2 + 1 = 3
+```
+
+**提示：**
+
+- `0 <= n <= 30`
+
+
+
+**解题思路：**
+
+思路一：循环
+
+​		时间复杂度：O(n)
+
+​		空间复杂度：O(1)
+
+思路二：递归
+
+思路三：**矩阵快速幂**
+
+​	首先我们可以构建这样一个递推关系：
+
+$$\left[ \begin{matrix} 1 & 1 \\ 1 & 0 \end{matrix} \right] \left[ \begin{matrix} F(n)\\ F(n - 1) \end{matrix} \right] = \left[ \begin{matrix} F(n) + F(n - 1)\\ F(n) \end{matrix} \right] = \left[ \begin{matrix} F(n + 1)\\ F(n) \end{matrix} \right]$$
+
+因此：
+
+$$\left[ \begin{matrix} F(n + 1)\\ F(n) \end{matrix} \right] = \left[ \begin{matrix} 1 & 1 \\ 1 & 0 \end{matrix} \right] ^n \left[ \begin{matrix} F(1)\\ F(0) \end{matrix} \right]$$
+
+
+令：
+
+$$M = \left[ \begin{matrix} 1 & 1 \\ 1 & 0 \end{matrix} \right]$$
+
+因此只要我们能快速计算矩阵 $M$ 的 $n$ 次幂，就可以得到 $F(n)$ 的值。如果直接求取 $M^n$
+ ，时间复杂度是 $O(n)$，可以定义矩阵乘法，然后用快速幂算法来加速这里 $M^n$
+  的求取。
+
+​		时间复杂度：O(logn)
+
+​		空间复杂度：O(1)
+
+思路四：组合数学递推式
+
+$F(n)=\frac{1}{\sqrt{5}}\left[ \left(\frac{1+\sqrt{5}}{2}\right)^{n} - \left(\frac{1-\sqrt{5}}{2}\right)^{n} \right]$
+
+
+**方法一：**循环
+
+```c++
+class Solution {
+public:
+    int fib(int n) {
+        if (n == 0)
+            return 0;
+        if (n == 1)
+            return 1;
+        int a = 0, b = 1;
+        int c = 0;
+        for (int i = 2; i <= n; ++i)
+        {
+            c = a + b;
+            a = b;
+            b = c;
+        }
+        return c;
+    }
+};
+```
+
+**方法二：**递归
+
+```c++
+class Solution {
+public:
+    int fib(int n) {
+        if (n == 0)
+            return 0;
+        else if (n == 1)
+            return 1;
+        else 
+            return fib(n - 1) + fib(n - 2);
+    }
+};
+```
+
+**方法三：**矩阵快速幂
+
+```c++
+class Solution {
+public:
+    int fib(int n) {
+        if (n < 2)
+            return n;
+        vector<vector<int>> q = {{1, 1}, {1, 0}};
+        vector<vector<int>> ret = matrix_pow(q, n - 1);
+        return ret[0][0];
+    }
+
+    vector<vector<int>> matrix_pow(vector<vector<int>>& a, int n)
+    {
+        // 重点
+        vector<vector<int>> ret = {{1, 0}, {0, 1}};
+        while (n > 0)
+        {
+            if (n & 1)
+                ret = matrix_multiply(ret, a);
+            n >>= 1;
+            a = matrix_multiply(a, a);
+        }
+        return ret;
+    }
+
+    vector<vector<int>> matrix_multiply(vector<vector<int>>& a, vector<vector<int>>& b)
+    {
+        vector<vector<int>> c = {{0, 0}, {0, 0}};
+        for (int i = 0; i < 2; ++i)
+            for (int j = 0; j < 2; ++j)
+                c[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j];
+        return c;
+    }
+};
+```
+
+**方法四：**递推式（组合数学）
+
+```c++
+class Solution {
+public:
+    int fib(int n) {
+        if (n < 2)
+            return n;
+        double sqrt5 = sqrt(5);
+        double fibn = pow((1 + sqrt5) / 2, n) + pow((1 - sqrt5) / 2, n);
+        return round(fibn / sqrt5);
+    }
+};
+```
+
+
+
+
+
+## 1137. 第N个泰波那契数
+
+### 题目：
+
+泰波那契序列 Tn 定义如下： 
+
+T0 = 0, T1 = 1, T2 = 1, 且在 n >= 0 的条件下 Tn+3 = Tn + Tn+1 + Tn+2
+
+给你整数 n，请返回第 n 个泰波那契数 Tn 的值。
+
+**示例 1：**
+
+```
+输入：n = 4
+输出：4
+解释：
+T_3 = 0 + 1 + 1 = 2
+T_4 = 1 + 1 + 2 = 4
+```
+
+**示例 2：**
+
+```
+输入：n = 25
+输出：1389537
+```
+
+**提示：**
+
+- `0 <= n <= 37`
+- 答案保证是一个 32 位整数，即 `answer <= 2^31 - 1`。
+
+**解题思路：**
+
+同0509题：
+
+思路一：循环   O(n)  O(1)
+
+思路二：递归
+
+**思路三：快速矩阵法(注意M矩阵的构建方法)**
+
+首先我们可以构建这样一个递推关系：
+
+$\left[ \begin{matrix} 1 & 1 & 1 \\ 1 & 0 & 0 \\ 0 & 1 & 0 \end{matrix} \right] \left[ \begin{matrix} T(n) \\ T(n - 1) \\ T(n - 2) \end{matrix} \right] = \left[ \begin{matrix} T(n) + T(n - 1) + T(n - 2) \\ T(n) \\ T(n - 1) \end{matrix} \right] = \left[ \begin{matrix} T(n + 1) \\ T(n) \\ T(n - 1) \end{matrix} \right]$
+
+因此：
+
+$\left[ \begin{matrix} T(n + 2) \\ T(n + 1) \\ T(n) \end{matrix} \right] = \left[ \begin{matrix} 1 & 1 & 1 \\ 1 & 0 & 0 \\ 0 & 1 & 0 \end{matrix} \right]^n \left[ \begin{matrix} T(2) \\ T(1) \\ T(0) \end{matrix} \right]$
+
+令：
+
+$M = \left[ \begin{matrix} 1 & 1 & 1 \\ 1 & 0 & 0 \\ 0 & 1 & 0 \end{matrix} \right]$
+
+因此只要我们能快速计算矩阵 $M$ 的 $n$ 次幂，就可以得到 $T(n)$ 的值。如果直接求取 $M^n$ ，时间复杂度是 $O(n)$，可以定义矩阵乘法，然后用快速幂算法来加速这里 $M^n$  的求取。
+
+**方法一：**循环
+
+```c++
+class Solution {
+public:
+    int tribonacci(int n) {
+        if (n < 2)
+            return n;
+        else if (n == 2)
+            return 1;
+        
+        int a = 0, b = 1, c = 1;
+        int d = 0;
+        for (int i = 3; i <= n; ++i)
+        {
+            d = a + b + c;
+            a = b;
+            b = c;
+            c = d;
+        }
+        return d;
+    }
+};
+```
+
+**方法二：**递归
+
+```c++
+class Solution {
+public:
+    int tribonacci(int n) {
+        if (n < 2)
+            return n;
+        else if (n == 2)
+            return 1;
+        
+        return tribonacci(n - 1) + tribonacci(n - 2) + tribonacci( n - 3);
+    }
+};
+```
+
+**方法三：**快速矩阵法
+
+```c++
+class Solution {
+public:
+    int tribonacci(int n) {
+        if (n < 2)
+            return n;
+        else if (n == 2)
+            return 1;
+        vector<vector<long>> q = {{1, 1, 1}, {1, 0, 0}, {0, 1, 0}};
+        vector<vector<long>> ret = matrix_pow(q, n - 2);
+        return ret[0][0] + ret[0][1];        
+    }
+
+    vector<vector<long>> matrix_pow(vector<vector<long>>& a, int n)
+    {
+        vector<vector<long>> ret = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+        while (n > 0)
+        {
+            if (n & 1)
+                ret = matrix_multiply(ret, a);
+            n >>= 1;
+            a = matrix_multiply(a, a);
+        }
+        return ret;
+    }
+
+    vector<vector<long>> matrix_multiply(vector<vector<long>>& a, vector<vector<long>>& b)
+    {
+        vector<vector<long>> c = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                c[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j];
+        return c;
+    }
+};
+```
+
