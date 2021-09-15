@@ -4569,6 +4569,139 @@ public:
 
 
 
+## 0070. 爬楼梯
+
+### 题目：
+
+假设你正在爬楼梯。需要 *n* 阶你才能到达楼顶。
+
+每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶呢？
+
+注意：给定 *n* 是一个正整数。
+
+**示例 1：**
+
+```
+输入： 2
+输出： 2
+解释： 有两种方法可以爬到楼顶。
+1.  1 阶 + 1 阶
+2.  2 阶
+```
+
+**示例 2：**
+
+```
+输入： 3
+输出： 3
+解释： 有三种方法可以爬到楼顶。
+1.  1 阶 + 1 阶 + 1 阶
+2.  1 阶 + 2 阶
+3.  2 阶 + 1 阶
+```
+
+**解题思路：**
+
+爬楼梯的思路类似于斐波那契数列；
+
+前者是自顶向下，后者是自底向上；
+
+做法都一样；
+
+循环、递归、快速幂阵法、公式推导法；
+
+**方法一：**递归
+
+```c++
+class Solution {
+public:
+    int climbStairs(int n) {
+        int count = 0;
+        _climbStairs(n, count);
+        return count;
+    }
+
+    void _climbStairs(int n, int& count) 
+    {
+        if (n <= 0)
+        {
+            if (n == 0)
+                ++count;
+            return;
+        }
+
+        _climbStairs(n - 1, count);
+        _climbStairs(n - 2, count);
+    }
+};
+```
+
+**方法二：**循环
+
+```c++
+class Solution {
+public:
+    int climbStairs(int n) {
+        if (n <= 2)
+            return n;
+        int a = 1, b = 2, c = 0;
+        for (int i = 2; i < n; ++i)
+        {
+            c = a + b;
+            a = b;
+            b = c;
+        }
+                
+        return c;
+    }
+};
+```
+
+**方法三：**快速幂阵法
+
+```c++
+class Solution {
+public:
+    int climbStairs(int n) {
+        if (n <= 2)
+            return n;
+        
+        vector<vector<long>> m = {{1, 1}, {1, 0}};
+        vector<vector<long>> ret = matrix_pow(m, n - 2);
+                
+        return 2 * ret[0][0] + ret[0][1];
+    }
+
+    vector<vector<long>> matrix_pow(vector<vector<long>>& a, int n)
+    {
+        vector<vector<long>> ret = {{1, 0}, {0, 1}};
+        while (n > 0)
+        {
+            if (n & 1)
+                ret = matrix_multiply(ret, a);
+            n >>= 1;
+            a = matrix_multiply(a, a);
+        }
+        return ret;
+    }
+
+    vector<vector<long>> matrix_multiply(vector<vector<long>>& a, vector<vector<long>>& b)
+    {
+        vector<vector<long>> ret = {{0, 0}, {0, 0}};
+        for (int i = 0; i < 2; ++i)
+            for (int j = 0; j < 2; ++j)
+                ret[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j];
+        return ret;
+    }
+};
+```
+
+
+
+
+
+
+
 ## 0509. 斐波那契数列
 
 ### 题目：
@@ -4740,6 +4873,95 @@ public:
         double sqrt5 = sqrt(5);
         double fibn = pow((1 + sqrt5) / 2, n) + pow((1 - sqrt5) / 2, n);
         return round(fibn / sqrt5);
+    }
+};
+```
+
+
+
+
+
+## 0746. 使用最小花费爬楼梯
+
+### 题目：
+
+数组的每个下标作为一个阶梯，第 i 个阶梯对应着一个非负数的体力花费值 cost[i]（下标从 0 开始）。
+
+每当你爬上一个阶梯你都要花费对应的体力值，一旦支付了相应的体力值，你就可以选择向上爬一个阶梯或者爬两个阶梯。
+
+请你找出达到楼层顶部的最低花费。在开始时，你可以选择从下标为 0 或 1 的元素作为初始阶梯。
+
+**示例 1：**
+
+```
+输入：cost = [10, 15, 20]
+输出：15
+解释：最低花费是从 cost[1] 开始，然后走两步即可到阶梯顶，一共花费 15 。
+```
+
+**示例 2：**
+
+```
+输入：cost = [1, 100, 1, 1, 1, 100, 1, 1, 100, 1]
+输出：6
+解释：最低花费方式是从 cost[0] 开始，逐个经过那些 1 ，跳过 cost[3] ，一共花费 6 。
+```
+
+**提示：**
+
+- `cost` 的长度范围是 `[2, 1000]`。
+- `cost[i]` 将会是一个整型数据，范围为 `[0, 999]` 。
+
+
+
+**解题思路：**
+
+题目要求：可以从 0 或 1 下标出发；
+
+使用一个 len + 1 长度的数组，dp[0] == dp[1] == 0;
+
+$2≤i≤n$，每次到达当前位置所需要的花费为：min(到达前一个位置的花费 + 前一个位置的花费，到达前两个位置的花费 + 前两个位置的花费 )，即：
+
+$dp[i]=min(dp[i−1]+cost[i−1],dp[i−2]+cost[i−2])$
+
+
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)，使用滚动数组，可以达到O(1)
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int minCostClimbingStairs(vector<int>& cost) {
+        int len = cost.size();
+        vector<int> dp(len + 1, 0);
+
+        for (int i = 2; i <= len; ++i)
+            dp[i] = min(dp[i - 1] + cost[i - 1], dp[i - 2] + cost[i - 2]);
+        return dp[len];
+    }
+};
+
+// 改进
+class Solution {
+public:
+    int minCostClimbingStairs(vector<int>& cost) {
+        int len = cost.size();
+        int prepreval = 0, preval = 0, curval = 0;
+
+        for (int i = 2; i <= len; ++i)
+        {
+            curval = min(preval + cost[i - 1], prepreval + cost[i - 2]);
+            prepreval = preval;
+            preval = curval;
+        }
+            
+        return curval;
     }
 };
 ```
