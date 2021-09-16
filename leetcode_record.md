@@ -4702,6 +4702,230 @@ public:
 
 
 
+## 0198. 打家劫舍
+
+### 题目：
+
+每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，**如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警**。
+
+给定一个代表每个房屋存放金额的非负整数数组，计算你 **不触动警报装置的情况下** ，一夜之内能够偷窃到的最高金额。
+
+**示例 1：**
+
+```
+输入：[1,2,3,1]
+输出：4
+解释：偷窃 1 号房屋 (金额 = 1) ，然后偷窃 3 号房屋 (金额 = 3)。
+     偷窃到的最高金额 = 1 + 3 = 4 。
+```
+
+**示例 2：**
+
+```
+输入：[2,7,9,3,1]
+输出：12
+解释：偷窃 1 号房屋 (金额 = 2), 偷窃 3 号房屋 (金额 = 9)，接着偷窃 5 号房屋 (金额 = 1)。
+     偷窃到的最高金额 = 2 + 9 + 1 = 12 。
+```
+
+**提示：**
+
+- `1 <= nums.length <= 100`
+- `0 <= nums[i] <= 400`
+
+
+
+**解题思路**
+
+数组跳跃组合求极值的问题
+
+如果房屋数量大于两间，应该如何计算能够偷窃到的最高总金额呢？对于第 $k~(k>2)$ 间房屋，有两个选项：
+
+偷窃第 $k$ 间房屋，那么就不能偷窃第 $k-1$ 间房屋，偷窃总金额为前 $k-2$ 间房屋的最高总金额与第 $k$ 间房屋的金额之和。
+
+不偷窃第 $k$ 间房屋，偷窃总金额为前 $k-1$ 间房屋的最高总金额。
+
+在两个选项中选择偷窃总金额较大的选项，该选项对应的偷窃总金额即为前 kk 间房屋能偷窃到的最高总金额。
+
+用 $\textit{dp}[i]$ 表示前 $i$ 间房屋能偷窃到的最高总金额，那么就有如下的状态转移方程：
+
+$\textit{dp}[i] = \max(\textit{dp}[i-2]+\textit{nums}[i], \textit{dp}[i-1])$
+
+边界条件为：
+
+$\begin{cases} \textit{dp}[0] = \textit{nums}[0] & 只有一间房屋，则偷窃该房屋 \\ \textit{dp}[1] = \max(\textit{nums}[0], \textit{nums}[1]) & 只有两间房屋，选择其中金额较高的房屋进行偷窃 \end{cases}$
+
+最终的答案即为 $\textit{dp}[n-1]$，其中 $n$ 是数组的长度。
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)  (滚动数组)
+
+
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int len = nums.size();
+        if (len == 1)
+            return nums[0];
+        
+        if (len == 2)
+            return max(nums[0], nums[1]);
+
+        int a = nums[0], b = max(nums[0], nums[1]), c = 0;
+
+        for (int i = 2; i < len; ++i)
+        {
+            c = max(a + nums[i], b);
+            a = b;
+            b = c;
+        }
+
+        return c;
+    }
+};
+
+/*
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int len = nums.size();
+        if (len == 1)
+            return nums[0];
+        
+        vector<int> dp(len, 0);
+        dp[0] = nums[0];
+        dp[1] = max(nums[0], nums[1]);
+
+        for (int i = 2; i < len; ++i)
+            dp[i] = max(dp[i - 2] + nums[i], dp[i - 1]);
+
+        return dp[len - 1];
+    }
+};
+
+
+/*
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int len = nums.size();
+        if (len == 1)
+            return nums[0];
+        
+        vector<int> dp(len + 1, 0);
+        dp[1] = nums[0];
+        dp[2] = nums[1];
+
+        for (int i = 3; i <= len; ++i)
+        {
+            dp[i] = max(dp[i - 2], dp[i - 3]) + nums[i - 1];
+        }
+
+        return max(dp[len - 1], dp[len]);
+    }
+};
+*/
+```
+
+
+
+
+
+## 0213. 打家劫舍Ⅱ
+
+### 题目：
+
+每间房内都藏有一定的现金。这个地方所有的房屋都 **围成一圈** ，这意味着第一个房屋和最后一个房屋是紧挨着的。同时，相邻的房屋装有相互连通的防盗系统，**如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警** 。
+
+给定一个代表每个房屋存放金额的非负整数数组，计算你 **在不触动警报装置的情况下** ，今晚能够偷窃到的最高金额。
+
+**示例 1：**
+
+```
+输入：nums = [2,3,2]
+输出：3
+解释：你不能先偷窃 1 号房屋（金额 = 2），然后偷窃 3 号房屋（金额 = 2）, 因为他们是相邻的。
+```
+
+**示例 2：**
+
+```
+输入：nums = [1,2,3,1]
+输出：4
+解释：你可以先偷窃 1 号房屋（金额 = 1），然后偷窃 3 号房屋（金额 = 3）。
+     偷窃到的最高金额 = 1 + 3 = 4 。
+```
+
+**示例 3：**
+
+```
+输入：nums = [0]
+输出：0
+```
+
+**提示：**
+
+- `1 <= nums.length <= 100`
+- `0 <= nums[i] <= 1000`
+
+
+
+**解题思路：**
+
+思路等同于0198题，但这个数组是一个循环数组，所以需要计算 0 ~ len - 2 以及 1 ~ len - 1范围内的最大值；
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)  (滚动数组)
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int len = nums.size();
+        if (len == 1)
+            return nums[0];
+        if (len == 2)
+            return max(nums[0], nums[1]);
+
+        return max(rotateRob(nums, 0, len - 2), rotateRob(nums, 1, len - 1));
+    }
+    int rotateRob(vector<int>& nums, int start, int end)
+    {
+        int len = end - start + 1;
+        if (len == 2)
+            return max(nums[start], nums[end]);
+
+        int a = nums[start], b = max(nums[start], nums[start + 1]), c = 0;
+
+        for (int i = 2; i < len; ++i)
+        {
+            c = max(a + nums[start + i], b);
+            a = b;
+            b = c;
+        }
+        return c;
+    }
+};
+```
+
+
+
+
+
+
+
 ## 0509. 斐波那契数列
 
 ### 题目：
@@ -4876,6 +5100,96 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0740. 删除并获得点数
+
+### 题目：
+
+给你一个整数数组 nums ，你可以对它进行一些操作。
+
+每次操作中，选择任意一个 nums[i] ，删除它并获得 nums[i] 的点数。之后，你必须删除 **所有** 等于 nums[i] - 1 和 nums[i] + 1 的元素。
+
+开始你拥有 0 个点数。返回你能通过这些操作获得的最大点数。
+
+**示例 1：**
+
+```
+输入：nums = [3,4,2]
+输出：6
+解释：
+删除 4 获得 4 个点数，因此 3 也被删除。
+之后，删除 2 获得 2 个点数。总共获得 6 个点数。
+```
+
+**示例 2：**
+
+```
+输入：nums = [2,2,3,3,3,4]
+输出：9
+解释：
+删除 3 获得 3 个点数，接着要删除两个 2 和 4 。
+之后，再次删除 3 获得 3 个点数，再次删除 3 获得 3 个点数。
+总共获得 9 个点数。
+```
+
+**提示：**
+
+- 1 <= nums.length <= 2 * 10^4
+- 1 <= nums[i] <= 10^4
+
+
+
+**解题思路：**
+
+选择一个数，需要删除掉nums[i] - 1 和 nums[i] + 1 的元素，并且获得nums[i]个点数，nums[i] - 1 、nums[i] 和 nums[i] + 1 都可能重复出现，所以可以先将相同的元素，累加和统计起来,得到一个dp数组，最后将这个数组的每段可以获得的最大点数求和；
+
+求每段可获得最大点数之和的情况，就是拿到一个点数，就不能再拿和他相邻的点数，也就是打家劫舍的问题，不能同时拿相邻的点数，直至数组为空；
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)  (滚动数组)
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int deleteAndEarn(vector<int>& nums) {
+        int maxVal = 0;
+        for (auto &e : nums)
+            maxVal = max(maxVal, e);
+        
+        vector<int> dp(maxVal + 1, 0);
+        for (auto &e : nums)
+            dp[e] += e;
+        
+        return rob(dp);
+    }
+
+    int rob(vector<int>& nums)
+    {
+        int len = nums.size();
+        if (len == 2)
+            return max(nums[0], nums[1]);
+        int a = nums[0], b = max(nums[0], nums[1]), c = 0;
+        for (int i = 2; i < len; ++i)
+        {
+            c = max(a + nums[i], b);
+            a = b;
+            b = c;
+        }
+        return c;
+    }
+};
+```
+
+
 
 
 
