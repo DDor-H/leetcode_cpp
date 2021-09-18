@@ -4569,6 +4569,56 @@ public:
 
 
 
+
+
+## 0045. 跳跃游戏Ⅱ
+
+### 同 Array 模块下 0045
+
+
+
+
+
+## 0053. 最大子序和
+
+### 同 Array 模块下 0053
+
+
+
+
+
+## 0055. 跳跃游戏
+
+### 同 Array 模块下 0055
+
+
+
+
+
+## 0062. 不同路径
+
+### 同 Array 模块下 0062
+
+
+
+
+
+## 0063. 不同路径Ⅱ
+
+### 同 Array 模块下 0063
+
+
+
+
+
+## 0064. 最小路径和
+
+### 同 Array 模块下 0064
+
+
+
+
+
 ## 0070. 爬楼梯
 
 ### 题目：
@@ -4692,6 +4742,146 @@ public:
             for (int j = 0; j < 2; ++j)
                 ret[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j];
         return ret;
+    }
+};
+```
+
+
+
+
+
+## 0072. 编辑距离
+
+### 题目：
+
+给你两个单词 `word1` 和 `word2`，请你计算出将 `word1` 转换成 `word2` 所使用的最少操作数 。
+
+你可以对一个单词进行如下三种操作：
+
+- 插入一个字符
+- 删除一个字符
+- 替换一个字符
+
+**示例 1：**
+
+```
+输入：word1 = "horse", word2 = "ros"
+输出：3
+解释：
+horse -> rorse (将 'h' 替换为 'r')
+rorse -> rose (删除 'r')
+rose -> ros (删除 'e')
+```
+
+**示例 2：**
+
+```
+输入：word1 = "intention", word2 = "execution"
+输出：5
+解释：
+intention -> inention (删除 't')
+inention -> enention (将 'i' 替换为 'e')
+enention -> exention (将 'n' 替换为 'x')
+exention -> exection (将 'n' 替换为 'c')
+exection -> execution (插入 'u')
+```
+
+**提示：**
+
+- `0 <= word1.length, word2.length <= 500`
+- `word1` 和 `word2` 由小写英文字母组成
+
+
+
+**解题思路：**
+
+思路一：自顶向下递归
+
+当任意一个子串长处为 0 ，则只需要再删除另外一个字串长度数即可；
+
+当两个子串最后一个字母相同，则只需要比较前面的即可；
+
+当两个子串最后一个字母相同，可以选择删除掉第一个字串最后一个，然后比较前面；
+
+​													可以选择在第二个后面添加一个，抵消后再比较前面的；
+
+​													或者替换后抵消，再比较前面的；
+
+
+
+思路二：自底向上动态规划
+
+使用一个二维数组dp[len1 + 1] [len2 + 1]，表示子串1第 0-i匹配子串2第0-j需要执行多少步；
+
+初始化：二维矩阵第一行第一列依次初始化为 0-len（表示移除一个子串，匹配一个空串，细品）
+
+状态转移方程：
+
+​			如果当前word[i - 1] == word[j - 1]
+
+​					dp[i] [j] = dp[i - 1] [j - 1];
+
+​			否则  
+
+​					dp[i] [j] = min(dp[i - 1] [j - 1], dp[i - 1] [j], dp[i] [j - 1]);  // 分别表示递归的最后三种子选项
+
+
+
+
+
+**方法一：**递归
+
+```c++
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        if (word1.length() == 0 || word2.length() == 0)
+            return max(word1.length(), word2.length());
+        
+        if (word1.back() == word2.back())
+        {
+            return minDistance(word1.substr(0, word1.length() - 1), word2.substr(0, word2.length() - 1));
+        }
+
+        return 1 + min(
+            minDistance(word1, word2.substr(0, word2.length() - 1)),
+            min(minDistance(word1.substr(0, word1.length() - 1), word2),
+            minDistance(word1.substr(0, word1.length() - 1), word2.substr(0, word2.length() - 1)))
+        );
+    }
+};
+```
+
+**方法二：**动态规划
+
+```c++
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        int len1 = word1.length();
+        int len2 = word2.length();
+
+        if (len1 * len2 == 0)
+            return len1 + len2;
+        
+        vector<vector<int>> dp(len1 + 1, vector<int>(len2 + 1, 0));
+        for (int i = 0; i < len1 + 1; ++i)
+            dp[i][0] = i;
+        for (int i = 0; i < len2 + 1; ++i)
+            dp[0][i] = i;
+
+        for (int i = 1; i < len1 + 1; ++i)
+        {
+            for (int j = 1; j < len2 + 1; ++j)
+            {
+                if (word1[i - 1] == word2[j - 1])  // 字符串下标要比dp数组下少 1
+                    dp[i][j] = dp[i - 1][j - 1];
+                else
+                    dp[i][j] = 1 + min(dp[i - 1][j - 1], min(dp[i][j - 1], dp[i - 1][j]));
+            }
+        }
+
+        return dp[len1][len2];
     }
 };
 ```
@@ -5279,6 +5469,115 @@ public:
     }
 };
 ```
+
+
+
+
+
+
+
+## 0918. 环形子数组的最大和
+
+### 题目：
+
+给定一个由整数数组 `A` 表示的**环形数组 `C`**，求 `C` 的非空子数组的最大可能和。
+
+在此处，环形数组意味着数组的末端将会与开头相连呈环状。（形式上，当`0 <= i < A.length` 时 `C[i] = A[i]`，且当 `i >= 0` 时 `C[i+A.length] = C[i]`）
+
+此外，子数组最多只能包含固定缓冲区 `A` 中的每个元素一次。（形式上，对于子数组 `C[i], C[i+1], ..., C[j]`，不存在 `i <= k1, k2 <= j` 其中 `k1 % A.length = k2 % A.length`）
+
+**示例 1：**
+
+```
+输入：[1,-2,3,-2]
+输出：3
+解释：从子数组 [3] 得到最大和 3
+```
+
+**示例 2：**
+
+```
+输入：[5,-3,5]
+输出：10
+解释：从子数组 [5,5] 得到最大和 5 + 5 = 10
+```
+
+**示例 3：**
+
+```
+输入：[3,-1,2,-1]
+输出：4
+解释：从子数组 [2,-1,3] 得到最大和 2 + (-1) + 3 = 4
+```
+
+**示例 4：**
+
+```
+输入：[3,-2,2,-3]
+输出：3
+解释：从子数组 [3] 和 [3,-2,2] 都可以得到最大和 3
+```
+
+**示例 5：**
+
+```
+输入：[-2,-3,-1]
+输出：-1
+解释：从子数组 [-1] 得到最大和 -1
+```
+
+**提示：**
+
+1. `-30000 <= A[i] <= 30000`
+2. `1 <= A.length <= 30000`
+
+
+
+**解题思路：**
+
+会了最大子序和，这题也就明白了。
+对于环形数组，分两种情况。
+	(1)答案在数组中间，就是最大子序和。例如[1,-2,3,-2]；
+	(2)答案在数组两边，例如[5,-3,5]最大的子序和就等于数组的总和SUM-最小的子序和。(一种特殊情况是数组全为负数，也就是SUM-最小子序和==0，最大子序和等于数组中最小的那个)。
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int maxSubarraySumCircular(vector<int>& nums) {
+        int len = nums.size();
+        if (len == 1)
+            return nums[0];
+
+        int maxCurSum = nums[0];
+        int maxSum = nums[0];
+        int minCurSum = nums[0];
+        int minSum = nums[0];
+        int Sum = nums[0];
+
+        for (int i = 1; i < len; ++i)
+        {
+            Sum += nums[i];
+            maxCurSum = max(maxCurSum + nums[i], nums[i]);
+            maxSum = max(maxCurSum, maxSum);
+            minCurSum = min(minCurSum + nums[i], nums[i]);
+            minSum = min(minCurSum, minSum);
+        }
+
+        // 防止全是负数的情况
+        return max(maxSum, Sum - minSum == 0 ? maxSum : (Sum - minSum));
+    }
+};
+```
+
+
 
 
 
