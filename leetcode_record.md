@@ -4892,6 +4892,78 @@ public:
 
 
 
+## 0152. 乘积最大子数组
+
+### 题目：
+
+给你一个整数数组 `nums` ，请你找出数组中乘积最大的连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。
+
+**示例 1:**
+
+```
+输入: [2,3,-2,4]
+输出: 6
+解释: 子数组 [2,3] 有最大乘积 6。
+```
+
+**示例 2:**
+
+```
+输入: [-2,0,-1]
+输出: 0
+解释: 结果不能为 2, 因为 [-2,-1] 不是子数组。
+```
+
+
+
+**解题思路：**
+
+- 标签：动态规划
+- 遍历数组时计算当前最大值，不断更新
+- 令imax为当前最大值，则当前最大值为 imax = max(imax * nums[i], nums[i])
+- **由于存在负数，那么会导致最大的变最小的，最小的变最大的**。因此还需要维护当前最小值imin，imin = min(imin * nums[i], nums[i])
+- 当负数出现时则imax与imin进行交换再进行下一步计算
+- 时间复杂度：O(n)
+- 空间复杂度：O(1)
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int maxProduct(vector<int>& nums) {
+        int len = nums.size();
+        if (len == 1)
+            return nums[0];
+        
+        int curMax = 1;
+        int curMin = 1;
+        int allMax = INT_MIN;
+        for (int i = 0; i < len; ++i)
+        {
+            if (nums[i] < 0)
+            {
+                int tmp = curMax;
+                curMax = curMin;
+                curMin = tmp;
+            }
+            curMax = max(curMax * nums[i], nums[i]);
+            curMin = min(curMin * nums[i], nums[i]);
+            allMax = max(allMax, curMax);
+        }
+        return allMax;
+    }
+};
+```
+
+
+
+
+
+
+
 ## 0198. 打家劫舍
 
 ### 题目：
@@ -5718,4 +5790,137 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 1567. 乘积为正数的最长子数组长度
+
+### 题目：
+
+给你一个整数数组 `nums` ，请你求出乘积为正数的最长子数组的长度。
+
+一个数组的子数组是由原数组中零个或者更多个连续数字组成的数组。
+
+请你返回乘积为正数的最长子数组长度。
+
+**示例 1：**
+
+```
+输入：nums = [1,-2,-3,4]
+输出：4
+解释：数组本身乘积就是正数，值为 24 。
+```
+
+**示例 2：**
+
+```
+输入：nums = [0,1,-2,-3,-4]
+输出：3
+解释：最长乘积为正数的子数组为 [1,-2,-3] ，乘积为 6 。
+注意，我们不能把 0 也包括到子数组中，因为这样乘积为 0 ，不是正数。
+```
+
+**示例 3：**
+
+```
+输入：nums = [-1,-2,-3,0,1]
+输出：2
+解释：乘积为正数的最长子数组是 [-1,-2] 或者 [-2,-3] 。
+```
+
+**示例 4：**
+
+```
+输入：nums = [-1,2]
+输出：1
+```
+
+**示例 5：**
+
+```
+输入：nums = [1,2,3,5,-6,4,0,10]
+输出：4
+```
+
+**提示：**
+
+- `1 <= nums.length <= 10^5`
+- `-10^9 <= nums[i] <= 10^9`
+
+
+
+**解题思路：**
+
+[我是fw](https://leetcode-cn.com/problems/maximum-length-of-subarray-with-positive-product/solution/cheng-ji-wei-zheng-shu-de-zui-chang-zi-shu-zu-ch-3/)
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int getMaxLen(vector<int>& nums) {
+        int len = nums.size();
+        int curPositive = (nums[0] > 0);
+        int curNegative = (nums[0] < 0);
+        int maxLength = curPositive;
+        
+        for (int i = 1; i < len; ++i)
+        {
+            if (nums[i] > 0)
+            {
+                ++curPositive;
+                curNegative = curNegative ? curNegative + 1 : 0;
+            }
+            else if (nums[i] < 0)
+            {
+                // 负数会改变正负号
+                int newPositive = curNegative ? curNegative + 1 : 0;
+                int newNegative = curPositive + 1;
+                curPositive = newPositive;
+                curNegative = newNegative;
+            }
+            else
+            {
+                curPositive = curNegative = 0;
+            }
+            maxLength = max(curPositive, maxLength);
+        }
+        return maxLength;
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
