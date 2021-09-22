@@ -3645,15 +3645,157 @@ public:
 
 
 
+## 0084. 柱状图中最大的矩形
+
+### 题目：
+
+给定 *n* 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。
+
+求在该柱状图中，能够勾勒出来的矩形的最大面积。
+
+**示例1：**
+
+![leetcode_84_1](F:\C++\刷题\Img\leetcode_84_1.jpg)
+
+```
+输入：heights = [2,1,5,6,2,3]
+输出：10
+解释：最大的矩形为图中红色区域，面积为 10
+```
+
+**示例2：**
+
+![leetcode_84_2](F:\C++\刷题\Img\leetcode_84_2.jpg)
+
+```
+输入： heights = [2,4]
+输出： 4
+```
+
+**提示：**
+
+- `1 <= heights.length <=10^5`
+- `0 <= heights[i] <= 10^4`
 
 
 
+**解题思路：**
+
+思路一：暴力解法
+
+依次遍历每一个柱子，找到左边，右边最近的一个没自己高的柱子，然后计算这个柱子周边最大面积的矩形；
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(1)
+
+思路二：单调栈 + （常数优化）
+
+[**单调栈（继续重点理解**）](https://leetcode-cn.com/problems/largest-rectangle-in-histogram/solution/zhu-zhuang-tu-zhong-zui-da-de-ju-xing-by-leetcode-/)
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
 
 
 
+**方法一：**
 
+```c++
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        int len = heights.size();
+        if (len == 1)
+            return heights[0];
+        int maxArea = 0;
+        int left = 0;
+        int right = 0;
+        for (int i = 0; i < len; ++i)
+        {
+            left = right = i;
+            while (left >= 0 && heights[left] >= heights[i])
+                --left;
+            ++left;
+            while (right < len && heights[right] >= heights[i])
+                ++right;
+            --right;
 
+            maxArea = max((right - left + 1) * heights[i], maxArea);
+        }
+        return maxArea;
+    }
+};
+```
 
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        int len = heights.size();
+        if (len == 1)
+            return heights[0];
+        int maxArea = 0;
+        vector<int> left(len, 0), right(len, 0);
+
+        stack<int> dp_stack;
+        for (int i = 0; i < len; ++i)
+        {
+            while (!dp_stack.empty() && heights[dp_stack.top()] >= heights[i])
+                dp_stack.pop();
+            left[i] = (dp_stack.empty() ? -1 : dp_stack.top());
+            dp_stack.push(i);
+        }
+        dp_stack = stack<int>();
+        for (int i = len - 1; i >= 0; --i)
+        {
+            while (!dp_stack.empty() && heights[i] <= heights[dp_stack.top()])
+                dp_stack.pop();
+            right[i] = (dp_stack.empty() ? len : dp_stack.top());
+            dp_stack.push(i);
+        }
+
+        for (int i = 0; i < len; ++i)
+            maxArea = max(maxArea, heights[i] * (right[i] - left[i] - 1));
+
+        return maxArea;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        int len = heights.size();
+        if (len == 1)
+            return heights[0];
+        int maxArea = 0;
+        vector<int> left(len, 0), right(len, len);
+
+        stack<int> dp_stack;
+        for (int i = 0; i < len; ++i)
+        {
+            while (!dp_stack.empty() && heights[dp_stack.top()] >= heights[i])
+            {
+                right[dp_stack.top()] = i;
+                dp_stack.pop();
+            }
+            left[i] = (dp_stack.empty() ? -1 : dp_stack.top());
+            dp_stack.push(i);
+        }
+
+        for (int i = 0; i < len; ++i)
+            maxArea = max(maxArea, heights[i] * (right[i] - left[i] - 1));
+
+        return maxArea;
+    }
+};
+```
 
 
 
@@ -4890,6 +5032,299 @@ public:
 
 
 
+## 0085. 最大矩形
+
+### 题目：
+
+给定一个仅包含 `0` 和 `1` 、大小为 `rows x cols` 的二维二进制矩阵，找出只包含 `1` 的最大矩形，并返回其面积。
+
+**示例1：**
+
+![leetcode_85](F:\C++\刷题\Img\leetcode_85.jpg)
+
+```
+输入：matrix = [["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
+输出：6
+解释：最大矩形如上图所示。
+```
+
+**示例 2：**
+
+```
+输入：matrix = []
+输出：0
+```
+
+**示例 3：**
+
+```
+输入：matrix = [["0"]]
+输出：0
+```
+
+**示例 4：**
+
+```
+输入：matrix = [["1"]]
+输出：1
+```
+
+**示例 5：**
+
+```
+输入：matrix = [["0","0"]]
+输出：0
+```
+
+**提示：**
+
+- `rows == matrix.length`
+- `cols == matrix[0].length`
+- `0 <= row, cols <= 200`
+- `matrix[i][j] 为 '0' 或 '1'`
+
+
+
+**解题思路：**
+
+思路一：暴力解法
+
+依次遍历每一个位置，并将同行前可累加的连续值累加起来；
+
+在某一个特定位置，以这个位置为右下角（以当前行为底），然后依次向上遍历，向上遍历过程中，宽度只可能比当前行的连续宽窄，高度可以增加，因为底已经决定了宽度；
+
+用一个二维数组，存储下每个位置在当前行前面可以遇到最大宽度；
+
+时间复杂度：O(m^2 * n)
+
+空间复杂度：O(mn)
+
+思路二：84题的单调栈 + 每一列积累
+
+遍历每一行时，每一个元素可以和上面的积累成最大连续高度，就可以组成一个以当前行为底，高度为累加的条形图，然后就可以调用单调栈，计算每次条形图的最大矩形面积；
+
+![leetcode_85_1](F:\C++\刷题\Img\leetcode_85_1.png)
+
+时间复杂度：O(mn)
+
+空间复杂度：O(n)
+
+思路三：动态规划
+
+[还需再理解](https://leetcode-cn.com/problems/maximal-rectangle/solution/xiang-xi-tong-su-de-si-lu-fen-xi-duo-jie-fa-by-1-8/)
+
+时间复杂度：O(mn)
+
+空间复杂度：O(n)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        int rows = matrix.size();
+        if (rows == 0)
+            return 0;
+        int cols = matrix[0].size();
+        
+        vector<vector<int>> dp(rows, vector<int>(cols, 0));
+        int maxArea = 0;
+
+        for (int i = 0; i < rows; ++i)
+        {
+            for (int j = 0; j < cols; ++j)
+            {
+                if (matrix[i][j] == '1')
+                {
+                    if (j == 0)
+                        dp[i][j] = 1;
+                    else
+                        dp[i][j] = dp[i][j - 1] + 1;
+                }
+                else
+                {
+                    dp[i][j] = 0;
+                }
+
+                int minWidth = dp[i][j];
+                for (int up_i = i; up_i >= 0; --up_i)
+                {
+                    int height = i - up_i + 1;
+                    minWidth = min(minWidth, dp[up_i][j]);
+                    maxArea = max(maxArea, height * minWidth);
+                }
+            }
+        }
+        return maxArea;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 整合顺序栈
+class Solution {
+public:
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        int rows = matrix.size();
+        if (rows == 0)
+            return 0;
+        int cols = matrix[0].size();
+        vector<int> dp(cols, 0);
+        int maxArea = 0;
+
+        for (int i = 0; i < rows; ++i)
+        {
+            for (int j = 0; j < cols; ++j)
+            {
+                if (matrix[i][j] == '1')
+                    dp[j] = (i == 0 ? 0 : dp[j]) + 1;
+                else
+                    dp[j] = 0;
+            }
+
+            vector<int> left(cols, 0), right(cols, cols);
+            stack<int> dp_stack;
+            for (int j = 0; j < cols; ++j)
+            {
+                while (!dp_stack.empty() && dp[dp_stack.top()] >= dp[j])
+                {
+                    right[dp_stack.top()] = j;
+                    dp_stack.pop();
+                }
+                left[j] = (dp_stack.empty() ? -1 : dp_stack.top());
+                dp_stack.push(j);
+            }
+            for (int j = 0; j < cols; ++j)
+                maxArea = max(maxArea, dp[j] * (right[j] - left[j] - 1));
+        }
+
+        return maxArea;
+    }
+};
+
+// 调用顺序栈柱状函数
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        int len = heights.size();
+        if (len == 1)
+            return heights[0];
+        int maxArea = 0;
+        vector<int> left(len, 0), right(len, len);
+        stack<int> dp_stack;
+        for (int i = 0; i < len; ++i)
+        {
+            while (!dp_stack.empty() && heights[dp_stack.top()] >= heights[i])
+            {
+                right[dp_stack.top()] = i;
+                dp_stack.pop();
+            }
+            left[i] = (dp_stack.empty() ? -1 : dp_stack.top());
+            dp_stack.push(i);
+        }
+        for (int i = 0; i < len; ++i)
+            maxArea = max(maxArea, heights[i] * (right[i] - left[i] - 1));
+        
+        return maxArea;
+    }
+
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        int rows = matrix.size();
+        if (rows == 0)
+            return 0;
+        int cols = matrix[0].size();
+        
+        vector<int> dp(cols, 0);
+        int maxArea = 0;
+
+        for (int i = 0; i < rows; ++i)
+        {
+            for (int j = 0; j < cols; ++j)
+            {
+                if (matrix[i][j] == '1')
+                    dp[j] = (i == 0 ? 0 : dp[j]) + 1;
+                else
+                    dp[j] = 0;
+            }
+
+            maxArea = max(maxArea, largestRectangleArea(dp));
+        }
+
+        return maxArea;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+// 方法三：动态规划
+class Solution {
+public:
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        int rows = matrix.size();
+        if (rows == 0)
+            return 0;
+        int cols = matrix[0].size();
+        vector<int> heights(cols, 0);
+        vector<int> left(cols, -1), right(cols, cols);
+        int maxArea = 0;
+
+        for (int i = 0; i < rows; ++i)
+        {
+            for (int j = 0; j < cols; ++j)
+            {
+                if (matrix[i][j] == '1')
+                    heights[j] += 1;
+                else
+                    heights[j] = 0;
+            }
+
+            int boundary = -1;
+            for (int j = 0; j < cols; ++j)
+            {
+                if (matrix[i][j] == '1')
+                    left[j] = max(left[j], boundary);
+                else
+                {
+                    left[j] = -1;
+                    boundary = j;
+                }
+            }
+
+            boundary = cols;
+            for (int j = cols - 1; j >= 0; --j)
+            {
+                if (matrix[i][j] == '1')
+                    right[j] = min(right[j], boundary);
+                else
+                {
+                    right[j] = cols;
+                    boundary = j;
+                }
+            }
+
+            for (int j = 0; j < cols; ++j)
+                maxArea = max(maxArea, heights[j] * (right[j] - left[j] - 1));
+        }
+
+        return maxArea;
+    }
+};
+
+```
+
+
+
+
+
+
+
 ## 0121. 买卖股票的最佳时机
 
 ### 题目：
@@ -5091,6 +5526,107 @@ public:
             tie(dp0, dp1) = {newdp0, newdp1};
         }
         return dp0;
+    }
+};
+```
+
+
+
+
+
+
+
+## 0139. 单词拆分
+
+### 题目：
+
+给定一个**非空**字符串 s 和一个包含**非空**单词的列表 wordDict，判定 s 是否可以被空格拆分为一个或多个在字典中出现的单词。
+
+**说明：**
+
+- 拆分时可以重复使用字典中的单词。
+- 你可以假设字典中没有重复的单词。
+
+**示例 1：**
+
+```
+输入: s = "leetcode", wordDict = ["leet", "code"]
+输出: true
+解释: 返回 true 因为 "leetcode" 可以被拆分成 "leet code"。
+```
+
+**示例 2：**
+
+```
+输入: s = "applepenapple", wordDict = ["apple", "pen"]
+输出: true
+解释: 返回 true 因为 "applepenapple" 可以被拆分成 "apple pen apple"。
+     注意你可以重复使用字典中的单词。
+```
+
+**示例 3：**
+
+```
+输入: s = "catsandog", wordDict = ["cats", "dog", "sand", "and", "cat"]
+输出: false
+```
+
+
+
+**解题思路：**
+
+![leetcode_139](F:\C++\刷题\Img\leetcode_139.png)
+
+- 初始化 $dp=[False,\cdots,False]$，长度为 $n+1$。$n$ 为字符串长度。$dp[i]$ 表示 $s$ 的前 $i$ 位是否可以用 $wordDict$ 中的单词表示。
+
+
+- 初始化 $dp[0]=True$，空字符可以被表示。
+
+
+- 遍历字符串的所有子串，遍历开始索引 $i$，遍历区间 $[0,n)$：
+  - 遍历结束索引 $j$，遍历区间 $[i+1,n+1)$：
+    - 若 $dp[i]=True$ 且 $s[i,\cdots,j)$ 在 $wordlist$ 中：$dp[j]=True$。解释：$dp[i]=True$ 说明 $s$ 的前 $i$ 位可以用 $wordDict$ 表示，则 $s[i,\cdots,j)$ 出现在 $wordDict$ 中，说明 $s$ 的前 $j$ 位可以表示。
+- 返回 $dp[n]$
+
+
+时间复杂度：$O(n^{2})$
+空间复杂度：$O(n)$
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    bool wordBreak(string s, vector<string>& wordDict) {
+        int len = s.length();
+        set<string> wordDictSet(wordDict.begin(), wordDict.end());
+
+        vector<bool> dp(len + 1, false);
+        dp[0] = true;
+        /*
+        for (int i = 1; i <= len; ++i)
+        {
+            for (int j = 0; j < i; ++j)
+            {
+                if (dp[j] && wordDictSet.find(s.substr(j, i - j)) != wordDictSet.end())
+                {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        */
+        for (int i = 0; i < len; ++i)
+        {
+            for (int j = i + 1; j <= len; ++j)
+            {
+                if (dp[i] && wordDictSet.find(s.substr(i, j - i)) != wordDictSet.end())
+                    dp[j] = true;
+            }
+        }
+        return dp[len];
     }
 };
 ```
