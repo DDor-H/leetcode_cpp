@@ -5435,6 +5435,95 @@ public:
 
 
 
+## 0096. 不同的二叉搜索树
+
+### 题目：
+
+给你一个整数 `n` ，求恰由 `n` 个节点组成且节点值从 `1` 到 `n` 互不相同的 **二叉搜索树** 有多少种？返回满足题意的二叉搜索树的种数。
+
+**示例1：**
+
+![leetcode_96_1](F:\C++\刷题\Img\leetcode_96_1.jpg)
+
+```
+输入：n = 3
+输出：5
+```
+
+**示例 2：**
+
+```
+输入：n = 1
+输出：1
+```
+
+**提示：**
+
+- `1 <= n <= 19`
+
+
+
+**解题思路：**
+
+思路一：动态规划
+
+假设 $n$ 个节点存在二叉排序树的个数是 $G(n)$，令 $f(i)$ 为以 $i$ 为根的二叉搜索树的个数
+
+即有:$G(n) = f(1) + f(2) + f(3) + f(4) + ... + f(n)$
+
+$n$ 为根节点，当 $i$ 为根节点时，其左子树节点个数为 $[1,2,3,...,i-1]$，右子树节点个数为$[i+1,i+2,...n]$，所以当i为根节点时，其左子树节点个数为 $i-1$ 个，右子树节点为$n-i$，即$f(i) = G(i-1)*G(n-i)$,
+
+上面两式可得:$G(n) = G(0)*G(n-1)+G(1)*(n-2)+...+G(n-1)*G(0)$
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：组合数学（卡特兰数）
+
+$C_0=1,C_{n+1}=\frac {2(2n+1)}{n+2}C_n$
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int numTrees(int n) {
+        vector<int> dp(n + 1, 0);
+        dp[0] = dp[1] = 1;
+        for (int i = 2; i <= n; ++i)
+            for (int j = 1; j <= i; ++j)
+                dp[i] += dp[j - 1] * dp[i - j];
+        return dp[n];
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int numTrees(int n) {
+        long long C = 1;
+        for (int i = 0; i < n; ++i)
+            C = C * 2 * (2 * i + 1) / (i + 2);
+
+        return C;
+    }
+};
+```
+
+
+
+
+
 ## 0121. 买卖股票的最佳时机
 
 ### 题目：
@@ -6036,6 +6125,178 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0264. 丑数Ⅱ
+
+给你一个整数 `n` ，请你找出并返回第 `n` 个 **丑数** 。
+
+**丑数** 就是只包含质因数 `2`、`3` 和/或 `5` 的正整数。
+
+**示例 1：**
+
+```
+输入：n = 10
+输出：12
+解释：[1, 2, 3, 4, 5, 6, 8, 9, 10, 12] 是由前 10 个丑数组成的序列。
+```
+
+**示例 2：**
+
+```
+输入：n = 1
+输出：1
+解释：1 通常被视为丑数。
+```
+
+**提示：**
+
+- `1 <= n <= 1690`
+
+
+
+**解题思路：**
+
+思路一：最小堆
+
+要得到从小到大的第 n 个丑数，可以使用**最小堆**实现。
+
+初始时堆为空。首先将最小的丑数 $1$ 加入堆。
+
+每次取出堆顶元素 $x$，则 $x$ 是堆中最小的丑数，由于 $2x, 3x, 5x$ 也是丑数，因此将 $2x, 3x, 5x$ 加入堆。
+
+上述做法会导致堆中出现重复元素的情况。为了避免重复元素，可以使用哈希集合去重，避免相同元素多次加入堆。
+
+在排除重复元素的情况下，第 $n$ 次从最小堆中取出的元素即为第 $n$ 个丑数。
+
+时间复杂度：O(nlogn)
+
+空间复杂度：O(n) 
+
+思路二：暴力解法（个别示例会超时）
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+思路三 ：动态规划
+
+使用一个数组记录所有丑数，在使用三个数p2、p3、p5记录当前最小丑数的下标，即
+
+`int num2 = dp[p2] * 2, num3 = dp[p3] * 3, num5 = dp[p5] * 5;`
+
+`dp[i] = min(num2, min(num3, num5));`
+
+因此每次找到的三个数肯定都是丑数，只需要依次记录下最小的一个就行，记录下当前丑数后，再把对应标记后移一位；
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int nthUglyNumber(int n) {
+        if (n == 1)
+            return 1;
+        
+        vector<int> factors = {2, 3, 5};
+        unordered_set<long> seen;
+        priority_queue<long, vector<long>, greater<long>> heap;
+        heap.push(1L);
+        seen.insert(1L);
+        int ugly = 0;
+
+        for (int i = 0; i < n; ++i)
+        {
+            long curr = heap.top();
+            heap.pop();
+            ugly = (int)curr;
+
+            for (auto & facotr : factors)
+            {
+                long next = facotr * curr;
+                if (!seen.count(next))
+                {
+                    seen.insert(next);
+                    heap.push(next);
+                }
+            }
+        }
+        return ugly;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool isUgly(int n) {
+        while( n > 0 )
+        {
+            if(n==1)
+                return true;
+            if(n%2==0)
+                n /= 2;
+            else if(n%3==0)
+                n /= 3;
+            else if(n%5==0)
+                n /= 5;
+            else
+                break;
+        }
+        return false;
+    }
+
+    int nthUglyNumber(int n) {
+        int count=0,num=1;
+        while(count!=n)
+        {
+            if(isUgly(num))
+                count++;
+            num++;
+        }
+        return num-1;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    int nthUglyNumber(int n) 
+    {
+        if (n == 1)
+            return 1;
+        
+        vector<int> dp(n + 1, 0);
+        dp[1] = 1;
+        int p2 = 1, p3 = 1, p5 = 1;
+        for (int i = 2; i <= n; ++i)
+        {
+            int num2 = dp[p2] * 2, num3 = dp[p3] * 3, num5 = dp[p5] * 5;
+            dp[i] = min(num2, min(num3, num5));
+            if (dp[i] == num2) ++p2;
+            if (dp[i] == num3) ++p3;
+            if (dp[i] == num5) ++p5;
+        }
+        return dp[n];
+    }
+};
+```
+
+
 
 
 
