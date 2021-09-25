@@ -5325,6 +5325,102 @@ public:
 
 
 
+## 0087. 扰乱字符串
+
+### 题目：
+
+使用下面描述的算法可以扰乱字符串 `s` 得到字符串 `t` ：
+
+1. 如果字符串的长度为 1 ，算法停止
+2. 如果字符串的长度 > 1 ，执行下述步骤：
+   - 在一个随机下标处将字符串分割成两个非空的子字符串。即，如果已知字符串 `s` ，则可以将其分成两个子字符串 `x` 和 `y` ，且满足 `s = x + y` 。
+   - **随机** 决定是要「交换两个子字符串」还是要「保持这两个子字符串的顺序不变」。即，在执行这一步骤之后，`s` 可能是 `s = x + y` 或者 `s = y + x` 。
+   - 在 `x` 和 `y` 这两个子字符串上继续从步骤 1 开始递归执行此算法。
+
+给你两个 `长度相等` 的字符串 `s1` 和 `s2`，判断 `s2` 是否是 `s1` 的扰乱字符串。如果是，返回 `true` ；否则，返回 `false` 。
+
+**示例 1：**
+
+```
+输入：s1 = "great", s2 = "rgeat"
+输出：true
+解释：s1 上可能发生的一种情形是：
+"great" --> "gr/eat" // 在一个随机下标处分割得到两个子字符串
+"gr/eat" --> "gr/eat" // 随机决定：「保持这两个子字符串的顺序不变」
+"gr/eat" --> "g/r / e/at" // 在子字符串上递归执行此算法。两个子字符串分别在随机下标处进行一轮分割
+"g/r / e/at" --> "r/g / e/at" // 随机决定：第一组「交换两个子字符串」，第二组「保持这两个子字符串的顺序不变」
+"r/g / e/at" --> "r/g / e/ a/t" // 继续递归执行此算法，将 "at" 分割得到 "a/t"
+"r/g / e/ a/t" --> "r/g / e/ a/t" // 随机决定：「保持这两个子字符串的顺序不变」
+算法终止，结果字符串和 s2 相同，都是 "rgeat"
+这是一种能够扰乱 s1 得到 s2 的情形，可以认为 s2 是 s1 的扰乱字符串，返回 true
+```
+
+**示例 2：**
+
+```
+输入：s1 = "abcde", s2 = "caebd"
+输出：false
+```
+
+**示例 3：**
+
+```
+输入：s1 = "a", s2 = "a"
+输出：true
+```
+
+**提示：**
+
+- `s1.length == s2.length`
+- `1 <= s1.length <= 30`
+- `s1` 和 `s2` 由小写英文字母组成
+
+
+
+**解题思路：**
+
+[扰乱字符串](https://leetcode-cn.com/problems/scramble-string/solution/miao-dong-de-qu-jian-xing-dpsi-lu-by-sha-yu-la-jia/)
+
+时间复杂度：O(n^4)
+
+空间复杂度：O(n^3)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    bool isScramble(string s1, string s2) {
+        int m = s1.length();
+        int n = s2.length();
+        if (m != n)
+            return false;
+        
+        vector<vector<vector<bool>>> dp(n, vector(n, vector(n + 1, false)));
+        for (int i = 0; i < n; ++i)
+            for (int j = 0; j < n; ++j)
+                dp[i][j][1] = (s1[i] == s2[j]);
+            
+        for (int len = 2; len <= n; ++len)
+            for (int i = 0; i <= n - len; ++i)
+                for (int j = 0; j <= n - len; ++j)
+                    for (int k = 1; k <= len - 1; ++k)
+                        if ((dp[i][j][k] && dp[i + k][j + k][len - k]) || (dp[i][len + j - k][k] && dp[i + k][j][len - k]))
+                        {
+                            dp[i][j][len] = true;
+                            break;
+                        }
+        return dp[0][0][n];
+    }
+};
+```
+
+
+
+
+
+
+
 ## 0091. 解码方法
 
 ### 题目：
@@ -5519,6 +5615,174 @@ public:
     }
 };
 ```
+
+
+
+
+
+
+
+## 0118. 杨辉三角
+
+### 题目：
+
+给定一个非负整数 *`numRows`，*生成「杨辉三角」的前 *`numRows`* 行。
+
+在「杨辉三角」中，每个数是它左上方和右上方的数的和。
+
+![leetcode_118](F:\C++\刷题\Img\leetcode_118.gif)
+
+**示例 1:**
+
+```
+输入: numRows = 5
+输出: [[1],[1,1],[1,2,1],[1,3,3,1],[1,4,6,4,1]]
+```
+
+**示例 2:**
+
+```
+输入: numRows = 1
+输出: [[1]]
+```
+
+**提示:**
+
+- `1 <= numRows <= 30`
+
+
+
+**解题思路：**
+
+常规思路
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(1)  返回数组不算
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> generate(int numRows) {
+        
+        vector<vector<int>> res(numRows);
+        for (int i = 0; i < numRows; ++i)
+        {
+            res[i].resize(i + 1);
+            res[i][0] = res[i][i] = 1;
+            for (int j = 1; j < i; ++j)
+                res[i][j] = res[i - 1][j - 1] + res[i - 1][j];
+        }
+        return res;
+    }
+};
+```
+
+
+
+
+
+## 0119. 杨辉三角Ⅱ
+
+### 题目：
+
+给定一个非负索引 `rowIndex`，返回「杨辉三角」的第 `rowIndex` 行。
+
+在「杨辉三角」中，每个数是它左上方和右上方的数的和。
+
+**示例 1:**
+
+```
+输入: rowIndex = 3
+输出: [1,3,3,1]
+```
+
+**示例 2:**
+
+```
+输入: rowIndex = 0
+输出: [1]
+```
+
+**示例 3:**
+
+```
+输入: rowIndex = 1
+输出: [1,1]
+```
+
+**提示:**
+
+- `0 <= rowIndex <= 33`
+
+
+
+**解题思路：**
+
+思路一：动态规划
+
+使用一个定长数组（rowIndex + 1），然后按照常规杨辉三角的双层循环依次赋值；
+
+注意：在使用滚动数组时，要注意数组的值会不会被重复使用，重复使用时会不会造成影响
+
+比如$res[j] = res[j - 1] + res[j];$，在遍历每一行时，当前值需要依靠一个，后一个值需要依靠当前值，如果先修改当前值，会对后一个值的修改造成影响，**因此内层循环采用从后往前的顺序来赋值**；
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(1) 
+
+思路二：组合数学
+
+由组合数公式 $\mathcal{C}_n^m=\dfrac{n!}{m!(n-m)!}$ ，可以得到同一行的相邻组合数的关系
+
+$\mathcal{C}_n^m= \mathcal{C}_n^{m-1} \times \dfrac{n-m+1}{m}$
+
+由于 $\mathcal{C}_n^0=1$，利用上述公式我们可以在线性时间计算出第 nn 行的所有组合数。
+
+时间复杂度：O(n)
+
+空间复杂度：O(1) 
+
+
+
+**方法一：**动态规划
+
+```c++
+class Solution {
+public:
+    vector<int> getRow(int rowIndex) {
+        vector<int> res(rowIndex + 1);
+        for (int i = 0; i <= rowIndex; ++i)
+        {
+            res[0] = res[i] = 1;
+            for (int j = i - 1; j > 0; --j)
+                res[j] = res[j - 1] + res[j];
+        }
+        return res;
+    }
+};
+```
+
+**方法二：**组合数学
+
+```c++
+class Solution {
+public:
+    vector<int> getRow(int rowIndex) {
+        vector<int> res(rowIndex + 1);
+        res[0] = 1;
+        for (int i = 1; i <= rowIndex; ++i)
+            res[i] = 1LL * res[i - 1] * (rowIndex - i + 1) / i;
+        return res;
+    }
+};
+```
+
+
 
 
 
