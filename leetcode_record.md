@@ -5788,6 +5788,94 @@ public:
 
 
 
+## 0120. 三角形最小路径和
+
+### 题目：
+
+给定一个三角形 `triangle` ，找出自顶向下的最小路径和。
+
+每一步只能移动到下一行中相邻的结点上。**相邻的结点** 在这里指的是 **下标** 与 **上一层结点下标** 相同或者等于 **上一层结点下标 + 1** 的两个结点。也就是说，如果正位于当前行的下标 `i` ，那么下一步可以移动到下一行的下标 `i` 或 `i + 1` 。
+
+**示例 1：**
+
+```
+输入：triangle = [[2],[3,4],[6,5,7],[4,1,8,3]]
+输出：11
+解释：如下面简图所示：
+   2
+  3 4
+ 6 5 7
+4 1 8 3
+自顶向下的最小路径和为 11（即，2 + 3 + 5 + 1 = 11）。
+```
+
+**示例 2：**
+
+```
+输入：triangle = [[-10]]
+输出：-10
+```
+
+**提示：**
+
+- `1 <= triangle.length <= 200`
+- `triangle[0].length == 1`
+- `triangle[i].length == triangle[i - 1].length + 1`
+- `-10^4 <= triangle[i][j] <= 10^4`
+
+
+
+**解题思路：**
+
+思路类似于931题
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n) 
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int minimumTotal(vector<vector<int>>& triangle) {
+        int n = triangle.size();
+        if (n == 1)
+            return triangle[0][0];
+        
+        vector<int> dp;
+        dp.resize(1);
+        dp[0] = triangle[0][0];
+
+        for (int i = 1; i < n; ++i)
+        {
+            dp.resize(i + 1);
+            for (int j = i; j >= 0; --j)
+            {
+                if (j == i)
+                    dp[j] = triangle[i][j] + dp[j - 1];
+                else if (j == 0)
+                    dp[j] = triangle[i][j] + dp[0];
+                else
+                    dp[j] = triangle[i][j] + min(dp[j], dp[j - 1]);
+            }
+        }
+        
+        return *min_element(dp.begin(), dp.end());;
+    }
+};
+```
+
+
+
+
+
+
+
+
+
 ## 0121. 买卖股票的最佳时机
 
 ### 题目：
@@ -7246,6 +7334,103 @@ public:
 
         // 防止全是负数的情况
         return max(maxSum, Sum - minSum == 0 ? maxSum : (Sum - minSum));
+    }
+};
+```
+
+
+
+
+
+
+
+## 0931. 下降路径最小和
+
+### 题目：
+
+给你一个 `n x n` 的 方形 整数数组 `matrix` ，请你找出并返回通过 `matrix` 的**下降路径** 的 **最小和** 。
+
+**下降路径** 可以从第一行中的任何元素开始，并从每一行中选择一个元素。在下一行选择的元素和当前行所选元素最多相隔一列（即位于正下方或者沿对角线向左或者向右的第一个元素）。具体来说，位置 `(row, col)` 的下一个元素应当是 `(row + 1, col - 1)、(row + 1, col)` 或者 `(row + 1, col + 1)` 。
+
+**示例 1：**
+
+```
+输入：matrix = [[2,1,3],[6,5,4],[7,8,9]]
+输出：13
+解释：下面是两条和最小的下降路径，用加粗+斜体标注：
+[[2,1,3],      [[2,1,3],
+ [6,5,4],       [6,5,4],
+ [7,8,9]]       [7,8,9]]
+```
+
+**示例 2：**
+
+```
+输入：matrix = [[-19,57],[-40,-5]]
+输出：-59
+解释：下面是一条和最小的下降路径，用加粗+斜体标注：
+[[-19,57],
+ [-40,-5]]
+```
+
+**示例 3：**
+
+```
+输入：matrix = [[-48]]
+输出：-48
+```
+
+**提示：**
+
+- `n == matrix.length`
+- `n == matrix[i].length`
+- `1 <= n <= 100`
+- `-100 <= matrix[i] [j] <= 100`
+
+
+
+**解题思路：**
+
+常规dp思路：创建一个n长的数组，记录第一行的值，依次循环1-n行matrix的每一个元素，判断头顶的元素哪个小，就走哪条路；
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n)  严格来讲是O(2n)，如果选择二维dp数组，就是O(n^2)，如果直接在原数组上修改，就是O(1)，但直接用修改有点不太合适；
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int minFallingPathSum(vector<vector<int>>& matrix) {
+        int n = matrix.size();
+        if (n == 1)
+            return matrix[0][0];
+        vector<int> dp(n, 0);
+        int minLen = INT_MAX;
+        for (int i = 0; i <n ; ++i)
+            dp[i] = matrix[0][i];
+        
+        for (int i = 1; i < n; ++i)
+        {
+            vector<int> tmpdp(n, 0);
+            for (int j = 0; j < n; ++j)
+            {
+                if (j == 0)
+                    tmpdp[j] = matrix[i][j] + min(dp[j], dp[j + 1]);
+                else if (j == n - 1)
+                    tmpdp[j] = matrix[i][j] + min(dp[j], dp[j - 1]);
+                else
+                    tmpdp[j] = matrix[i][j] + min(dp[j], min(dp[j + 1], dp[j - 1]));
+            }
+            dp = tmpdp;
+        }
+
+        for (int i = 0; i < n; ++i)
+            minLen = min(minLen, dp[i]);
+        return minLen;
     }
 };
 ```
