@@ -6654,6 +6654,94 @@ public:
 
 
 
+## 0304. 二维区域和检索-矩阵不可变
+
+### 题目：
+
+给定一个二维矩阵 `matrix`，以下类型的多个请求：
+
+- 计算其子矩形范围内元素的总和，该子矩阵的 **左上角** 为 `(row1, col1)` ，**右下角** 为 `(row2, col2)` 。
+
+实现 `NumMatrix` 类：
+
+- `NumMatrix(int[][] matrix)` 给定整数矩阵 `matrix` 进行初始化
+- `int sumRegion(int row1, int col1, int row2, int col2)` 返回 **左上角** `(row1, col1)` 、**右下角** `(row2, col2)` 所描述的子矩阵的元素 **总和** 。
+
+**示例1：**
+
+```
+输入: 
+["NumMatrix","sumRegion","sumRegion","sumRegion"]
+[[[[3,0,1,4,2],[5,6,3,2,1],[1,2,0,1,5],[4,1,0,1,7],[1,0,3,0,5]]],[2,1,4,3],[1,1,2,2],[1,2,2,4]]
+输出: 
+[null, 8, 11, 12]
+
+解释:
+NumMatrix numMatrix = new NumMatrix([[3,0,1,4,2],[5,6,3,2,1],[1,2,0,1,5],[4,1,0,1,7],[1,0,3,0,5]]]);
+numMatrix.sumRegion(2, 1, 4, 3); // return 8 (红色矩形框的元素总和)
+numMatrix.sumRegion(1, 1, 2, 2); // return 11 (绿色矩形框的元素总和)
+numMatrix.sumRegion(1, 2, 2, 4); // return 12 (蓝色矩形框的元素总和)
+```
+
+**提示：**
+
+- `m == matrix.length`
+- `n == matrix[i].length`
+- `1 <= m, n <= 200`
+- `-10^5 <= matrix[i][j] <= 10^5`
+- `0 <= row1 <= row2 < m`
+- `0 <= col1 <= col2 < n`
+- `最多调用 10^4 次 sumRegion 方法`
+
+
+
+**解题思路：**
+
+二位前缀和，方法等同于1314题
+
+时间复杂度：O(mn)
+
+空间复杂度：O(mn)
+
+**方法：**
+
+```c++
+class NumMatrix {
+private:
+    vector<vector<int>> dp, mat;
+public:
+    NumMatrix(vector<vector<int>>& matrix) {
+        int m = matrix.size();
+        int n = matrix[0].size();
+        dp.resize(m + 1, vector<int>(n + 1));
+        mat.resize(m, vector<int>(n));
+        mat = matrix;
+
+        for (int i = 1; i <= m; ++i)
+            for (int j = 1; j <= n; ++j)
+                dp[i][j] = mat[i - 1][j - 1] + dp[i - 1][j] + dp[i][j - 1] - dp[i - 1][j - 1];
+    }
+    
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        return dp[row2 + 1][col2 + 1] - dp[row2 + 1][col1] - dp[row1][col2 + 1] + dp[row1][col1];
+    }
+};
+
+/**
+ * Your NumMatrix object will be instantiated and called as such:
+ * NumMatrix* obj = new NumMatrix(matrix);
+ * int param_1 = obj->sumRegion(row1,col1,row2,col2);
+ */
+```
+
+
+
+
+
+
+
+
+
 ## 0309. 最佳买卖股票时机含冷冻期
 
 ### 题目：
@@ -7642,6 +7730,131 @@ public:
     }
 };
 ```
+
+
+
+
+
+
+
+## 1314. 矩阵区域和
+
+### 题目：
+
+给你一个 `m x n` 的矩阵 `mat` 和一个整数 `k` ，请你返回一个矩阵 `answer` ，其中每个 `answer[i][j]` 是所有满足下述条件的元素 `mat[r][c]` 的和： 
+
+- `i - k <= r <= i + k,`
+- `j - k <= c <= j + k` 且
+- `(r, c)` 在矩阵内。
+
+**示例 1：**
+
+```
+输入：mat = [[1,2,3],[4,5,6],[7,8,9]], k = 1
+输出：[[12,21,16],[27,45,33],[24,39,28]]
+```
+
+**示例 2：**
+
+```
+输入：mat = [[1,2,3],[4,5,6],[7,8,9]], k = 2
+输出：[[45,45,45],[45,45,45],[45,45,45]]
+```
+
+**提示：**
+
+- `m == mat.length`
+- `n == mat[i].length`
+- `1 <= m, n, k <= 100`
+- `1 <= mat[i] [j] <= 100`
+
+
+
+**解题思路：**
+
+思路一：暴力解法
+
+时间复杂度：O(m^2 * n^2)
+
+空间复杂度：O(1)
+
+思路二：动态规划
+
+我们用数组 `P` 表示数组 `mat` 的二维前缀和，`P` 的维数为 `(m + 1) * (n + 1)`，其中 `P[i][j]` 表示数组 `mat` 中以 `(0, 0)` 为左上角，`(i - 1, j - 1)` 为右下角的矩形子数组的元素之和。
+
+题目需要对数组 `mat` 中的每个位置，计算以 `(i - K, j - K)` 为左上角，`(i + K, j + K)` 为右下角的矩形子数组的元素之和，我们可以在前缀和数组的帮助下，通过：
+
+```
+sum = P[i + K + 1][j + K + 1] - P[i - K][j + K + 1] - P[i + K + 1][j - K] + P[i - K][j - K]
+```
+
+
+得到元素之和。注意到 `i + K + 1、j + K - 1、i - K` 和 `j - K` 这些下标有可能不在矩阵内，因此对于所有的横坐标，我们需要将其规范在 `[0, m]` 的区间内；对于所有的纵坐标，我们需要将其规范在 `[0, n]` 的区间内。具体地：
+
+`i + K + 1 和 j + K - 1` 分别可能超过 `m` 和 `n`，因此我们需要对这两个坐标与 `m` 和 `n` 取较小值，忽略不在矩阵内的部分；
+
+`i - K 和 j - K` 可能小于 `0`，因此我们需要对这两个坐标与 `0` 取较大值，忽略不在矩阵内的部分。
+
+时间复杂度：O(mn)
+
+空间复杂度：O(mn)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> matrixBlockSum(vector<vector<int>>& mat, int k) {
+        int m = mat.size(), n = mat[0].size();
+        vector<vector<int>> ans(m, vector<int>(n, 0));
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                for (int r = (i - k < 0 ? 0 : i - k); r <= (i + k >= m ? m - 1 : i + k); ++r)
+                {
+                    for (int c = (j - k < 0 ? 0 : j - k); c <= (j + k >= n ? n - 1 : j + k); ++c)
+                    {
+                        ans[i][j] += mat[r][c];
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int get(vector<vector<int>>& dp, int m, int n, int r, int c)
+    {
+        r = max(min(r, m), 0);
+        c = max(min(c, n), 0);
+        return dp[r][c];
+    }
+    vector<vector<int>> matrixBlockSum(vector<vector<int>>& mat, int k) {
+        int m = mat.size(), n = mat[0].size();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+        vector<vector<int>> ans(m, vector<int>(n, 0));
+        for (int i = 1; i <= m; ++i)
+            for (int j = 1; j <= n; ++j)
+                dp[i][j] = mat[i - 1][j - 1] + dp[i - 1][j] + dp[i][j - 1] - dp[i - 1][j - 1];
+
+        for (int i = 0; i < m; ++i)
+            for (int j = 0; j < n; ++j)
+                ans[i][j] = get(dp, m, n, i + k + 1, j + k + 1) - get(dp, m, n, i - k, j + k + 1) - get(dp, m, n, i + k + 1, j - k) + get(dp, m, n, i - k, j - k);
+        return ans;
+    }
+};
+```
+
+
 
 
 
