@@ -5531,6 +5531,103 @@ public:
 
 
 
+## 0095. 不同的二叉搜索树Ⅱ
+
+### 题目：
+
+给你一个整数 `n` ，请你生成并返回所有由 `n` 个节点组成且节点值从 `1` 到 `n` 互不相同的不同 **二叉搜索树** 。可以按 **任意顺序** 返回答案。
+
+**示例1：**
+
+![leetcode_95](F:\C++\刷题\Img\leetcode_95.jpg)
+
+```
+输入：n = 3
+输出：[[1,null,2,null,3],[1,null,3,2],[2,1,3],[3,1,null,null,2],[3,2,null,1]]
+```
+
+**示例 2：**
+
+```
+输入：n = 1
+输出：[[1]]
+```
+
+**提示：**
+
+- `1 <= n <= 8`
+
+
+
+**解题思路：**
+
+我们定义 `generateTrees(start, end)` 函数表示当前值的集合为 $[\textit{start},\textit{end}]$，返回序列 $[\textit{start},\textit{end}]$生成的所有可行的二叉搜索树。按照上文的思路，我们考虑枚举 $[\textit{start},\textit{end}]$ 中的值 $i$ 为当前二叉搜索树的根，那么序列划分为了 $[\textit{start},i-1]$ 和 $[i+1,\textit{end}]$ 两部分。我们递归调用这两部分，即 `generateTrees(start, i - 1)` 和 `generateTrees(i + 1, end)`，获得所有可行的左子树和可行的右子树，那么最后一步我们只要从可行左子树集合中选一棵，再从可行右子树集合中选一棵拼接到根节点上，并将生成的二叉搜索树放入答案数组即可。
+
+递归的入口即为 `generateTrees(1, n)`，出口为当 $\textit{start}>\textit{end}$ 的时候，当前二叉搜索树为空，返回空节点即可。
+
+
+
+**方法：**
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    vector<TreeNode*> generateTrees(int n) {
+        if (n)
+            return generateTrees(1, n);
+        else
+            return vector<TreeNode*>{};
+    }
+
+    vector<TreeNode*> generateTrees(int left, int right) 
+    {
+        vector<TreeNode*> res;
+        if (left > right)
+        {
+            res.push_back(nullptr);
+            return res;
+        }
+
+        for (int i = left; i <= right; ++i)
+        {
+            vector<TreeNode*> leftTrees = generateTrees(left, i - 1);
+            vector<TreeNode*> rightTrees = generateTrees(i + 1, right);
+
+            for (TreeNode* leftNode : leftTrees)
+            {
+                for (TreeNode* rightNode : rightTrees)
+                {
+                    TreeNode* root = new TreeNode(i);
+                    root->left = leftNode;
+                    root->right = rightNode;
+                    res.push_back(root);
+                }
+            }
+        }
+        return res;
+    }
+};
+```
+
+
+
+
+
+
+
+
+
 ## 0096. 不同的二叉搜索树
 
 ### 题目：
