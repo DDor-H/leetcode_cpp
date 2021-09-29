@@ -5719,6 +5719,130 @@ public:
 
 
 
+## 0097. 交错字符串
+
+### 题目：
+
+给定三个字符串 `s1、s2、s3`，请你帮忙验证 `s3` 是否是由 `s1` 和 `s2` **交错** 组成的。
+
+两个字符串 `s` 和 `t` **交错** 的定义与过程如下，其中每个字符串都会被分割成若干 **非空** 子字符串：
+
+- `s = s1 + s2 + ... + sn`
+- `t = t1 + t2 + ... + tm`
+- `|n - m| <= 1`
+- **交错** 是 `s1 + t1 + s2 + t2 + s3 + t3 + ...` 或者 `t1 + s1 + t2 + s2 + t3 + s3 + ...`
+- **提示**：`a + b` 意味着字符串 `a` 和 `b` 连接。
+
+**示例1：**
+
+![leetcode_97](F:\C++\刷题\Img\leetcode_97.jpg)
+
+```
+输入：s1 = "aabcc", s2 = "dbbca", s3 = "aadbbcbcac"
+输出：true
+```
+
+**示例 2：**
+
+```
+输入：s1 = "aabcc", s2 = "dbbca", s3 = "aadbbbaccc"
+输出：false
+```
+
+**示例 3：**
+
+```
+输入：s1 = "", s2 = "", s3 = ""
+输出：true
+```
+
+**提示：**
+
+- `0 <= s1.length, s2.length <= 100
+- `0 <= s3.length <= 200`
+- `s1、s2、和 s3` 都由小写英文字母组成
+
+
+
+**解题思路：**
+
+首先如果 $|s_1| + |s_2| \neq |s_3|$∣，那 $s_3$  必然不可能由 $s_1$ 和 $s_2$ 交错组成。在 $|s_1| + |s_2| = |s_3|$ 时，我们可以用动态规划来求解。我们定义 $f(i, j)$ 表示 $s_1$ 的前 $i$ 个元素和 $s_2$ 的前 $j$ 个元素是否能交错组成 $s_3$ 的前 $i + j$ 个元素。如果 $s_1$ 的第 $i$ 个元素和 $s_3$ 的第 $i + j$ 个元素相等，那么 $s_1$ 的前 $i$ 个元素和 $s_2$ 的前 $j$ 个元素是否能交错组成 $s_3$ 的前 $i + j$ 个元素取决于 $s_1$ 的前 i - 1i−1 个元素和 $s_2$ 的前 $j$ 个元素是否能交错组成 $s_3$ 的前 $i + j - 1$ 个元素，即此时 $f(i, j)$ 取决于 $f(i - 1, j)$，在此情况下如果 $f(i - 1, j)$ 为真，则 $f(i, j)$ 也为真。同样的，如果 $s_2$ 的第 $j$ 个元素和 $s_3$ 的第 $i + j$ 个元素相等并且 $f(i, j - 1)$ 为真，则 $f(i, j)$ 也为真。于是我们可以推导出这样的动态规划转移方程：
+
+$f(i, j) = [f(i - 1, j) \, {\rm and} \, s_1(i - 1) = s_3(p)] \, {\rm or} \, [f(i, j - 1) \, {\rm and} \, s_2(j - 1) = s_3(p)]$
+
+其中 $p = i + j - 1$。边界条件为 $f(0, 0) = {\rm True}$。至此，我们很容易可以给出这样一个实现：
+
+
+
+时间复杂度：O(mn)
+
+空间复杂度：O(mn)   -> 滚动数组  O(n)
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    bool isInterleave(string s1, string s2, string s3) {
+        int len1 = s1.length();
+        int len2 = s2.length();
+        int len3 = s3.length();
+        if (len1 + len2 != len3)
+            return false;
+
+        vector<vector<int>> dp(len1 + 1, vector<int>(len2 + 1, false));
+        dp[0][0] = true;
+        for (int i = 0; i <= len1; ++i)
+        {
+            for (int j = 0; j <= len2; ++j)
+            {
+                int p = i + j - 1;
+                if (i > 0)
+                    dp[i][j] |= (dp[i - 1][j] && (s1[i - 1] == s3[p]));
+                if (j > 0)
+                    dp[i][j] |= (dp[i][j - 1] && (s2[j - 1] == s3[p]));
+            }
+        }
+        return dp[len1][len2];
+    }
+};
+
+// 滚动数组
+class Solution {
+public:
+    bool isInterleave(string s1, string s2, string s3) {
+        int len1 = s1.length();
+        int len2 = s2.length();
+        int len3 = s3.length();
+        if (len1 + len2 != len3)
+            return false;
+
+        vector<int> dp(len2 + 1, false);
+        dp[0] = true;
+        for (int i = 0; i <= len1; ++i)
+        {
+            for (int j = 0; j <= len2; ++j)
+            {
+                int p = i + j - 1;
+                if (i > 0)
+                    dp[j] &= (s1[i - 1] == s3[p]);
+                if (j > 0)
+                    dp[j] |= (dp[j - 1] && (s2[j - 1] == s3[p]));
+            }
+        }
+        return dp[len2];
+    }
+};
+```
+
+
+
+
+
+
+
 ## 0118. 杨辉三角
 
 ### 题目：
@@ -6574,6 +6698,99 @@ public:
     }
 };
 ```
+
+
+
+
+
+
+
+## 0221. 最大正方形
+
+### 题目：
+
+在一个由 `'0'` 和 `'1'` 组成的二维矩阵内，找到只包含 `'1'` 的最大正方形，并返回其面积。
+
+**示例1：**
+
+![leetcode_221](F:\C++\刷题\Img\leetcode_221.jpg)
+
+```
+输入：matrix = [["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
+输出：4
+```
+
+**示例2：**
+
+![leetcode_221_1](F:\C++\刷题\Img\leetcode_221_1.jpg)
+
+```
+输入：matrix = [["0","1"],["1","0"]]
+输出：1
+```
+
+**示例 3：**
+
+```
+输入：matrix = [["0"]]
+输出：0
+```
+
+**提示：**
+
+- `m == matrix.length`
+- `n == matrix[i].length`
+- `1 <= m, n <= 300`
+- `matrix[i][j] 为 '0' 或 '1'`
+
+
+
+**解题思路：**
+
+用 $\textit{dp}(i, j)$ 表示以 $(i, j)$ 为右下角，且只包含 $1$ 的正方形的边长最大值。如果我们能计算出所有 $\textit{dp}(i, j)$ 的值，那么其中的最大值即为矩阵中只包含 $1$ 的正方形的边长最大值，其平方即为最大正方形的面积。
+
+那么如何计算 $\textit{dp}$ 中的每个元素值呢？对于每个位置 $(i, j)$，检查在矩阵中该位置的值：
+
+- 如果该位置的值是 $0$，则 $\textit{dp}(i, j) = 0$，因为当前位置不可能在由 $1$ 组成的正方形中；
+
+- 如果该位置的值是 $1$，则 $\textit{dp}(i, j)$ 的值由其上方、左方和左上方的三个相邻位置的 $\textit{dp}$ 值决定。**具体而言，当前位置的元素值等于三个相邻位置的元素中的最小值加 $1$**，状态转移方程如下：
+
+
+$$
+dp(i, j)=min(dp(i−1, j), dp(i−1, j−1), dp(i, j−1))+1
+$$
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int maximalSquare(vector<vector<char>>& matrix) {
+        int m = matrix.size();
+        int n = matrix[0].size();
+
+        vector<int> dp(n, 0);
+        int maxArea = INT_MIN;
+        for (int i = 0; i < m; ++i)
+        {
+            vector<int> dpTmp(n, 0);
+            for (int j = 0; j < n; ++j)
+                if (matrix[i][j] == '1')
+                    if (i == 0 || j == 0)
+                        dpTmp[j] = 1;
+                    else
+                        dpTmp[j] = min(dp[j - 1], min(dp[j], dpTmp[j - 1])) + 1;
+            dp = dpTmp;
+            maxArea = max(maxArea, *max_element(dp.begin(), dp.end()));
+        }
+        return maxArea * maxArea;
+    }
+};
+```
+
+
 
 
 
