@@ -3889,7 +3889,7 @@ public:
 
 思路二：中间扩散法
 
-​		依次从每一个下表的 i  i  位置和 i  i+1 位置向两边扩散，寻找最长回文
+​		依次从每一个下标的 i  i  位置和 i  i+1 位置向两边扩散，寻找最长回文
 
 ​		时间复杂度：O(n^2)
 
@@ -6966,6 +6966,152 @@ public:
 
 
 
+## 0300. 最长递增子序列
+
+### 题目：
+
+给你一个整数数组 `nums` ，找到其中最长严格递增子序列的长度。
+
+子序列是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，`[3,6,2,7]` 是数组 `[0,3,1,6,2,2,7]` 的子序列。
+
+**示例 1：**
+
+```
+输入：nums = [10,9,2,5,3,7,101,18]
+输出：4
+解释：最长递增子序列是 [2,3,7,101]，因此长度为 4 。
+```
+
+**示例 2：**
+
+```
+输入：nums = [0,1,0,3,2,3]
+输出：4
+```
+
+**示例 3：**
+
+```
+输入：nums = [7,7,7,7,7,7,7]
+输出：1
+```
+
+**提示：**
+
+- `1 <= nums.length <= 2500`
+- `-10^4 <= nums[i] <= 10^4`
+
+
+
+**解题思路：**
+
+思路一：动态规划
+
+定义 $\textit{dp}[i]$ 为考虑前 $i$ 个元素，以第 $i$ 个数字结尾的最长上升子序列的长度，注意 $\textit{nums}[i]$ 必须被选取。
+
+我们从小到大计算 $\textit{dp}$ 数组的值，在计算 $\textit{dp}[i]$ 之前，我们已经计算出 $\textit{dp}[0 \ldots i-1]$ 的值，则状态转移方程为：
+
+$$
+\textit{dp}[i] = \max(\textit{dp}[j]) + 1, \text{其中} \, 0 \leq j < i \, \text{且} \, \textit{num}[j]<\textit{num}[i]
+$$
+即考虑往 $\textit{dp}[0 \ldots i-1]$ 中最长的上升子序列后面再加一个 $\textit{nums}[i]$。由于 $\textit{dp}[j]$ 代表 $\textit{nums}[0 \ldots j]$ 中以 $\textit{nums}[j]$ 结尾的最长上升子序列，所以如果能从 $\textit{dp}[j]$这个状态转移过来，那么 $\textit{nums}[i]$ 必然要大于 $\textit{nums}[j]$，才能将 $\textit{nums}[i]$ 放在 $\textit{nums}[j]$ 后面以形成更长的上升子序列。
+
+最后，整个数组的最长上升子序列即所有 $\textit{dp}[i]$ 中的最大值。
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n)
+
+思路二：动态规划 + 二分查找
+
+使用一个数组，存储当前已经遍历过的最长递增子序列，若遍历当前元素大于数组最后一个，说明最长递增子序列还能增长，就添加到数组中，否则在当前数组中找位置并插入（可能是中间的某个数）
+
+以输入序列 [0,8,4,12,2] 为例：
+
+- 第一步插入 0，d = [0]；
+
+
+- 第二步插入 8，d = [0, 8]；
+
+
+- 第三步插入 4，d = [0, 4]；
+
+
+- 第四步插入 12，d = [0, 4, 12]；
+
+
+- 第五步插入 2，d = [0, 2, 12]。
+
+
+最终得到最大递增子序列长度为 3。
+
+时间复杂度：O(nlogn)
+
+空间复杂度：O(n)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> dp(n, 1);
+        for (int i = 0; i < n; ++i)
+            for (int j = 0; j < i; ++j)
+                if (nums[j] < nums[i])
+                    dp[i] = max(dp[i], dp[j] + 1);
+        return *max_element(dp.begin(), dp.end());
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        int n = nums.size();
+        int len = 1;
+        vector<int> dp(n + 1, 0);
+        dp[len] = nums[0];
+        for (int i = 1; i < n; ++i)
+            if (nums[i] > dp[len])
+                dp[++len] = nums[i];
+            else
+            {
+                int pos = binaryFind(dp, len, nums[i]);
+                dp[pos] = nums[i];
+            }
+        return len;
+    }
+
+    int binaryFind(vector<int>& dp, int len, int data)
+    {
+        int l = 1, r = len, pos = 0;
+        while (l <= r)
+        {
+            int mid = ((l + r) >> 1);
+            if (data > dp[mid])
+            {
+                pos = mid;
+                l = mid + 1;
+            }
+            else 
+                r = mid - 1;
+        }
+        return pos + 1;
+    }
+};
+```
+
+
+
+
+
 
 
 ## 0304. 二维区域和检索-矩阵不可变
@@ -7116,6 +7262,120 @@ public:
             tie(sell, buy, cool) = {newsell, newbuy, newcool};
         }
         return max(sell, cool);
+    }
+};
+```
+
+
+
+
+
+## 0376. 摆动序列
+
+### 题目：
+
+如果连续数字之间的差严格地在正数和负数之间交替，则数字序列称为 `摆动序列` 。第一个差（如果存在的话）可能是正数或负数。仅有一个元素或者含两个不等元素的序列也视作摆动序列。
+
+- 例如， `[1, 7, 4, 9, 2, 5]` 是一个 摆动序列 ，因为差值 `(6, -3, 5, -7, 3)` 是正负交替出现的。
+
+- 相反，`[1, 4, 7, 2, 5] 和 [1, 7, 4, 5, 5]` 不是摆动序列，第一个序列是因为它的前两个差值都是正数，第二个序列是因为它的最后一个差值为零。
+
+**子序列** 可以通过从原始序列中删除一些（也可以不删除）元素来获得，剩下的元素保持其原始顺序。
+
+给你一个整数数组 `nums` ，返回 `nums` 中作为 **摆动序列** 的 **最长子序列的长度** 。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [1,7,4,9,2,5]
+输出：6
+解释：整个序列均为摆动序列，各元素之间的差值为 (6, -3, 5, -7, 3) 。
+```
+
+**示例 2：**
+
+```
+输入：nums = [1,17,5,10,13,15,10,5,16,8]
+输出：7
+解释：这个序列包含几个长度为 7 摆动序列。
+其中一个是 [1, 17, 10, 13, 10, 16, 8] ，各元素之间的差值为 (16, -7, 3, -3, 6, -8) 。
+```
+
+**示例 3：**
+
+```
+输入：nums = [1,2,3,4,5,6,7,8,9]
+输出：2
+```
+
+**提示：**
+
+- `1 <= nums.length <= 1000`
+- `0 <= nums[i] <= 1000`
+
+
+
+**解题思路：**
+
+思路一：动态规划
+
+[动态规划思路](https://leetcode-cn.com/problems/wiggle-subsequence/solution/bai-dong-xu-lie-by-leetcode-solution-yh2m/)
+
+- 时间复杂度：O(n)
+- 空间复杂度：O(1)
+
+思路二：贪心算法
+
+[贪心算法思路](https://leetcode-cn.com/problems/wiggle-subsequence/solution/bai-dong-xu-lie-by-leetcode-solution-yh2m/)
+
+- 时间复杂度：O(n)
+- 空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int wiggleMaxLength(vector<int>& nums) {
+        int n = nums.size();
+        if (n < 2)
+            return n;
+        
+        int up = 1, down = 1;
+        for (int i = 1; i < n; ++i)
+            if (nums[i] > nums[i - 1])
+                up = down + 1;
+            else if (nums[i] < nums[i - 1])
+                down = up + 1;
+        return max(up, down);
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int wiggleMaxLength(vector<int>& nums) {
+        int n = nums.size();
+        if (n < 2)
+            return n;
+        
+        int prevdiff = nums[1] - nums[0];
+        int ret = prevdiff != 0 ? 2 : 1;
+        for (int i = 2; i < n; ++i)
+        {
+            int diff = nums[i] - nums[i - 1];
+            if ((diff > 0 && prevdiff <= 0) || (diff < 0 && prevdiff >= 0))
+            {
+                ++ret;
+                prevdiff = diff;
+            }
+        }
+        return ret;
     }
 };
 ```
@@ -7378,6 +7638,89 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0516. 最长回文子序列
+
+### 题目：
+
+给你一个字符串 `s` ，找出其中最长的回文子序列，并返回该序列的长度。
+
+子序列定义为：不改变剩余字符顺序的情况下，删除某些字符或者不删除任何字符形成的一个序列。
+
+**示例 1：**
+
+```
+输入：s = "bbbab"
+输出：4
+解释：一个可能的最长回文子序列为 "bbbb" 。
+```
+
+**示例 2：**
+
+```
+输入：s = "cbbd"
+输出：2
+解释：一个可能的最长回文子序列为 "bb" 。
+```
+
+**提示：**
+
+- `1 <= s.length <= 1000`
+- `s 仅由小写英文字母组成`
+
+
+
+**解题思路：**
+
+用 $\textit{dp}[i][j]$ 表示字符串 $s$ 的下标范围 $[i, j]$ 内的最长回文子序列的长度。假设字符串 $s$ 的长度为 $n$，则只有当 $0 \le i \le j < n$ 时，才会有 $\textit{dp}[i][j] > 0$，否则 $\textit{dp}[i][j] = 0$。
+
+由于任何长度为 $1$ 的子序列都是回文子序列，因此动态规划的边界情况是，对任意 $0 \le i < n$，都有 $\textit{dp}[i][i] = 1$。
+
+当 $i < j$ 时，计算 $\textit{dp}[i][j]$ 需要分别考虑 $s[i]$ 和 $s[j]$ 相等和不相等的情况：
+
+如果 $s[i] = s[j]$，则首先得到 ss 的下标范围 $[i+1, j-1]$ 内的最长回文子序列，然后在该子序列的首尾分别添加 $s[i]$ 和 $s[j]$，即可得到 $s$ 的下标范围 $[i, j]$ 内的最长回文子序列，因此 $\textit{dp}[i][j] = \textit{dp}[i+1][j-1] + 2$；
+
+如果 $s[i] \ne s[j]$，则 $s[i]$ 和 $s[j]$ 不可能同时作为同一个回文子序列的首尾，因此 $\textit{dp}[i][j] = \max(\textit{dp}[i+1][j], \textit{dp}[i][j-1])$。
+
+由于状态转移方程都是从长度较短的子序列向长度较长的子序列转移，因此需要注意动态规划的循环顺序。然后注意遍历顺序，`i` 从最后一个字符开始往前遍历，`j` 从 `i + 1` 开始往后遍历，这样可以保证每个子问题都已经算好了。
+
+最终得到 $\textit{dp}[0][n-1]$ 即为字符串 $s$ 的最长回文子序列的长度。
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n^2)
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int longestPalindromeSubseq(string s) {
+        int len = s.length();
+        vector<vector<int>> dp(len, vector<int>(len, 0));
+        for (int i = len - 1; i >= 0; --i)
+        {
+            dp[i][i] = 1;
+            for (int j = i + 1; j < len; ++j)
+            {
+                if (s[i] == s[j])
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
+                else
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]);
+            }
+        }
+        return dp[0][len - 1];
+    }
+};
+```
+
+
 
 
 
