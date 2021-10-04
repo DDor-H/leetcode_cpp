@@ -4943,7 +4943,7 @@ exection -> execution (插入 'u')
 
 当两个子串最后一个字母相同，则只需要比较前面的即可；
 
-当两个子串最后一个字母相同，可以选择删除掉第一个字串最后一个，然后比较前面；
+当两个子串最后一个字母不相同，可以选择删除掉第一个字串最后一个，然后比较前面；
 
 ​													可以选择在第二个后面添加一个，抵消后再比较前面的；
 
@@ -7270,6 +7270,134 @@ public:
 
 
 
+## 0322. 零钱兑换
+
+### 题目：
+
+给你一个整数数组 `coins` ，表示不同面额的硬币；以及一个整数 `amount` ，表示总金额。
+
+计算并返回可以凑成总金额所需的 **最少的硬币个数** 。如果没有任何一种硬币组合能组成总金额，返回 `-1` 。
+
+你可以认为每种硬币的数量是无限的。
+
+ 
+
+**示例 1：**
+
+```
+输入：coins = [1, 2, 5], amount = 11
+输出：3 
+解释：11 = 5 + 5 + 1
+```
+
+**示例 2：**
+
+```
+输入：coins = [2], amount = 3
+输出：-1
+```
+
+**示例 3：**
+
+```
+输入：coins = [1], amount = 0
+输出：0
+```
+
+**示例 4：**
+
+```
+输入：coins = [1], amount = 1
+输出：1
+```
+
+**示例 5：**
+
+```
+输入：coins = [1], amount = 2
+输出：2
+```
+
+**提示：**
+
+- `1 <= coins.length <= 12`
+- `1 <= coins[i] <= 2^31 - 1`
+- `0 <= amount <= 10^4`
+
+
+
+**解题思路：**
+
+思路一：动态规划
+
+依次遍历钱数 1 ~ amount，判断当前余额，可以使用最少的硬币组合
+
+时间复杂度：O(Sn)
+
+空间复杂度：O(S)
+
+思路二：贪心 + dfs
+
+![leetcode_322](F:\C++\刷题\Img\leetcode_322.png)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        int len = coins.size();
+        int Max = amount + 1;
+        vector<int> dp(amount + 1, Max);
+        dp[0] = 0;
+        for (int i = 1; i <= amount; ++i)
+        {
+            for (int j = 0; j < len; ++j)
+            {
+                if (coins[j] <= i)
+                    dp[i] = min(dp[i], dp[i - coins[j]] + 1);
+            }
+        }
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    void _coinChange(vector<int>& coins, int amount, int c_index, int curCount, int& ans)
+    {
+        if (amount == 0)
+        {
+            ans = min(curCount, ans);
+            return;
+        }
+        if (c_index == coins.size()) return;
+
+        // k + curCount < ans 为剪枝操作
+        for (int k = amount / coins[c_index]; k >= 0 && k + curCount < ans; --k)
+            _coinChange(coins, amount - k * coins[c_index], c_index + 1, curCount + k, ans);
+    }
+    int coinChange(vector<int>& coins, int amount) {
+        if (amount == 0)
+            return 0;
+        sort(coins.rbegin(), coins.rend());
+        int ans = INT_MAX;
+        _coinChange(coins, amount, 0, 0, ans);
+        return ans == INT_MAX ? -1 : ans;
+    }
+};
+```
+
+
+
+
+
 ## 0376. 摆动序列
 
 ### 题目：
@@ -7379,6 +7507,86 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0392. 判断子序列
+
+### 题目：
+
+给定字符串 **s** 和 **t** ，判断 **s** 是否为 **t** 的子序列。
+
+字符串的一个子序列是原始字符串删除一些（也可以不删除）字符而不改变剩余字符相对位置形成的新字符串。（例如，`"ace"`是`"abcde"`的一个子序列，而`"aec"`不是）。
+
+**进阶：**
+
+如果有大量输入的 `S`，称作 `S1, S2, ... , Sk` 其中 `k >= 10亿`，你需要依次检查它们是否为 `T` 的子序列。在这种情况下，你会怎样改变代码？
+
+**示例 1：**
+
+```
+输入：s = "abc", t = "ahbgdc"
+输出：true
+```
+
+**示例 2：**
+
+```
+输入：s = "axc", t = "ahbgdc"
+输出：false
+```
+
+**提示：**
+
+- `0 <= s.length <= 100`
+- `0 <= t.length <= 10^4`
+- 两个字符串都只由小写字符组成。
+
+
+
+**解题思路：**
+
+思路一：双指针法
+
+挨个比较，若不相等，母串后移一位，若相等，母串子串都后移一位；
+
+时间复杂度：O(m + n)
+
+空间复杂度：O(1)
+
+思路二：动态规划（？？？）
+
+
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool isSubsequence(string s, string t) {
+        int len1 = s.length();
+        int len2 = t.length();
+
+        int i = 0, j = 0;
+        while (i < len1 && j < len2)
+        {
+            if (s[i] == t[j])
+                ++i;
+            ++j;
+        }
+
+        return i == len1;
+    }
+};
+```
+
+
+
+
 
 
 
@@ -7721,6 +7929,84 @@ public:
 ```
 
 
+
+
+
+
+
+## 0518. 零钱兑换Ⅱ
+
+### 题目：
+
+给你一个整数数组 `coins` 表示不同面额的硬币，另给一个整数 `amount` 表示总金额。
+
+请你计算并返回可以凑成总金额的硬币组合数。如果任何硬币组合都无法凑出总金额，返回 `0` 。
+
+假设每一种面额的硬币有无限个。 
+
+题目数据保证结果符合 32 位带符号整数。
+
+**示例 1：**
+
+```
+输入：amount = 5, coins = [1, 2, 5]
+输出：4
+解释：有四种方式可以凑成总金额：
+5=5
+5=2+2+1
+5=2+1+1+1
+5=1+1+1+1+1
+```
+
+**示例 2：**
+
+```
+输入：amount = 3, coins = [2]
+输出：0
+解释：只用面额 2 的硬币不能凑成总金额 3 。
+```
+
+**示例 3：**
+
+```
+输入：amount = 10, coins = [10] 
+输出：1
+```
+
+**提示：**
+
+- `1 <= coins.length <= 300`
+- `1 <= coins[i] <= 5000`
+- `coins 中的所有值 互不相同`
+- `0 <= amount <= 5000`
+
+
+
+**解题思路：**
+
+依次遍历coins，判断从 i = coin  ---- > amount 这些总余额依次可以用coin凑出几个整来，然后就是coins[0]、coins[1]的参与，再从 i = coins[1]  ---- > amount 这些总余额依次可以用coin凑出几个整来，依次遍历结束coins，每次状态转移方程是 dp[i] += dp[i - coin]，dp[i]表示 i 余额可以使用多少种搭配方式找零。
+
+用 $\textit{dp}[x]$ 表示金额之和等于 $x$ 的硬币组合数，目标是求 $\textit{dp}[\textit{amount}]$。
+
+动态规划的边界是 $\textit{dp}[0]=1$。只有当不选取任何硬币时，金额之和才为 $0$，因此只有 $1$ 种硬币组合。
+
+对于面额为 $\textit{coin}$ 的硬币，当 $\textit{coin} \le i \le \textit{amount}$ 时，如果存在一种硬币组合的金额之和等于 $i - \textit{coin}$，则在该硬币组合中增加一个面额为 $\textit{coin}$ 的硬币，即可得到一种金额之和等于 $i$ 的硬币组合。因此需要遍历 $\textit{coins}$，对于其中的每一种面额的硬币，更新数组 $\textit{dp}$ 中的每个大于或等于该面额的元素的值。
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int change(int amount, vector<int>& coins) {
+        vector<int> dp(amount + 1, 0);
+        dp[0] = 1;
+        for (auto& coin : coins)
+            for (int i = coin; i <= amount; ++i)
+                dp[i] += dp[i - coin];
+        return dp[amount];
+    }
+};
+```
 
 
 
@@ -8384,6 +8670,113 @@ public:
             for (int j = 0; j < 3; ++j)
                 c[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j];
         return c;
+    }
+};
+```
+
+
+
+
+
+
+
+## 1143. 最长公共子序列
+
+### 题目：
+
+给定两个字符串 `text1` 和 `text2`，返回这两个字符串的最长 **公共子序列** 的长度。如果不存在 **公共子序列** ，返回 `0` 。
+
+一个字符串的 **子序列** 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。
+
+- 例如，`"ace"` 是 `"abcde"` 的子序列，但 `"aec"` 不是 `"abcde"` 的子序列。
+
+两个字符串的 **公共子序列** 是这两个字符串所共同拥有的子序列。
+
+**示例 1：**
+
+```
+输入：text1 = "abcde", text2 = "ace" 
+输出：3  
+解释：最长公共子序列是 "ace" ，它的长度为 3 。
+```
+
+**示例 2：**
+
+```
+输入：text1 = "abc", text2 = "abc"
+输出：3
+解释：最长公共子序列是 "abc" ，它的长度为 3 。
+```
+
+**示例 3：**
+
+```
+输入：text1 = "abc", text2 = "def"
+输出：0
+解释：两个字符串没有公共子序列，返回 0 。
+```
+
+**提示：**
+
+- `1 <= text1.length, text2.length <= 1000`
+- `text1 和 text2 仅由小写英文字符组成。`
+
+
+
+**解题思路：**
+
+假设字符串 $\textit{text}_1$ 和 $\textit{text}_2$ 的长度分别为 $m$ 和 $n$，创建 $m+1$ 行 $n+1$ 列的二维数组 $\textit{dp}$，其中 $\textit{dp}[i][j]$ 表示 $\textit{text}_1[0:i]$ 和 $\textit{text}_2[0:j]$ 的最长公共子序列的长度。
+
+- 上述表示中，$\textit{text}_1[0:i]$ 表示 $\textit{text}_1$ 的长度为 $i$ 的前缀，$\textit{text}_2[0:j]$ 表示 $\textit{text}_2$ 的长度为 $j$ 的前缀。
+
+考虑动态规划的边界情况：
+
+- 当 $i=0$ 时，$\textit{text}_1[0:i]$ 为空，空字符串和任何字符串的最长公共子序列的长度都是 00，因此对任意 $0 \le j \le n$，有 $\textit{dp}[0][j]=0$；
+
+- 当 $j=0$ 时，$\textit{text}_2[0:j]$ 为空，同理可得，对任意 $0 \le i \le m$，有 $\textit{dp}[i][0]=0$。
+
+因此动态规划的边界情况是：当 $i=0$ 或 $j=0$ 时，$\textit{dp}[i][j]=0$。
+
+当 $i>0$ 且 $j>0$ 时，考虑 $\textit{dp}[i][j]$ 的计算：
+
+- 当 $\textit{text}_1[i-1]=\textit{text}_2[j-1]$ 时，将这两个相同的字符称为公共字符，考虑 $\textit{text}_1[0:i-1]$ 和 $\textit{text}_2[0:j-1]$ 的最长公共子序列，再增加一个字符（即公共字符）即可得到 $\textit{text}_1[0:i]$ 和 $\textit{text}_2[0:j]$ 的最长公共子序列，因此 $\textit{dp}[i][j]=\textit{dp}[i-1][j-1]+1$。
+
+- 当 $\textit{text}_1[i-1] \ne \textit{text}_2[j-1]$ 时，考虑以下两项：
+  - $\textit{text}_1[0:i-1]$ 和 $\textit{text}_2[0:j]$ 的最长公共子序列；
+  - $\textit{text}_1[0:i]$ 和 $\textit{text}_2[0:j-1]$ 的最长公共子序列。
+
+要得到 $\textit{text}_1[0:i]$ 和 $\textit{text}_2[0:j]$ 的最长公共子序列，应取两项中的长度较大的一项，因此 $\textit{dp}[i][j]=\max(\textit{dp}[i-1][j],\textit{dp}[i][j-1])$。
+
+由此可以得到如下状态转移方程：
+
+$$
+\textit{dp}[i][j] = \begin{cases} \textit{dp}[i-1][j-1]+1, & \textit{text}_1[i-1]=\textit{text}_2[j-1] \\ \max(\textit{dp}[i-1][j],\textit{dp}[i][j-1]), & \textit{text}_1[i-1] \ne \textit{text}_2[j-1] \end{cases}
+$$
+最终计算得到 $\textit{dp}[m][n]$ 即为 $\textit{text}_1$ 和 $\textit{text}_2$ 的最长公共子序列的长度。
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int longestCommonSubsequence(string text1, string text2) {
+        int m = text1.length(), n = text2.length();
+        vector<int> dp(n + 1, 0);
+        for (int i = 1; i <= m; ++i)
+        {
+            vector<int> tmpDp(n + 1, 0);
+            for (int j = 1; j <= n; ++j)
+            {
+                if (text1[i - 1] == text2[j - 1])
+                    tmpDp[j] = dp[j - 1] + 1;
+                else
+                    tmpDp[j] = max(dp[j], tmpDp[j - 1]);
+            }
+            dp = tmpDp;
+        }
+        return dp[n];
     }
 };
 ```
