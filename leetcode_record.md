@@ -6798,6 +6798,8 @@ public:
 
 ## 0264. 丑数Ⅱ
 
+### 题目：
+
 给你一个整数 `n` ，请你找出并返回第 `n` 个 **丑数** 。
 
 **丑数** 就是只包含质因数 `2`、`3` 和/或 `5` 的正整数。
@@ -6961,6 +6963,82 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0279. 完全平方数
+
+### 题目：
+
+给定正整数 `n`，找到若干个完全平方数（`比如 1, 4, 9, 16, ...`）使得它们的和等于 `n`。你需要让组成和的完全平方数的个数最少。
+
+给你一个整数 n ，返回和为 n 的完全平方数的 **最少数量** 。
+
+**完全平方数** 是一个整数，其值等于另一个整数的平方；换句话说，其值等于一个整数自乘的积。例如，`1、4、9 和 16` 都是完全平方数，而 `3` 和 `11` 不是。
+
+**示例 1：**
+
+```
+输入：n = 12
+输出：3 
+解释：12 = 4 + 4 + 4
+```
+
+**示例 2：**
+
+```
+输入：n = 13
+输出：2
+解释：13 = 4 + 9
+```
+
+**提示：**
+
+- `1 <= n <= 10^4`
+
+
+
+**解题思路：**
+
+$f[i]$ 表示最少需要多少个数的平方来表示整数 $i$。
+
+这些数必然落在区间 $[1,\sqrt{n}]$。我们可以枚举这些数，假设当前枚举到 $j$，那么我们还需要取若干数的平方，构成 $i-j^2$。此时我们发现该子问题和原问题类似，只是规模变小了。这符合了动态规划的要求，于是我们可以写出状态转移方程。
+
+$f[i]=1+\min_{j=1}^{\lfloor\sqrt{i}\rfloor}{f[i-j^2]}$
+
+其中 $f[0]=0$ 为边界条件，实际上我们无法表示数字 $0$，只是为了保证状态转移过程中遇到 $j$ 恰为 $\sqrt{i} $
+的情况合法。
+
+同时因为计算 $f[i]$ 时所需要用到的状态仅有 $f[i-j^2]$，必然小于 $i$，因此我们只需要从小到大地枚举 $i$ 来计算 $f[i]$ 即可。
+
+
+
+时间复杂度：$O(n\sqrt{n})$
+
+空间复杂度：$O(n)$
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int numSquares(int n) {
+        vector<int> dp(n + 1, 0);
+        for (int i = 1; i <= n; ++i)
+        {
+            int minn = INT_MAX;
+            for (int j = 1; j * j <= i; ++j)
+                minn = min(minn, dp[i - j * j]);
+            dp[i] = minn + 1;
+        }
+        return dp[n];
+    }
+};
+```
+
+
 
 
 
@@ -7398,6 +7476,135 @@ public:
 
 
 
+## 0343. 整数拆分
+
+### 题目：
+
+给定一个正整数 `n`，将其拆分为**至少**两个正整数的和，并使这些整数的乘积最大化。 返回你可以获得的最大乘积。
+
+**示例 1:**
+
+```
+输入: 2
+输出: 1
+解释: 2 = 1 + 1, 1 × 1 = 1。
+```
+
+**示例 2:**
+
+```
+输入: 10
+输出: 36
+解释: 10 = 3 + 3 + 4, 3 × 3 × 4 = 36。
+```
+
+**说明**: 你可以假设 n 不小于 2 且不大于 58。
+
+
+
+**解题思路：**
+
+思路一：动态规划
+
+创建数组 $\textit{dp}$，其中 $\textit{dp}[i]$ 表示将正整数 $i$ 拆分成至少两个正整数的和之后，这些正整数的最大乘积。特别地，$0$ 不是正整数，$1$ 是最小的正整数，$0$ 和 $1$ 都不能拆分，因此 $\textit{dp}[0]=\textit{dp}[1]=0$。
+
+当 $i \ge 2$ 时，假设对正整数 $i$ 拆分出的第一个正整数是 $j$（$1 \le j < i$），则有以下两种方案：
+
+将 $i$ 拆分成 $j$ 和 $i-j$ 的和，且 $i-j$ 不再拆分成多个正整数，此时的乘积是 $j \times (i-j)$；
+
+将 $i$ 拆分成 $j$ 和 $i-j$ 的和，且 $i-j$ 继续拆分成多个正整数，此时的乘积是 $j \times \textit{dp}[i-j]$。
+
+因此，当 $j$ 固定时，有 $\textit{dp}[i]=\max(j \times (i-j), j \times \textit{dp}[i-j])$。由于 $j$ 的取值范围是 $1$ 到 $i-1$，需要遍历所有的 $j$ 得到 $\textit{dp}[i]$ 的最大值，因此可以得到状态转移方程如下：
+
+$\textit{dp}[i]=\mathop{\max}\limits_{1 \le j < i}\{\max(j \times (i-j), j \times \textit{dp}[i-j])\}$
+
+最终得到 $\textit{dp}[n]$ 的值即为将正整数 $n$ 拆分成至少两个正整数的和之后，这些正整数的最大乘积。
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n)
+
+思路二：动态规划改进
+
+[动态规划改进](https://leetcode-cn.com/problems/integer-break/solution/zheng-shu-chai-fen-by-leetcode-solution/)
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路三：数学方法
+
+[数学方法](https://leetcode-cn.com/problems/integer-break/solution/zheng-shu-chai-fen-by-leetcode-solution/)
+
+时间复杂度：O(1)
+
+空间复杂度：O(1)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int integerBreak(int n) {
+        vector<int> dp(n + 1, 0);
+        for (int i = 2; i <= n; ++i)
+        {
+            int curMax = 0;
+            for (int j = 1; j < i; ++j)
+                curMax = max(curMax, max(j * (i - j), j * dp[i - j]));
+            dp[i] = curMax;
+        }
+        return dp[n];
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int integerBreak(int n) {
+        if (n < 4)
+            return n - 1;
+        vector<int> dp(n + 1, 0);
+        for (int i = 4; i <= n; ++i)
+        {
+            dp[i] = max(max(2 * (i - 2), 2 * dp[i - 2]), max(3 * (i - 3), 3 * dp[i - 3]));
+        }
+        return dp[n];
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    int integerBreak(int n) {
+        if (n < 4)
+            return n - 1;
+        
+        int zheng = n / 3;
+        int yu = n % 3;
+
+        if (yu == 0)
+            return pow(3, zheng);
+        else if (yu == 1)
+            return pow(3, zheng - 1) * 4;
+        else
+            return pow(3, zheng) * 2;
+    }
+};
+```
+
+
+
+
+
 ## 0376. 摆动序列
 
 ### 题目：
@@ -7504,6 +7711,97 @@ public:
             }
         }
         return ret;
+    }
+};
+```
+
+
+
+
+
+## 0377. 组合总和Ⅳ
+
+### 题目：
+
+给你一个由 **不同** 整数组成的数组 `nums` ，和一个目标整数 `target` 。请你从 `nums` 中找出并返回总和为 `target` 的元素组合的个数。
+
+题目数据保证答案符合 32 位整数范围。
+
+**示例 1：**
+
+```
+输入：nums = [1,2,3], target = 4
+输出：7
+解释：
+所有可能的组合为：
+(1, 1, 1, 1)
+(1, 1, 2)
+(1, 2, 1)
+(1, 3)
+(2, 1, 1)
+(2, 2)
+(3, 1)
+请注意，顺序不同的序列被视作不同的组合。
+```
+
+**示例 2：**
+
+```
+输入：nums = [9], target = 3
+输出：0
+```
+
+**提示：**
+
+- `1 <= nums.length <= 200`
+- `1 <= nums[i] <= 1000`
+- `nums 中的所有元素 互不相同`
+- `1 <= target <= 1000`
+
+
+
+**解题思路：**
+
+思路等同于0518题，一个是需要组合，一个不需要，另外还要保证答案在32位整数范围内
+
+时间复杂度：$O(\textit{target} \times n)$
+
+空间复杂度：$O(\textit{target})$
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int _combinationSum4(vector<int>& nums, int target) {
+        vector<int> dp(target + 1, 0);
+        dp[0] = 1;
+        for (int i = 1; i <= target; ++i)
+        {
+            for (auto& num : nums)
+            {
+                // dp[i - num] < INT_MAX - dp[i]
+                // dp[i - num] + dp[i] < INT_MAX  // 这种可能会为负，越界
+                // 题目要求答案符合 32 位整数范围，所以不能越 size_t 的范围，越界的都是不符合的
+                if (i >= num && dp[i - num] < INT_MAX - dp[i])
+                    dp[i] += dp[i - num];
+            }
+        }
+        return dp[target];
+    }
+
+    int combinationSum4(vector<int>& nums, int target) {
+        vector<size_t> dp(target + 1, 0);
+        dp[0] = 1;
+        for (int i = 1; i <= target; ++i)
+        {
+            for (auto& num : nums)
+            {
+                if (i >= num)
+                    dp[i] += dp[i - num];
+            }
+        }
+        return dp[target];
     }
 };
 ```
