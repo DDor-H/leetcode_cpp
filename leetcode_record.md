@@ -1320,6 +1320,127 @@ public:
 
 
 
+## 0036. 有效的数独
+
+### 题目：
+
+请你判断一个 `9x9` 的数独是否有效。只需要 **根据以下规则** ，验证已经填入的数字是否有效即可。
+
+1. 数字 `1-9` 在每一行只能出现一次。
+2. 数字 `1-9` 在每一列只能出现一次。
+3. 数字 `1-9` 在每一个以粗实线分隔的 `3x3` 宫内只能出现一次。（请参考示例图）
+
+数独部分空格内已填入了数字，空白格用 `'.'` 表示。
+
+**注意：**
+
+- 一个有效的数独（部分已被填充）不一定是可解的。
+- 只需要根据以上规则，验证已经填入的数字是否有效即可。
+
+**示例 1：**
+
+![leetcode_36](F:\C++\刷题\Img\leetcode_36.png)
+
+```
+输入：board = 
+[["5","3",".",".","7",".",".",".","."]
+,["6",".",".","1","9","5",".",".","."]
+,[".","9","8",".",".",".",".","6","."]
+,["8",".",".",".","6",".",".",".","3"]
+,["4",".",".","8",".","3",".",".","1"]
+,["7",".",".",".","2",".",".",".","6"]
+,[".","6",".",".",".",".","2","8","."]
+,[".",".",".","4","1","9",".",".","5"]
+,[".",".",".",".","8",".",".","7","9"]]
+输出：true
+```
+
+**示例 2：**
+
+```
+输入：board = 
+[["8","3",".",".","7",".",".",".","."]
+,["6",".",".","1","9","5",".",".","."]
+,[".","9","8",".",".",".",".","6","."]
+,["8",".",".",".","6",".",".",".","3"]
+,["4",".",".","8",".","3",".",".","1"]
+,["7",".",".",".","2",".",".",".","6"]
+,[".","6",".",".",".",".","2","8","."]
+,[".",".",".","4","1","9",".",".","5"]
+,[".",".",".",".","8",".",".","7","9"]]
+输出：false
+解释：除了第一行的第一个数字从 5 改为 8 以外，空格内其他数字均与 示例1 相同。 但由于位于左上角的 3x3 宫内有两个 8 存在, 因此这个数独是无效的。
+```
+
+**提示：**
+
+- `board.length == 9`
+- `board[i].length == 9`
+- `board[i][j]` 是一位数字或者 `'.'`
+
+
+
+**解题思路：**
+
+有效的数独满足以下三个条件：
+
+- 同一个数字在每一行只能出现一次；
+
+
+- 同一个数字在每一列只能出现一次；
+
+
+- 同一个数字在每一个小九宫格只能出现一次。
+
+
+可以使用哈希表记录每一行、每一列和每一个小九宫格中，每个数字出现的次数。只需要遍历数独一次，在遍历的过程中更新哈希表中的计数，并判断是否满足有效的数独的条件即可。
+
+对于数独的第 $i$ 行第 $j$ 列的单元格，其中 $0 \le i, j < 9$，该单元格所在的行下标和列下标分别为 $i$ 和 $j$，该单元格所在的小九宫格的行数和列数分别为 $\Big\lfloor \dfrac{i}{3} \Big\rfloor$ 和 $\Big\lfloor \dfrac{j}{3} \Big\rfloor$，其中 $0 \le \Big\lfloor \dfrac{i}{3} \Big\rfloor, \Big\lfloor \dfrac{j}{3} \Big\rfloor < 3$。
+
+由于数独中的数字范围是 $1$ 到 $9$，因此可以使用数组代替哈希表进行计数。
+
+具体做法是，创建二维数组 $\textit{rows}$ 和 $\textit{columns}$ 分别记录数独的每一行和每一列中的每个数字的出现次数，创建三维数组 $\textit{subboxes}$ 记录数独的每一个小九宫格中的每个数字的出现次数，其中 $\textit{rows}[i][\textit{index}]$、$\textit{columns}[j][\textit{index}]$ 和 $\textit{subboxes}\Big[\Big\lfloor \dfrac{i}{3} \Big\rfloor\Big]\Big[\Big\lfloor \dfrac{j}{3} \Big\rfloor\Big]\Big[\textit{index}\Big]$ 分别表示数独的第 $i$ 行第 $j$ 列的单元格所在的行、列和小九宫格中，数字 $\textit{index} + 1$ 出现的次数，其中 $0 \le \textit{index} < 9$，对应的数字 $\textit{index} + 1$ 满足 $1 \le \textit{index} + 1 \le 9$。
+
+如果 $\textit{board}[i][j]$ 填入了数字 $n$，则将 $\textit{rows}[i][n - 1]$、$\textit{columns}[j][n - 1]$ 和 $\textit{subboxes}\Big[\Big\lfloor \dfrac{i}{3} \Big\rfloor\Big]\Big[\Big\lfloor \dfrac{j}{3} \Big\rfloor\Big]\Big[n - 1\Big]$ 各加 $1$。如果更新后的计数大于 $1$，则不符合有效的数独的条件，返回 $\text{false}$。
+
+如果遍历结束之后没有出现计数大于 $1$ 的情况，则符合有效的数独的条件，返回 $\text{true}$。
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    bool isValidSudoku(vector<vector<char>>& board) {
+        vector<vector<int>> row(9, vector<int>(9, 0));
+        vector<vector<int>> col(9, vector<int>(9, 0));
+        vector<vector<vector<int>>> subGrid(3, vector<vector<int>>(3, vector<int>(9, 0)));
+
+        for (int i = 0; i < 9; ++i)
+        {
+            for (int j = 0; j < 9; ++j)
+            {
+                if (board[i][j] != '.')
+                {
+                    int index = board[i][j] - '0' - 1;
+                    row[i][index]++;
+                    col[j][index]++;
+                    subGrid[i / 3][j / 3][index]++;
+                    if (row[i][index] > 1 || col[j][index] > 1 || subGrid[i / 3][j / 3][index] > 1)
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+};
+```
+
+
+
+
+
 ## 0039. 组合总和
 
 ### 题目：
@@ -9327,6 +9448,17 @@ public:
 
 
 
+# 数据结构
+
+
+
+
+
+## 0053. 最大子序和
+
+### 题目：
+
+同Array模块的53题
 
 
 
@@ -9336,4 +9468,121 @@ public:
 
 
 
+## 0217. 存在重复元素
+
+### 题目：
+
+给定一个整数数组，判断是否存在重复元素。
+
+如果存在一值在数组中出现至少两次，函数返回 `true` 。如果数组中每个元素都不相同，则返回 `false` 。
+
+**示例 1:**
+
+```
+输入: [1,2,3,1]
+输出: true
+```
+
+**示例 2:**
+
+```
+输入: [1,2,3,4]
+输出: false
+```
+
+**示例 3:**
+
+```
+输入: [1,1,1,3,3,4,3,2,4,2]
+输出: true
+```
+
+
+
+**解题思路：**
+
+思路一：暴力解法
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(1)
+
+思路二：排序
+
+时间复杂度：O(nlogn)
+
+空间复杂度：O(1)
+
+思路三：hash表
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool containsDuplicate(vector<int>& nums) {
+        int n = nums.size();
+        if (n < 2)
+            return false;
+        
+        for (int i = 1; i < n; ++i)
+        {
+            for (int j = 0; j < i; ++j)
+            {
+                if (nums[i] == nums[j])
+                    return true;
+            }
+        }
+        return false;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool containsDuplicate(vector<int>& nums) {
+        int n = nums.size();
+        if (n < 2)
+            return false;
+        sort(nums.begin(), nums.end());
+        for (int i = 1; i < n; ++i)
+        {
+            if (nums[i - 1] == nums[i])
+                return true;
+        }
+        return false;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    bool containsDuplicate(vector<int>& nums) {
+        int n = nums.size();
+        if (n < 2)
+            return false;
+        unordered_set<int> us;
+
+        for (auto& x : nums)
+        {
+            if (us.find(x) != us.end())
+                return true;
+            us.insert(x);
+        }
+        return false;
+    }
+};
+```
 
