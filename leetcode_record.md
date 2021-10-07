@@ -1441,6 +1441,298 @@ public:
 
 
 
+## 0037. 解数独
+
+### 题目：
+
+编写一个程序，通过填充空格来解决数独问题。
+
+数独的解法需 **遵循如下规则**：
+
+1. 数字 `1-9` 在每一行只能出现一次。
+2. 数字 `1-9` 在每一列只能出现一次。
+3. 数字 `1-9` 在每一个以粗实线分隔的 `3x3` 宫内只能出现一次。（请参考示例图）
+
+数独部分空格内已填入了数字，空白格用 `'.'` 表示。
+
+**示例：**
+
+![leetcode_37_1](F:\C++\刷题\Img\leetcode_37_1.png)
+
+```
+输入：board = [["5","3",".",".","7",".",".",".","."],		["6",".",".","1","9","5",".",".","."],
+[".","9","8",".",".",".",".","6","."],
+["8",".",".",".","6",".",".",".","3"],
+["4",".",".","8",".","3",".",".","1"],
+["7",".",".",".","2",".",".",".","6"],
+[".","6",".",".",".",".","2","8","."],
+[".",".",".","4","1","9",".",".","5"],
+[".",".",".",".","8",".",".","7","9"]]
+输出：[["5","3","4","6","7","8","9","1","2"],
+["6","7","2","1","9","5","3","4","8"],
+["1","9","8","3","4","2","5","6","7"],
+["8","5","9","7","6","1","4","2","3"],
+["4","2","6","8","5","3","7","9","1"],
+["7","1","3","9","2","4","8","5","6"],
+["9","6","1","5","3","7","2","8","4"],
+["2","8","7","4","1","9","6","3","5"],
+["3","4","5","2","8","6","1","7","9"]]
+解释：输入的数独如上图所示，唯一有效的解决方案如下所示：
+```
+
+![leetcode_37_2](F:\C++\刷题\Img\leetcode_37_2.png)
+
+**提示：**
+
+- `board.length == 9`
+- `board[i].length == 9`
+- `board[i][j] 是一位数字或者 '.'`
+- 题目数据 **保证** 输入数独仅有一个解
+
+
+
+**解题思路：**
+
+我们首先对整个数独数组进行遍历，当我们遍历到第 $i$ 行第 $j$ 列的位置：
+
+如果该位置是一个空白格，那么我们将其加入一个用来存储空白格位置的列表中，方便后续的递归操作；
+
+如果该位置是一个数字 $x$，那么我们需要将 $\textit{line}[i][x-1]$，$\textit{column}[j][x-1]$ 以及 $\textit{block}[\lfloor i/3 \rfloor][\lfloor j/3 \rfloor][x-1]$ 均置为 $\text{True}$。
+
+当我们结束了遍历过程之后，就可以开始递归枚举。当递归到第 $i$ 行第 $j$ 列的位置时，我们枚举填入的数字 $x$。根据题目的要求，数字 $x$ 不能和当前行、列、九宫格中已经填入的数字相同，因此 $\textit{line}[i][x-1]$，$\textit{column}[j][x-1]$ 以及 $\textit{block}[\lfloor i/3 \rfloor][\lfloor j/3 \rfloor][x-1]$ 必须均为 $\text{False}$。
+
+当我们填入了数字 $x$ 之后，我们要将上述的三个值都置为 $\text{True}$，并且继续对下一个空白格位置进行递归。在回溯到当前递归层时，我们还要将上述的三个值重新置为 $\text{False}$。
+
+改进一：是用位运算，减少空间复杂度
+
+改进二：若某一行、某一列、某一小块只剩一个空位，则不需要回溯，直接填值；
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+private:
+    vector<vector<bool>> row;
+    vector<vector<bool>> col;
+    vector<vector<vector<bool>>> subGrid;
+    vector<pair<int, int>> space;
+    bool valid;
+
+
+public:
+    void solveSudoku(vector<vector<char>>& board) {
+        row = vector<vector<bool>>(9, vector<bool>(9, false));
+        col = vector<vector<bool>>(9, vector<bool>(9, false));
+        subGrid = vector<vector<vector<bool>>>(3, vector<vector<bool>>(3, vector<bool>(9, false)));
+        valid = false;
+
+        for (int i = 0; i < 9; ++i)
+        {
+            for (int j = 0; j < 9; ++j)
+            {
+                if (board[i][j] == '.')
+                    space.push_back(make_pair(i, j));
+                else
+                {
+                    int index = board[i][j] - '0' - 1;
+                    row[i][index] = col[j][index] = subGrid[i / 3][j / 3][index] = true;
+                }
+            }
+        }
+        dfs(board, 0);
+    }
+
+    void dfs(vector<vector<char>>& board, int pos)
+    {
+        if (pos == space.size())
+        {
+            valid = true;
+            return;
+        }
+
+        auto [i, j] = space[pos];
+        for (int digit = 0; digit < 9 && !valid; ++digit)
+        {
+            if (!row[i][digit] && !col[j][digit] && !subGrid[i / 3][j / 3][digit])
+            {
+                row[i][digit] = col[j][digit] = subGrid[i / 3][j / 3][digit] = true;
+                board[i][j] = digit + '0' + 1;
+                dfs(board, pos + 1);
+                row[i][digit] = col[j][digit] = subGrid[i / 3][j / 3][digit] = false;
+            }
+        }
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+private:
+    vector<int> row;
+    vector<int> col;
+    vector<vector<int>> subGrid;
+    vector<pair<int, int>> space;
+    bool valid;
+
+
+public:
+    void solveSudoku(vector<vector<char>>& board) {
+        row = vector<int>(9, 0);
+        col = vector<int>(9, 0);
+        subGrid = vector<vector<int>>(3, vector<int>(3, 0));
+        valid = false;
+
+        for (int i = 0; i < 9; ++i)
+        {
+            for (int j = 0; j < 9; ++j)
+            {
+                if (board[i][j] == '.')
+                    space.push_back(make_pair(i, j));
+                else
+                {
+                    int index = board[i][j] - '0' - 1;
+                    flip(i, j, index);
+                }
+            }
+        }
+        dfs(board, 0);
+    }
+
+    void dfs(vector<vector<char>>& board, int pos)
+    {
+        if (pos == space.size())
+        {
+            valid = true;
+            return;
+        }
+
+        auto [i, j] = space[pos];
+        int mask = ~(row[i] | col[j] | subGrid[i / 3][j / 3]) & 0x1ff;
+        for (; mask && !valid; mask &= (mask - 1))
+        {
+            int digitMask = mask & (-mask);
+            int digit = __builtin_ctz(digitMask);
+            flip(i, j, digit);
+            board[i][j] = digit + '0' + 1;
+            dfs(board, pos + 1);
+            flip(i, j, digit);
+        }
+    }
+
+    void flip(int i, int j, int digit)
+    {
+        row[i] ^= (1 << digit);
+        col[j] ^= (1 << digit);
+        subGrid[i / 3][j / 3] ^= (1 << digit);
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+private:
+    vector<int> row;
+    vector<int> col;
+    vector<vector<int>> subGrid;
+    vector<pair<int, int>> space;
+    bool valid;
+
+
+public:
+    void solveSudoku(vector<vector<char>>& board) {
+        row = vector<int>(9, 0);
+        col = vector<int>(9, 0);
+        subGrid = vector<vector<int>>(3, vector<int>(3, 0));
+        valid = false;
+
+        for (int i = 0; i < 9; ++i)
+        {
+            for (int j = 0; j < 9; ++j)
+            {
+                if (board[i][j] != '.')
+                {
+                    int index = board[i][j] - '0' - 1;
+                    flip(i, j, index);
+                }
+            }
+        }
+
+        while(true)
+        {
+            bool modified = false;
+            for (int i = 0; i < 9; ++i)
+            {
+                for (int j = 0; j < 9; ++j)
+                {
+                    if (board[i][j] == '.')
+                    {
+                        int mask = ~(row[i] | col[j] | subGrid[i / 3][j / 3]) & 0x1ff;
+                        if (!(mask & (mask - 1)))
+                        {
+                            int digitMask = mask & (-mask);
+                            int digit = __builtin_ctz(digitMask);
+                            flip(i, j, digit);
+                            board[i][j] = digit + '0' + 1;
+                            modified = true;
+                        }
+                    }
+                }
+            }
+            if (!modified)
+                break;
+        }
+
+        for (int i = 0; i < 9; ++i)
+        {
+            for (int j = 0; j < 9; ++j)
+            {
+                if (board[i][j] == '.')
+                    space.push_back(make_pair(i, j));
+            }
+        }
+        dfs(board, 0);
+    }
+
+    void dfs(vector<vector<char>>& board, int pos)
+    {
+        if (pos == space.size())
+        {
+            valid = true;
+            return;
+        }
+
+        auto [i, j] = space[pos];
+        int mask = ~(row[i] | col[j] | subGrid[i / 3][j / 3]) & 0x1ff;
+        for (; mask && !valid; mask &= (mask - 1))
+        {
+            int digitMask = mask & (-mask);
+            int digit = __builtin_ctz(digitMask);
+            flip(i, j, digit);
+            board[i][j] = digit + '0' + 1;
+            dfs(board, pos + 1);
+            flip(i, j, digit);
+        }
+    }
+
+    void flip(int i, int j, int digit)
+    {
+        row[i] ^= (1 << digit);
+        col[j] ^= (1 << digit);
+        subGrid[i / 3][j / 3] ^= (1 << digit);
+    }
+};
+```
+
+
+
+
+
 ## 0039. 组合总和
 
 ### 题目：
@@ -9454,6 +9746,18 @@ public:
 
 
 
+
+
+## 0001. 两数之和
+
+### 题目：
+
+同Array模块的1题
+
+
+
+
+
 ## 0053. 最大子序和
 
 ### 题目：
@@ -9463,6 +9767,101 @@ public:
 
 
 
+
+## 0088. 合并两个有序数组
+
+### 题目：
+
+给你两个按 **非递减顺序** 排列的整数数组 `nums1` 和 `nums2`，另有两个整数 `m` 和 `n` ，分别表示 `nums1` 和 `nums2` 中的元素数目。
+
+请你 **合并** `nums2` 到 `nums1` 中，使合并后的数组同样按 **非递减顺序** 排列。
+
+**注意**：最终，合并后数组不应由函数返回，而是存储在数组 `nums1` 中。为了应对这种情况，`nums1` 的初始长度为 `m + n`，其中前 `m` 个元素表示应合并的元素，后 `n` 个元素为 `0` ，应忽略。`nums2` 的长度为 `n` 。
+
+**示例 1：**
+
+```
+输入：nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3
+输出：[1,2,2,3,5,6]
+解释：需要合并 [1,2,3] 和 [2,5,6] 。
+合并结果是 [1,2,2,3,5,6] ，其中斜体加粗标注的为 nums1 中的元素。
+```
+
+**示例 2：**
+
+```
+输入：nums1 = [1], m = 1, nums2 = [], n = 0
+输出：[1]
+解释：需要合并 [1] 和 [] 。
+合并结果是 [1] 。
+```
+
+**示例 3：**
+
+```
+输入：nums1 = [0], m = 0, nums2 = [1], n = 1
+输出：[1]
+解释：需要合并的数组是 [] 和 [1] 。
+合并结果是 [1] 。
+注意，因为 m = 0 ，所以 nums1 中没有元素。nums1 中仅存的 0 仅仅是为了确保合并结果可以顺利存放到 nums1 中。
+```
+
+**提示：**
+
+- `nums1.length == m + n`
+- `nums2.length == n`
+- `0 <= m, n <= 200`
+- `1 <= m + n <= 200`
+- `-10^9 <= nums1[i], nums2[j] <= 10^9`
+
+
+
+**解题思路：**
+
+思路一：排序
+
+把nums2的值先放到nums1后面，然后排序
+
+时间复杂度：$O((m+n)\log(m+n))$
+
+空间复杂度：$O(\log(m+n))$
+
+思路二：借助中间变量
+
+时间复杂度：$O(m+n)$
+
+空间复杂度：$O(m+n)$
+
+思路三：逆向插入
+
+时间复杂度：$O(m+n)$
+
+空间复杂度：$O(1)$
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+        int i = m - 1, j = n - 1, k = m + n - 1;
+        while (i >= 0 && j >= 0)
+        {
+            if (nums1[i] > nums2[j])
+                nums1[k--] = nums1[i--];
+            else
+                nums1[k--] = nums2[j--];
+        }
+
+        while (i >= 0)
+            nums1[k--] = nums1[i--];
+        while (j >= 0)
+            nums1[k--] = nums2[j--];
+    }
+};
+```
 
 
 
