@@ -9758,6 +9758,89 @@ public:
 
 
 
+## 0046. 全排列
+
+### 题目：
+
+给定一个不含重复数字的数组 `nums` ，返回其 **所有可能的全排列** 。你可以 **按任意顺序** 返回答案。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [1,2,3]
+输出：[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
+```
+
+**示例 2：**
+
+```
+输入：nums = [0,1]
+输出：[[0,1],[1,0]]
+```
+
+**示例 3：**
+
+```
+输入：nums = [1]
+输出：[[1]]
+```
+
+**提示：**
+
+- `1 <= nums.length <= 6`
+- `-10 <= nums[i] <= 10`
+- `nums` 中的所有整数 **互不相同**
+
+
+
+**解题思路：**
+
+这个问题可以看作有 $n$ 个排列成一行的空格，我们需要从左往右依此填入题目给定的 $n$ 个数，每个数只能使用一次。那么很直接的可以想到一种穷举的算法，即从左往右每一个位置都依此尝试填入一个数，看能不能填完这 $n$ 个空格，在程序中我们可以用「回溯法」来模拟这个过程。
+
+我们定义递归函数 $backtrack(first, output)$ 表示从左往右填到第 $\textit{first}$ 个位置，当前排列为 $\textit{output}$。 那么整个递归函数分为两个情况：
+
+如果 $\textit{first}==n$，说明我们已经填完了 $n$ 个位置（注意下标从 $0$ 开始），找到了一个可行的解，我们将 $\textit{output}$ 放入答案数组中，递归结束。
+如果 $\textit{first}<n$，我们要考虑这第 $\textit{first}$ 个位置我们要填哪个数。根据题目要求我们肯定不能填已经填过的数，因此很容易想到的一个处理手段是我们定义一个标记数组 $\textit{vis}[]$ 来标记已经填过的数，那么在填第 $\textit{first}$ 个数的时候我们遍历题目给定的 $n$ 个数，如果这个数没有被标记过，我们就尝试填入，并将其标记，继续尝试填下一个位置，即调用函数 $backtrack(first + 1, output)$。回溯的时候要撤销这一个位置填的数以及标记，并继续尝试其他没被标记过的数。
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> permute(vector<int>& nums) {
+        int n = nums.size();
+        vector<vector<int>> res;
+        
+        backtrace(res, nums, 0, n);
+        return res;
+    }
+
+    void backtrace(vector<vector<int>>& res, vector<int>& output, int first, int end)
+    {
+        if (first == end)
+        {
+            res.push_back(output);
+            return;
+        }
+
+        for (int i = first; i < end; ++i)
+        {
+            swap(output[i], output[first]);
+            backtrace(res, output, first + 1, end);
+            swap(output[i], output[first]);
+        }
+    }
+};
+```
+
+
+
+
+
 ## 0053. 最大子序和
 
 ### 题目：
@@ -9862,6 +9945,16 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0121. 买卖股票的最佳时机
+
+### 题目：
+
+同动态规划模块121题
 
 
 
@@ -9981,6 +10074,127 @@ public:
             us.insert(x);
         }
         return false;
+    }
+};
+```
+
+
+
+
+
+## 0350. 两个数组的交集Ⅱ
+
+### 题目：
+
+给定两个数组，编写一个函数来计算它们的交集。
+
+**示例 1：**
+
+```
+输入：nums1 = [1,2,2,1], nums2 = [2,2]
+输出：[2,2]
+```
+
+**示例 2:**
+
+```
+输入：nums1 = [4,9,5], nums2 = [9,4,9,8,4]
+输出：[4,9]
+```
+
+**说明：**
+
+- 输出结果中每个元素出现的次数，应与元素在两个数组中出现次数的最小值一致。
+- 我们可以不考虑输出结果的顺序。
+
+
+
+**解题思路：**
+
+思路一：hash表法
+
+将短的数组存在hash表中，并计数
+
+![leetcode_350_1](F:\C++\刷题\Img\leetcode_350_1.gif)
+
+时间复杂度：O(m+n)
+
+空间复杂度：O(min(m,n))
+
+思路二：排序 + 双指针
+
+如果两个数组是有序的，则可以使用双指针的方法得到两个数组的交集。
+
+首先对两个数组进行排序，然后使用两个指针遍历两个数组。
+
+初始时，两个指针分别指向两个数组的头部。每次比较两个指针指向的两个数组中的数字，如果两个数字不相等，则将指向较小数字的指针右移一位，如果两个数字相等，将该数字添加到答案，并将两个指针都右移一位。当至少有一个指针超出数组范围时，遍历结束。
+
+
+
+时间复杂度：$O(m \log m+n \log n)$
+
+空间复杂度：$O(\min(m,n))$
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<int> intersect(vector<int>& nums1, vector<int>& nums2) {
+        int m = nums1.size(), n = nums2.size();
+        if (m == 0 || n == 0)
+            return vector<int>();
+        if (m > n)
+            return intersect(nums2, nums1);
+        
+        vector<int> res;
+        unordered_map<int, int> mm;
+        for (auto& x : nums1)
+            ++mm[x];
+        
+        for (int i = 0; i < n; ++i)
+        {
+            if (mm[nums2[i]] > 0)
+            {
+                res.push_back(nums2[i]);
+                --mm[nums2[i]];
+            }
+        }
+        return res;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    vector<int> intersect(vector<int>& nums1, vector<int>& nums2) {
+        int m = nums1.size(), n = nums2.size();
+        if (m == 0 || n == 0)
+            return vector<int>();
+        
+        vector<int> res;
+        sort(nums1.begin(), nums1.end());
+        sort(nums2.begin(), nums2.end());
+        int i = 0, j = 0;
+        while (i < m && j < n)
+        {
+            if (nums1[i] == nums2[j])
+            {
+                res.push_back(nums1[i]);
+                ++i, ++j;
+            }
+            else if (nums1[i] > nums2[j])
+                ++j;
+            else
+                ++i;
+        }
+
+        return res;
     }
 };
 ```
