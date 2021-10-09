@@ -9841,6 +9841,96 @@ public:
 
 
 
+## 0047. 全排列Ⅱ
+
+### 题目：
+
+给定一个可包含重复数字的序列 `nums` ，**按任意顺序** 返回所有不重复的全排列。
+
+**示例 1：**
+
+```
+输入：nums = [1,1,2]
+输出：
+[[1,1,2],
+ [1,2,1],
+ [2,1,1]]
+```
+
+**示例 2：**
+
+```
+输入：nums = [1,2,3]
+输出：[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
+```
+
+**提示：**
+
+- `1 <= nums.length <= 8`
+- `-10 <= nums[i] <= 10`
+
+**解题思路：**
+
+方法等同于46题的全排列，但不同的是需要去重
+
+在去重时，使用vis数组来标记数组nums某个值是否被使用，每一层递归使用for循环遍历，并判断vis[i]是否被使用，具体去重条件：
+
+- vis[i] : 表示这个位置的数已经被使用；
+- i > 0 && nums[i] == nums[i - 1] ： 主要是防止两个连续的数相同
+- for循环保证了从数组中从前往后一个一个取值，再用if判断条件。所以nums[i - 1]一定比nums[i]先被取值和判断。如果nums[i - 1]被取值了，那vis[i - 1]会被置1，只有当递归再回退到这一层时再将它置0。每递归一层都是在寻找数组对应于递归深度位置的值，每一层里用for循环来寻找。所以当vis[i - 1] == 1时，说明nums[i - 1]和nums[i]分别属于两层递归中，也就是我们要用这两个数分别放在数组的两个位置，这时不需要去重。但是当vis[i - 1] == 0时，说明nums[i - 1]和nums[i]属于同一层递归中（只是for循环进入下一层循环），也就是我们要用这两个数放在数组中的同一个位置上，这就是我们要去重的情况。
+
+
+
+**方法：**
+
+```c++
+class Solution {
+private:
+    vector<int> vis;
+public:
+    vector<vector<int>> permuteUnique(vector<int>& nums) {
+        vector<vector<int>> ans;
+        vector<int> perm;
+        vis.resize(nums.size());
+        sort(nums.begin(), nums.end());
+        backtrace(nums, ans, 0, perm);
+        return ans;
+    }
+    void backtrace(vector<int>& nums, vector<vector<int>>& ans, int idx, vector<int>& perm)
+    {
+        if (idx == nums.size())
+        {
+            ans.push_back(perm);
+            return;
+        }
+
+        for (int i = 0; i < nums.size(); ++i)
+        {
+            // vis[i] : 表示这个位置的数已经被使用
+            // i > 0 && nums[i] == nums[i - 1] ： 主要是防止两个连续的数相同
+            /*for循环保证了从数组中从前往后一个一个取值，再用if判断条件。所以nums[i - 1]一定比nums[i]先被取值和判断。
+            如果nums[i - 1]被取值了，那vis[i - 1]会被置1，只有当递归再回退到这一层时再将它置0。每递归一层都是在寻找数
+            组对应于递归深度位置的值，每一层里用for循环来寻找。所以当vis[i - 1] == 1时，说明nums[i - 1]和nums[i]分别
+            属于两层递归中，也就是我们要用这两个数分别放在数组的两个位置，这时不需要去重。但是当vis[i - 1] == 0时，
+            说明nums[i - 1]和nums[i]属于同一层递归中（只是for循环进入下一层循环），也就是我们要用这两个数放在数组中的
+            同一个位置上，这就是我们要去重的情况。*/
+            if (vis[i] || (i > 0 && nums[i] == nums[i - 1] && !vis[i - 1]))
+                continue;
+            
+            perm.push_back(nums[i]);
+            vis[i] = 1;
+            backtrace(nums, ans, idx + 1, perm);
+            vis[i] = 0;
+            perm.pop_back();
+        }
+    }
+};
+```
+
+
+
+
+
 ## 0053. 最大子序和
 
 ### 题目：
@@ -9945,6 +10035,16 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0118. 杨辉三角
+
+### 题目：
+
+同动态规划模块118题
 
 
 
@@ -10194,6 +10294,80 @@ public:
                 ++i;
         }
 
+        return res;
+    }
+};
+```
+
+
+
+
+
+## 0566. 重塑矩阵
+
+### 题目：
+
+在 `MATLAB` 中，有一个非常有用的函数 `reshape` ，它可以将一个 `m x n` 矩阵重塑为另一个大小不同`（r x c）`的新矩阵，但保留其原始数据。
+
+给你一个由二维数组 `mat` 表示的 `m x n` 矩阵，以及两个正整数 `r` 和 `c` ，分别表示想要的重构的矩阵的行数和列数。
+
+重构后的矩阵需要将原始矩阵的所有元素以相同的 行遍历顺序 填充。
+
+如果具有给定参数的 `reshape` 操作是可行且合理的，则输出新的重塑矩阵；否则，输出原始矩阵。
+
+**示例1：**
+
+![leetcode_566_1](F:\C++\刷题\Img\leetcode_566_1.jpg)
+
+```
+输入：mat = [[1,2],[3,4]], r = 1, c = 4
+输出：[[1,2,3,4]]
+```
+
+**示例2：**
+
+![leetcode_566_2](F:\C++\刷题\Img\leetcode_566_2.jpg)
+
+```
+输入：mat = [[1,2],[3,4]], r = 2, c = 4
+输出：[[1,2],[3,4]]
+```
+
+**提示：**
+
+- `m == mat.length`
+- `n == mat[i].length`
+- `1 <= m, n <= 100`
+- `-1000 <= mat[i][j] <= 1000`
+- `1 <= r, c <= 300`
+
+
+
+**解题思路：**
+
+直接使用一个一维数组进行过渡，但我们也可以直接从二维数组 $\textit{nums}$ 得到 $r$ 行 $c$ 列的重塑矩阵：
+
+设 $\textit{nums}$ 本身为 $m$ 行 $n$ 列，如果 $mn \neq rc$，那么二者包含的元素个数不相同，因此无法进行重塑；
+
+否则，对于 $x \in [0, mn)$，第 $x$ 个元素在 $\textit{nums}$ 中对应的下标为 $(x ~/~ n, x~\%~ n)$，而在新的重塑矩阵中对应的下标为 $(x ~/~ c, x~\%~ c)$。我们直接进行赋值即可。
+
+时间复杂度：O(mn)
+
+空间复杂度：O(1)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> matrixReshape(vector<vector<int>>& mat, int r, int c) {
+        int m = mat.size(), n = mat[0].size();
+        if (m * n != r * c)
+            return mat;
+        
+        vector<vector<int>> res(r, vector<int>(c, 0));
+        for (int x = 0; x < m * n; ++x)
+            res[x / c][x % c] = mat[x / n][x % n];
         return res;
     }
 };
