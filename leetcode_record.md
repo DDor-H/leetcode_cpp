@@ -2658,6 +2658,160 @@ public:
 
 
 
+## 0051. N皇后
+
+### 题目：
+
+**n 皇后问题** 研究的是如何将 `n` 个皇后放置在 `n×n` 的棋盘上，并且使皇后彼此之间不能相互攻击。
+
+给你一个整数 `n` ，返回所有不同的 **n 皇后问题** 的解决方案。
+
+每一种解法包含一个不同的 **n 皇后问题** 的棋子放置方案，该方案中 `'Q'` 和 `'.'` 分别代表了皇后和空位。
+
+**示例1：**
+
+![leetcode_51](F:\C++\刷题\Img\leetcode_51.jpg)
+
+```
+输入：n = 4
+输出：[[".Q..","...Q","Q...","..Q."],["..Q.","Q...","...Q",".Q.."]]
+解释：如上图所示，4 皇后问题存在两个不同的解法。
+```
+
+**示例 2：**
+
+```
+输入：n = 1
+输出：[["Q"]]
+```
+
+**提示：**
+
+- `1 <= n <= 9`
+- 皇后彼此不能相互攻击，也就是说：任何两个皇后都不能处于同一条横行、纵行或斜线上。
+
+
+
+**解题思路：**
+
+思路一：递归 + 回溯
+
+[递归+回溯](https://leetcode-cn.com/problems/n-queens/solution/nhuang-hou-by-leetcode-solution/)
+
+时间复杂度：O(n!)
+
+空间复杂度：O(n)
+
+思路二：位运算改进
+
+[位运算改进](https://leetcode-cn.com/problems/n-queens/solution/nhuang-hou-by-leetcode-solution/)
+
+时间复杂度：O(n!)
+
+空间复杂度：O(n)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<vector<string>> solveNQueens(int n) {
+        vector<vector<string>> res;
+        vector<int> queens = vector<int>(n, -1);
+        unordered_set<int> col = unordered_set<int>();
+        unordered_set<int> diags1 = unordered_set<int>();
+        unordered_set<int> diags2 = unordered_set<int>();
+        backTrace(res, col, diags1, diags2, queens, n, 0);
+        return res;
+    }
+    void backTrace(vector<vector<string>>& res, unordered_set<int>& col, unordered_set<int>& diags1, unordered_set<int>& diags2, vector<int>& queens, int n, int idx)
+    {
+        if (idx == n)
+        {
+            res.push_back(generateBoard(queens, n));
+            return;
+        }
+        else
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                if (col.find(i) != col.end())
+                    continue;
+                int diag1 = idx - i;
+                if (diags1.find(diag1) != diags1.end())
+                    continue;
+                int diag2 = idx + i;
+                if (diags2.find(diag2) != diags2.end())
+                    continue;
+                col.insert(i);
+                diags1.insert(diag1);
+                diags2.insert(diag2);
+                queens[idx] = i;
+                backTrace(res, col, diags1, diags2, queens, n, idx + 1);
+                queens[idx] = -1;
+                col.erase(i);
+                diags1.erase(diag1);
+                diags2.erase(diag2);
+            }
+        }
+    }
+    vector<string> generateBoard(vector<int>& queens, int n)
+    {
+        vector<string> res = vector<string>(n, string(n, '.'));
+        for (int i = 0; i < n; ++i)
+            res[i][queens[i]] = 'Q';
+        return res;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    vector<vector<string>> solveNQueens(int n) {
+        vector<vector<string>> res;
+        vector<int> queens = vector<int>(n, -1);
+        backTrace(res, 0, 0, 0, queens, n, 0);
+        return res;
+    }
+    void backTrace(vector<vector<string>>& res, int col, int diags1, int diags2, vector<int>& queens, int n, int idx)
+    {
+        if (idx == n)
+        {
+            res.push_back(generateBoard(queens, n));
+            return;
+        }
+        else
+        {
+            int availablePosition = ~(col | diags1 | diags2) & ((1 << n) - 1);
+            for (; availablePosition > 0; availablePosition &= (availablePosition - 1))
+            {
+                int pos = availablePosition & (-availablePosition);
+                int index = __builtin_ctz(pos);
+                queens[idx] = index;
+                backTrace(res, col | pos, (diags1 | pos) >> 1, (diags2 | pos) << 1, queens, n, idx + 1);
+                queens[idx] = -1;
+            }
+        }
+    }
+    vector<string> generateBoard(vector<int>& queens, int n)
+    {
+        vector<string> res = vector<string>(n, string(n, '.'));
+        for (int i = 0; i < n; ++i)
+            res[i][queens[i]] = 'Q';
+        return res;
+    }
+};
+```
+
+
+
+
+
 ## 0054. 螺旋矩阵
 
 ### 题目：
@@ -9758,6 +9912,16 @@ public:
 
 
 
+## 0036. 有效的数独
+
+### 题目：
+
+同Array模块的36题
+
+
+
+
+
 ## 0046. 全排列
 
 ### 题目：
@@ -9936,6 +10100,16 @@ public:
 ### 题目：
 
 同Array模块的53题
+
+
+
+
+
+## 0073. 矩阵置零
+
+### 题目：
+
+同Array模块的73题
 
 
 
