@@ -10356,6 +10356,101 @@ public:
 
 
 
+## 0242. 有效的字母异位词
+
+### 题目：
+
+给定两个字符串 `s` 和 `t` ，编写一个函数来判断 `t` 是否是 `s` 的字母异位词。
+
+**注意**：若 `s` 和 t 中每个字符出现的次数都相同，则称 `s` 和 `t` 互为字母异位词。
+
+ 
+
+**示例 1:**
+
+```
+输入: s = "anagram", t = "nagaram"
+输出: true
+```
+
+**示例 2:**
+
+```
+输入: s = "rat", t = "car"
+输出: false
+```
+
+**提示:**
+
+`1 <= s.length, t.length <= 5 * 10^4`
+`s` 和 `t` 仅包含小写字母
+
+
+
+**解题思路：**
+
+思路一：排序
+
+时间复杂度：O(nlogn)
+
+空间复杂度：O(logn)  排序所需的额外空间
+
+思路二：hash表法
+
+时间复杂度：O(n)
+
+空间复杂度：O(S)  S = 26
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool isAnagram(string s, string t) {
+        if (s.length() != t.length())
+            return false;
+        
+        sort(s.begin(), s.end());
+        sort(t.begin(), t.end());
+        return s == t;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool isAnagram(string s, string t) {
+        if (s.length() != t.length())
+            return false;
+        
+        unordered_map<char, int> um;
+        for (auto& x : s)
+        {
+            if (um.count(x) > 0)
+                ++um[x];
+            else
+                um.insert(make_pair(x, 1));
+        }
+        for (auto& x : t)
+        {
+            if (um.count(x) < 1)
+                return false;
+            if (--um[x] < 0)
+                return false;
+        }
+
+        return true;
+    }
+};
+```
+
+
+
+
+
 ## 0350. 两个数组的交集Ⅱ
 
 ### 题目：
@@ -10469,6 +10564,190 @@ public:
         }
 
         return res;
+    }
+};
+```
+
+
+
+
+
+## 0383. 赎金信
+
+### 题目：
+
+给定一个赎金信 (`ransom`) 字符串和一个杂志(`magazine`)字符串，判断第一个字符串 `ransom` 能不能由第二个字符串 `magazines` 里面的字符构成。如果可以构成，返回 `true` ；否则返回 `false`。
+
+(题目说明：为了不暴露赎金信字迹，要从杂志上搜索各个需要的字母，组成单词来表达意思。杂志字符串中的每个字符只能在赎金信字符串中使用一次。)
+
+**示例 1：**
+
+```
+输入：ransomNote = "a", magazine = "b"
+输出：false
+```
+
+**示例 2：**
+
+```
+输入：ransomNote = "aa", magazine = "ab"
+输出：false
+```
+
+**示例 3：**
+
+```
+输入：ransomNote = "aa", magazine = "aab"
+输出：true
+```
+
+**提示：**
+
+- 你可以假设两个字符串均只含有小写字母。
+
+
+
+
+**解题思路：**
+
+思路一：hash表法
+
+时间复杂度：O(max(m, n))
+
+空间复杂度：O(m)
+
+思路二：直接在原字符串上find + 做标记
+
+时间复杂度：O(m)
+
+空间复杂度：O(1)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool canConstruct(string ransomNote, string magazine) {
+        int m = ransomNote.length();
+        int n = magazine.length();
+
+        if (m > n)
+            return false;
+        
+        unordered_map<char, int> um;
+        for (auto& x : magazine)
+        {
+            if (um.count(x) > 0)
+                ++um[x];
+            else
+                um.insert(make_pair(x, 1));
+        }
+
+        for (auto& x : ransomNote)
+        {
+            if (um.count(x) == 0)
+                return false;
+            if (--um[x] < 0)
+                return false;
+        }
+        return true;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool canConstruct(string ransomNote, string magazine) {
+        int m = ransomNote.length();
+        int n = magazine.length();
+        
+        for (auto& x : ransomNote)
+        {
+            int idx = magazine.find(x);
+            if (idx != -1)
+                magazine[idx] = '0';
+            else
+                return false;
+        }
+        return true;
+    }
+};
+```
+
+
+
+
+
+## 0387. 字符串中的第一个唯一字符
+
+### 题目：
+
+给定一个字符串，找到它的第一个不重复的字符，并返回它的索引。如果不存在，则返回 `-1`。
+
+ 
+
+**示例：**
+
+```
+s = "leetcode"
+返回 0
+
+s = "loveleetcode"
+返回 2
+```
+
+**解题思路：**
+
+思路一：空间换时间
+
+使用一个数组，来存储字符对应ascii码的存储次数，再遍历一遍数组
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)  ：字符种类是确定的前提下
+
+思路二：正反双指针find
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int firstUniqChar(string s) {
+        int Count[256] = {0};
+        for (int i = 0; i < s.size(); ++i)
+        {
+            ++Count[s[i]];
+        }
+        for (int i = 0; i < s.size(); ++i)
+        {
+            if (Count[s[i]] == 1)
+                return i;
+        }
+        return -1;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int firstUniqChar(string s) {
+        for (int i = 0; i < s.size(); ++i)
+        {
+            if (s.find(s[i]) == s.rfind(s[i]))
+                return i;
+        }
+        return -1;
     }
 };
 ```
