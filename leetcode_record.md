@@ -9912,6 +9912,114 @@ public:
 
 
 
+## 0021. 合并两个有序链表
+
+### 题目：
+
+将两个升序链表合并为一个新的 **升序** 链表并返回。新链表是通过拼接给定的两个链表的所有节点组成的。 
+
+**示例 1：**
+
+![leetcode_0021](F:\C++\刷题\Img\leetcode_0021.jpg)
+
+```
+输入：l1 = [1,2,4], l2 = [1,3,4]
+输出：[1,1,2,3,4,4]
+```
+
+**示例 2：**
+
+```
+输入：l1 = [], l2 = []
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：l1 = [], l2 = [0]
+输出：[0]
+```
+
+**提示：**
+
+- 两个链表的节点数目范围是 `[0, 50]`
+- `-100 <= Node.val <= 100`
+- `l1` 和 `l2` 均按 **非递减顺序** 排列
+
+
+
+**解题思路：**
+
+思路一：常规思路
+
+思路二：递归
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
+        if (l1 == nullptr)
+            return l2;
+        if (l2 == nullptr)
+            return l1;
+        ListNode* lhead = new ListNode(-1);
+        ListNode* l = lhead;
+        while (l1 != nullptr && l2 != nullptr)
+        {
+            if (l1->val < l2->val)
+            {
+                l->next = l1;
+                l1 = l1->next;
+            }
+            else
+            {
+                l->next = l2;
+                l2 = l2->next;
+            }
+            l = l->next;
+        }
+        l->next = l1 == nullptr ? l2 : l1;
+
+        return lhead->next;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
+        if (l1 == nullptr)
+            return l2;
+        if (l2 == nullptr)
+            return l1;
+        if (l1->val < l2->val)
+        {
+            l1->next = mergeTwoLists(l1->next, l2);
+            return l1;
+        }
+        else
+        {
+            l2->next = mergeTwoLists(l1, l2->next);
+            return l2;
+        }
+    }
+};
+```
+
+
+
+
+
+
+
 ## 0036. 有效的数独
 
 ### 题目：
@@ -10229,6 +10337,229 @@ public:
 ### 题目：
 
 同动态规划模块121题
+
+
+
+
+
+## 0141. 环形链表
+
+### 题目：
+
+给定一个链表，判断链表中是否有环。
+
+如果链表中有某个节点，可以通过连续跟踪 `next` 指针再次到达，则链表中存在环。 为了表示给定链表中的环，我们使用整数 ~来表示链表尾连接到链表中的位置（索引从 `0` 开始）。 如果 `pos` 是 `-1`，则在该链表中没有环。**注意：pos 不作为参数进行传递**，仅仅是为了标识链表的实际情况。
+
+如果链表中存在环，则返回 `true` 。 否则，返回 `false` 。
+
+**进阶：**
+
+你能用 `O(1)`（即，常量）内存解决此问题吗？
+
+**示例 1：**
+
+![leetcode_141_1](F:\C++\刷题\Img\leetcode_141_1.png)
+
+```
+输入：head = [3,2,0,-4], pos = 1
+输出：true
+解释：链表中有一个环，其尾部连接到第二个节点。
+```
+
+**示例 2：**
+
+![leetcode_141_2](F:\C++\刷题\Img\leetcode_141_2.png)
+
+```
+输入：head = [1,2], pos = 0
+输出：true
+解释：链表中有一个环，其尾部连接到第一个节点。
+```
+
+**示例 3：**
+
+![leetcode_141_3](F:\C++\刷题\Img\leetcode_141_3.png)
+
+```
+输入：head = [1], pos = -1
+输出：false
+解释：链表中没有环。
+```
+
+**提示：**
+
+- 链表中节点的数目范围是 `[0, 10^4]`
+- `-10^5 <= Node.val <= 10^5`
+- `pos` 为 `-1` 或者链表中的一个 **有效索引** 。
+
+
+
+**解题思路：**
+
+思路一：前后指针法
+
+快指针一次走两步，慢指针走一步，若有环，迟早会相遇
+
+时间复杂度：O(N)
+
+空间复杂度：O(1）
+
+思路二：hash表法
+
+时间复杂度：O(N)
+
+空间复杂度：O(N）
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool hasCycle(ListNode *head) {
+        if (head == NULL || head->next == NULL)
+            return false;
+        ListNode *slow = head;
+        ListNode *fast = head->next;
+
+        while (slow != fast)
+        {
+            if (fast == NULL || fast->next == NULL)
+                return false;
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+        return true;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool hasCycle(ListNode *head) {
+        if (head == NULL || head->next == NULL)
+            return false;
+        unordered_map<ListNode*, int> um;
+        while (head != NULL)
+        {
+            if (um.count(head) > 0)
+                return true;
+            um.insert(make_pair(head, 1));
+            head = head->next;
+        }
+        return false;
+    }
+};
+```
+
+
+
+
+
+## 0203. 移除链表元素
+
+### 题目：
+
+给你一个链表的头节点 `head` 和一个整数 `val` ，请你删除链表中所有满足 `Node.val == val` 的节点，并返回 **新的头节点** 。
+
+**示例 1：**
+
+![leetcode_203](F:\C++\刷题\Img\leetcode_203.jpg)
+
+```
+输入：head = [1,2,6,3,4,5,6], val = 6
+输出：[1,2,3,4,5]
+```
+
+**示例 2：**
+
+```
+输入：head = [], val = 1
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：head = [7,7,7,7], val = 7
+输出：[]
+```
+
+**提示：**
+
+- 列表中的节点数目在范围 `[0, 10^4]` 内
+- `1 <= Node.val <= 50`
+- `0 <= val <= 50`
+
+
+
+**解题思路：**
+
+思路一：常规方法
+
+注意：不能释放源节点
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+思路二：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    ListNode* removeElements(ListNode* head, int val) {
+        if (head == nullptr)
+            return head;
+        
+        ListNode* dynHead = new ListNode(-1);
+        dynHead->next = head;
+        ListNode* p = head;
+        ListNode* prev = dynHead;
+        while (p != nullptr)
+        {
+            if (p->val == val)
+            {
+                prev->next = p->next;
+                //free(p);
+                p = prev->next;
+            }
+            else
+            {
+                prev = p;
+                p = p->next;
+            }
+        }
+
+        return dynHead->next;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    ListNode* removeElements(ListNode* head, int val) {
+        if (head == nullptr)
+            return head;
+        
+        head->next = removeElements(head->next, val);
+        return head->val == val ? head->next : head;
+    }
+};
+```
 
 
 
