@@ -10223,6 +10223,114 @@ public:
 
 
 
+## 0083. 删除排序链表中的重复元素
+
+### 题目：
+
+存在一个按升序排列的链表，给你这个链表的头节点 `head` ，请你删除所有重复的元素，使每个元素 **只出现一次** 。
+
+返回同样按升序排列的结果链表。
+
+ 
+
+**示例 1：**
+
+![leetcode_83_1](F:\C++\刷题\Img\leetcode_83_1.jpg)
+
+```
+输入：head = [1,1,2]
+输出：[1,2]
+```
+
+**示例 2：**
+
+![leetcode_83_2](F:\C++\刷题\Img\leetcode_83_2.jpg)
+
+```
+输入：head = [1,1,2,3,3]
+输出：[1,2,3]
+```
+
+**提示：**
+
+- 链表中节点数目在范围 `[0, 300]` 内
+- `-100 <= Node.val <= 100`
+- 题目数据保证链表已经按升序排列
+
+
+
+**解题思路：**
+
+思路一：迭代法
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+思路二：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    ListNode* deleteDuplicates(ListNode* head) {
+        if (head == nullptr || head->next == nullptr)
+            return head;
+        
+        ListNode* prev = head;
+        ListNode* cur = head->next;
+        while (cur != nullptr)
+        {
+            if (prev->val == cur->val)
+            {
+                ListNode* tmp = cur;
+                prev->next = cur->next;
+                delete tmp;  // 这里不能用free
+                cur = prev->next;
+            }
+            else
+            {
+                prev = cur;
+                cur = cur->next;
+            }
+        }
+        return head;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    ListNode* deleteDuplicates(ListNode* head) {
+        if (head == nullptr || head->next == nullptr)
+            return head;
+        
+        ListNode* newHead = deleteDuplicates(head->next);
+        if (head->val == head->next->val)
+        {
+            ListNode* del = head->next;
+            head->next = head->next->next;
+            delete del;
+        }
+        return head;
+    }
+};
+```
+
+
+
+
+
 ## 0088. 合并两个有序数组
 
 ### 题目：
@@ -10557,6 +10665,138 @@ public:
         
         head->next = removeElements(head->next, val);
         return head->val == val ? head->next : head;
+    }
+};
+```
+
+
+
+
+
+## 0206. 反转链表
+
+### 题目：
+
+给你单链表的头节点 `head` ，请你反转链表，并返回反转后的链表。
+
+**示例1：**
+
+![leetcode_206_1](F:\C++\刷题\Img\leetcode_206_1.jpg)
+
+```
+输入：head = [1,2,3,4,5]
+输出：[5,4,3,2,1]
+```
+
+**示例 2：**
+
+![leetcode_206_2](F:\C++\刷题\Img\leetcode_206_2.jpg)
+
+```
+输入：head = [1,2]
+输出：[2,1]
+```
+
+**示例 3：**
+
+```
+输入：head = []
+输出：[]
+```
+
+**提示：**
+
+链表中节点的数目范围是 `[0, 5000]`
+`-5000 <= Node.val <= 5000`
+
+
+
+**解题思路：**
+
+思路一：迭代一
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+思路二：迭代二：
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+思路三：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        if (head == nullptr || head->next == nullptr)
+            return head;
+        ListNode* res = new ListNode(-1);
+        ListNode* p = head;
+        ListNode* q = head->next;
+
+        while (q != nullptr)
+        {
+            p->next = res->next;
+            res->next = p;
+            p = q;
+            q = q->next;
+        }
+        p->next = res->next;
+        res->next = p;
+
+        return res->next;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        if (head == nullptr || head->next == nullptr)
+            return head;
+            
+        ListNode* prev = nullptr;
+        ListNode* cur = head;
+
+        while (cur != nullptr)
+        {
+            ListNode* curNext = cur->next;
+            cur->next = prev;
+            prev = cur;
+            cur = curNext;
+        }
+        return prev;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        if (head == nullptr || head->next == nullptr)
+            return head;
+            
+        ListNode* newHead = reverseList(head->next);
+        head->next->next = head;
+        head->next = nullptr;
+        return newHead;
     }
 };
 ```
