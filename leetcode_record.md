@@ -4109,6 +4109,89 @@ public:
 
 
 
+## 0077. 组合
+
+### 题目：
+
+给定两个整数 `n` 和 `k`，返回范围 `[1, n]` 中所有可能的 `k` 个数的组合。
+
+你可以按 **任何顺序** 返回答案。
+
+**示例 1：**
+
+```
+输入：n = 4, k = 2
+输出：
+[
+  [2,4],
+  [3,4],
+  [2,3],
+  [1,2],
+  [1,3],
+  [1,4],
+]
+```
+
+**示例 2：**
+
+```
+输入：n = 1, k = 1
+输出：[[1]]
+```
+
+**提示：**
+
+- `1 <= n <= 20`
+- `1 <= k <= n`
+
+
+
+**解题思路：**
+
+递归 + 剪枝
+
+时间复杂度：$O({n \choose k} \times k)$
+
+空间复杂度：$O(n + k) = O(n)$
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> combine(int n, int k) {
+        if (n < k || k == 0)
+            return vector<vector<int>>();
+        vector<vector<int>> res;
+        vector<int> cur;
+        _combine(res, cur, 1, n, k);
+        return res;
+    }
+
+    void _combine(vector<vector<int>>& res, vector<int>& cur, int idx, int n, int k)
+    {
+        // 剪枝 ： 当前长度 + [idx, n] 的长度不够 k
+        if (cur.size() + (n - idx + 1) < k)
+            return;
+
+        if (cur.size() == k)
+        {
+            res.push_back(cur);
+            return;
+        }
+
+        // 选用idx
+        cur.push_back(idx);
+        _combine(res, cur, idx + 1, n, k);
+        cur.pop_back();
+        // 不用idx
+        _combine(res, cur, idx + 1, n, k);
+    }
+};
+```
+
+
+
 
 
 ## 0078. 子集
@@ -9912,6 +9995,99 @@ public:
 
 
 
+## 0020. 有效的括号
+
+### 题目：
+
+给定一个只包括 `'('，')'，'{'，'}'，'['，']'` 的字符串 `s` ，判断字符串是否有效。
+
+有效字符串需满足：
+
+1. 左括号必须用相同类型的右括号闭合。
+2. 左括号必须以正确的顺序闭合。
+
+**示例 1：**
+
+```
+输入：s = "()"
+输出：true
+```
+
+**示例 2：**
+
+```
+输入：s = "()[]{}"
+输出：true
+```
+
+**示例 3：**
+
+```
+输入：s = "(]"
+输出：false
+```
+
+**示例 4：**
+
+```
+输入：s = "([)]"
+输出：false
+```
+
+**示例 5：**
+
+```
+输入：s = "{[]}"
+输出：true
+```
+
+**提示：**
+
+- `1 <= s.length <= 104`
+- `s` 仅由括号 `'()[]{}'` 组成
+
+
+
+**解题思路：**
+
+使用栈
+
+时间复杂度：O(n)
+
+空间复杂度：O(n+∣Σ∣)，其中 Σ 表示字符集，本题中字符串只包含 6 种括号，∣Σ∣=6。栈中的字符数量为 O(n)，而哈希表使用的空间为 O(∣Σ∣)，相加即可得到总空间复杂度。
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    bool isValid(string s) {
+        int n = s.length();
+        if (n % 2 == 1)
+            return false;
+        stack<char> st;
+        for (int i = 0; i < n; ++i)
+        {
+            if (s[i] == '(' || s[i] == '[' || s[i] == '{')
+                st.push(s[i]);
+            else if ( (s[i] == ')' && !st.empty() && st.top() == '(') || 
+                        (s[i] == '}' && !st.empty() && st.top() == '{') || 
+                        (s[i] == ']' && !st.empty() && st.top() == '['))
+                st.pop();
+            else
+                return false;        
+        }
+        return st.empty();
+    }
+};
+```
+
+
+
+
+
 ## 0021. 合并两个有序链表
 
 ### 题目：
@@ -10921,6 +11097,131 @@ public:
         return false;
     }
 };
+```
+
+
+
+
+
+## 0232. 用栈实现队列
+
+### 题目：
+
+请你仅使用两个栈实现先入先出队列。队列应当支持一般队列支持的所有操作（`push`、`pop`、`peek`、`empty`）：
+
+实现 `MyQueue` 类：
+
+- `void push(int x)` 将元素 x 推到队列的末尾
+
+- `int pop()` 从队列的开头移除并返回元素
+
+- `int peek()` 返回队列开头的元素
+
+- `boolean empty()` 如果队列为空，返回 `true` ；否则，返回 `false`
+
+  
+
+**说明：**
+
+你只能使用标准的栈操作 —— 也就是只有 `push to top, peek/pop from top, size`, 和 `is empty` 操作是合法的。
+你所使用的语言也许不支持栈。你可以使用 `list` 或者 `deque`（双端队列）来模拟一个栈，只要是标准的栈操作即可。
+
+**进阶：**
+
+- 你能否实现每个操作均摊时间复杂度为 `O(1)` 的队列？换句话说，执行 `n` 个操作的总时间复杂度为 `O(n)` ，即使其中一个操作可能花费较长时间。
+
+
+**示例：**
+
+```
+输入：
+["MyQueue", "push", "push", "peek", "pop", "empty"]
+[[], [1], [2], [], [], []]
+输出：
+[null, null, null, 1, 1, false]
+
+解释：
+MyQueue myQueue = new MyQueue();
+myQueue.push(1); // queue is: [1]
+myQueue.push(2); // queue is: [1, 2] (leftmost is front of the queue)
+myQueue.peek(); // return 1
+myQueue.pop(); // return 1, queue is [2]
+myQueue.empty(); // return false
+```
+
+**提示：**
+
+- `1 <= x <= 9`
+- 最多调用 `100` 次 `push`、`pop`、`peek` 和 `empty`
+- 假设所有操作都是有效的 （例如，一个空的队列不会调用 `pop` 或者 `peek` 操作）
+
+
+
+**解题思路：**
+
+两个栈，一个倒进一个
+
+**方法：**
+
+```c++
+class MyQueue {
+private:
+    stack<int> st1;
+    stack<int> st2;
+public:
+    MyQueue() {
+        st1 = stack<int>();
+        st2 = stack<int>();
+    }
+    
+    void push(int x) {
+        st1.push(x);
+    }
+    
+    int pop() {
+        int tmp = -1;
+        if (st2.empty())
+        {
+            while (!st1.empty())
+            {
+                tmp = st1.top();
+                st1.pop();
+                st2.push(tmp);
+            }
+        }
+
+        tmp = st2.top();
+        st2.pop();
+        return tmp;
+    }
+    
+    int peek() {
+        if (st2.empty())
+        {
+            int tmp = -1;
+            while (!st1.empty())
+            {
+                tmp = st1.top();
+                st1.pop();
+                st2.push(tmp);
+            }
+        }
+        return st2.top();
+    }
+    
+    bool empty() {
+        return st2.empty() && st1.empty();
+    }
+};
+
+/**
+ * Your MyQueue object will be instantiated and called as such:
+ * MyQueue* obj = new MyQueue();
+ * obj->push(x);
+ * int param_2 = obj->pop();
+ * int param_3 = obj->peek();
+ * bool param_4 = obj->empty();
+ */
 ```
 
 
