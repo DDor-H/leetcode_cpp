@@ -1,4 +1,4 @@
-# Array
+# **Array**
 
 ## 0001. Two Sum
 
@@ -10606,6 +10606,176 @@ public:
 
 
 
+## 0094. 二叉树的中序遍历
+
+### 题目：
+
+给定一个二叉树的根节点 `root` ，返回它的 **中序** 遍历。
+
+**示例 1：**
+
+![leetcode_94_1](F:\C++\刷题\Img\leetcode_94_1.jpg)
+
+```
+输入：root = [1,null,2,3]
+输出：[1,3,2]
+```
+
+**示例 2：**
+
+```
+输入：root = []
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：root = [1]
+输出：[1]
+```
+
+**示例 4：**
+
+![leetcode_94_2](F:\C++\刷题\Img\leetcode_94_2.jpg)
+
+```
+输入：root = [1,2]
+输出：[2,1]
+```
+
+**示例 5：**
+
+![leetcode_94_3](F:\C++\刷题\Img\leetcode_94_3.jpg)
+
+```
+输入：root = [1,null,2]
+输出：[1,2]
+```
+
+**提示：**
+
+- 树中节点数目在范围 `[0, 100]` 内
+- `-100 <= Node.val <= 100`
+
+
+
+**解题思路：**
+
+思路一：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：迭代
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路三：Morris遍历
+
+[Morris遍历](https://leetcode-cn.com/problems/binary-tree-preorder-traversal/solution/leetcodesuan-fa-xiu-lian-dong-hua-yan-shi-xbian-2/)
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        if (root == nullptr)
+            return vector<int>();
+        vector<int> res;
+        _inorderTraversal(root, res);
+        return res;
+    }
+    void _inorderTraversal(TreeNode* node, vector<int>& res)
+    {
+        if (node == nullptr)
+            return;
+        _inorderTraversal(node->left, res);
+        res.push_back(node->val);
+        _inorderTraversal(node->right, res);
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        if (root == nullptr)
+            return vector<int>();
+        vector<int> res;
+        
+        stack<TreeNode*> st;
+        while (!st.empty() || root != nullptr)
+        {
+            while (root != nullptr)
+            {
+                st.push(root);
+                root = root->left;
+            }
+
+            TreeNode* node = st.top();
+            st.pop();
+            res.push_back(node->val);
+
+            if (node->right != nullptr)
+                root = node->right;
+        }
+        return res;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        if (root == nullptr)
+            return vector<int>();
+        vector<int> res;
+        
+        TreeNode* cur1 = root;
+        TreeNode* cur2 = nullptr;
+        while (cur1 != nullptr)
+        {
+            cur2 = cur1->left;
+            if (cur2 != nullptr)
+            {
+                while (cur2->right != nullptr && cur2->right != cur1)
+                    cur2 = cur2->right;
+                if (cur2->right == nullptr)
+                {
+                    cur2->right = cur1;
+                    cur1 = cur1->left;
+                    continue;
+                }
+                else
+                    cur2->right = nullptr;
+            }
+            res.push_back(cur1->val);
+            cur1 = cur1->right;
+        }
+        return res;
+    }
+};
+```
+
+
+
+
+
 ## 0118. 杨辉三角
 
 ### 题目：
@@ -10739,6 +10909,280 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0144. 二叉树的前序遍历
+
+### 题目：
+
+给你二叉树的根节点 `root` ，返回它节点值的 **前序** 遍历。
+
+**示例 1：**
+
+![leetcode_144](F:\C++\刷题\Img\leetcode_144.jpg)
+
+```
+输入：root = [1,null,2,3]
+输出：[1,2,3]
+```
+
+**示例 2：**
+
+```
+输入：root = []
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：root = [1]
+输出：[1]
+```
+
+**示例 4：**
+
+![leetcode_144_1](F:\C++\刷题\Img\leetcode_144_1.jpg)
+
+```
+输入：root = [1,2]
+输出：[1,2]
+```
+
+**示例 5：**
+
+![leetcode_144_2](F:\C++\刷题\Img\leetcode_144_2.jpg)
+
+```
+输入：root = [1,null,2]
+输出：[1,2]
+```
+
+**提示：**
+
+- 树中节点数目在范围 `[0, 100]` 内
+- `-100 <= Node.val <= 100`
+
+
+
+**解题思路：**
+
+思路一：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：迭代
+
+压栈，先压右分支
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路三：Morris遍历
+
+[Morris遍历](https://leetcode-cn.com/problems/binary-tree-preorder-traversal/solution/leetcodesuan-fa-xiu-lian-dong-hua-yan-shi-xbian-2/)
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<int> preorderTraversal(TreeNode* root) {
+        if (root == nullptr)
+            return vector<int>();
+        vector<int> res;
+        _preorderTraversal(root, res);
+        return res;
+    }
+    void _preorderTraversal(TreeNode* node, vector<int>& res)
+    {
+        if (node == nullptr)
+            return;
+        res.push_back(node->val);
+        _preorderTraversal(node->left, res);
+        _preorderTraversal(node->right, res);
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    vector<int> preorderTraversal(TreeNode* root) {
+        if (root == nullptr)
+            return vector<int>();
+        vector<int> res;
+        stack<TreeNode*> st;
+        st.push(root);
+        while (!st.empty())
+        {
+            TreeNode* node = st.top();
+            res.push_back(node->val);
+            st.pop();
+            if (node->right != nullptr)
+                st.push(node->right);
+            if (node->left != nullptr)
+                st.push(node->left);
+        }
+        return res;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    vector<int> preorderTraversal(TreeNode* root) {
+        if (root == nullptr)
+            return vector<int>();
+        vector<int> res;
+        
+        TreeNode* cur1 = root;
+        TreeNode* cur2 = nullptr;
+        while (cur1 != nullptr)
+        {
+            cur2 = cur1->left;
+            if (cur2 != nullptr)
+            {
+                while (cur2->right != nullptr && cur2->right != cur1)
+                    cur2 = cur2->right;
+                if (cur2->right == nullptr)
+                {
+                    res.push_back(cur1->val);
+                    cur2->right = cur1;
+                    cur1 = cur1->left;
+                    continue;
+                }
+                else
+                    cur2->right = nullptr;
+            }
+            else
+                res.push_back(cur1->val);
+            cur1 = cur1->right;
+        }
+        return res;
+    }
+};
+```
+
+
+
+
+
+## 0145. 二叉树的后序遍历
+
+### 题目：
+
+给定一个二叉树，返回它的 **后序** 遍历。
+
+**示例:**
+
+```
+输入: [1,null,2,3]  
+   1
+    \
+     2
+    /
+   3 
+
+输出: [3,2,1]
+```
+
+思路一：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：迭代
+
+压栈，先压所有的左，然后取出栈顶，若右为空 或 已访问过右，再访问当前，若没访问过右，再把当前压栈，继续访问右；
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<int> postorderTraversal(TreeNode* root) {
+        if (root == nullptr)
+            return vector<int>();
+        vector<int> res;
+        _postorderTraversal(root, res);
+        return res;
+    }
+    void _postorderTraversal(TreeNode* node, vector<int>& res)
+    {
+        if (node == nullptr)
+            return;
+        _postorderTraversal(node->left, res);
+        _postorderTraversal(node->right, res);
+        res.push_back(node->val);
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    vector<int> postorderTraversal(TreeNode* root) {
+        if (root == nullptr)
+            return vector<int>();
+        vector<int> res;
+        
+        stack<TreeNode*> st;
+        TreeNode* prev = nullptr;
+        while (root != nullptr || !st.empty())
+        {
+            while (root != nullptr)
+            {
+                st.push(root);
+                root = root->left;
+            }
+
+            root = st.top();
+            st.pop();
+
+            if (root->right == nullptr || root->right == prev)
+            {
+                res.push_back(root->val);
+                prev = root;
+                root = nullptr;
+            }
+            else
+            {
+                // 还有右节点，暂时不能访问，再压回去
+                st.push(root);
+                root = root->right;
+            }
+        }
+        return res;
+    }
+};
+```
+
+
 
 
 
