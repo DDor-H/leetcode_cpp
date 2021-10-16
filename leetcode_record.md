@@ -10776,6 +10776,271 @@ public:
 
 
 
+## 0101. 对称二叉树
+
+### 题目：
+
+给定一个二叉树，检查它是否是镜像对称的。
+
+例如，二叉树 `[1,2,2,3,4,4,3]` 是对称的。
+
+```
+	1
+   / \
+  2   2
+ / \ / \
+3  4 4  3
+```
+
+
+但是下面这个 `[1,2,2,null,3,null,3]` 则不是镜像对称的:
+
+```
+	1
+   / \
+  2   2
+   \   \
+   3    3
+```
+
+**解题思路：**
+
+思路一：迭代
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool isSymmetric(TreeNode* root) {
+        if (root == nullptr)
+            return true;
+        return check(root, root);
+    }
+
+    bool check(TreeNode* LNode, TreeNode* RNode)
+    {
+        queue<TreeNode*> dq;
+        dq.push(LNode);
+        dq.push(RNode);
+        while (!dq.empty())
+        {
+            TreeNode* l = dq.front();
+            dq.pop();
+            TreeNode* r = dq.front();
+            dq.pop();
+
+            if (!l && !r)
+                continue;
+            if ((!l || !r) || (l->val != r->val))
+                return false;
+            dq.push(l->left);
+            dq.push(r->right);
+
+            dq.push(l->right);
+            dq.push(r->left);
+        }
+        return true;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool isSymmetric(TreeNode* root) {
+        if (root == nullptr)
+            return true;
+        return check(root, root);
+    }
+
+    bool check(TreeNode* l, TreeNode* r)
+    {
+        if (!l && !r)
+            return true;
+        if ((!l || !r) || (l->val != r->val))
+            return false;
+        return check(l->left, r->right) && check(l->right, r->left);
+    }
+};
+```
+
+
+
+
+
+## 0102. 二叉树的层序遍历
+
+### 题目：
+
+给你一个二叉树，请你返回其按 **层序遍历** 得到的节点值。 （即逐层地，从左到右访问所有节点）。
+
+**示例：**
+二叉树：`[3,9,20,null,null,15,7]`,
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回其层序遍历结果：
+
+```
+[
+  [3],
+  [9,20],
+  [15,7]
+]
+```
+
+
+
+**解题思路：**
+
+使用队列，每次进入while循环，记录当前队列的大小，即为当前层的数量，再用一个内部for循环；
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        if (root == nullptr)
+            return vector<vector<int>>();
+        
+        queue<TreeNode*> dq;
+        vector<vector<int>> res;
+        dq.push(root);
+        while (!dq.empty())
+        {
+            int curLevelSize = dq.size();
+            vector<int> tmp;
+            for (int i = 0; i < curLevelSize; ++i)
+            {
+                TreeNode* node = dq.front();
+                dq.pop();
+                tmp.push_back(node->val);
+                if (node->left != nullptr)
+                    dq.push(node->left);
+                if (node->right != nullptr)
+                    dq.push(node->right);
+            }
+            res.push_back(tmp);
+        }
+        return res;
+    }
+};
+```
+
+
+
+
+
+## 0104. 二叉树的最大深度
+
+### 题目：
+
+给定一个二叉树，找出其最大深度。
+
+二叉树的深度为根节点到最远叶子节点的最长路径上的节点数。
+
+**说明**: 叶子节点是指没有子节点的节点。
+
+**示例：**
+给定二叉树 `[3,9,20,null,null,15,7]`，
+
+```
+	3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回它的最大深度 3 。
+
+**解题思路：**
+
+思路一：DFS
+
+时间复杂度：O(n)
+
+空间复杂度：O(height)
+
+思路二：BFS
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        if (root == nullptr)
+            return 0;
+        return root == nullptr ? 0 : max(maxDepth(root->left), maxDepth(root->right)) + 1;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        if (root == nullptr)
+            return 0;
+        queue<TreeNode*> dq;
+        dq.push(root);
+        int level = 0;
+        while (!dq.empty())
+        {
+            int curLevelSize = dq.size();
+            while (curLevelSize-- > 0)
+            {
+                TreeNode* node = dq.front();
+                dq.pop();
+                if (node->left != nullptr)
+                    dq.push(node->left);
+                if (node->right != nullptr)
+                    dq.push(node->right);
+            }
+            ++level;
+        }
+        return level;
+    }
+};
+```
+
+
+
+
+
 ## 0118. 杨辉三角
 
 ### 题目：
