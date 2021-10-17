@@ -11041,6 +11041,116 @@ public:
 
 
 
+## 0112. 路经总和
+
+### 题目：
+
+给你二叉树的根节点 `root` 和一个表示目标和的整数 `targetSum` ，判断该树中是否存在 **根节点到叶子节点** 的路径，这条路径上所有节点值相加等于目标和 `targetSum` 。
+
+**叶子节点** 是指没有子节点的节点。
+
+**示例 1：**
+
+![leetcode_112_1](F:\C++\刷题\Img\leetcode_112_1.jpg)
+
+```
+输入：root = [5,4,8,11,null,13,4,7,2,null,null,null,1], targetSum = 22
+输出：true
+```
+
+**示例 2：**
+
+![leetcode_112_2](F:\C++\刷题\Img\leetcode_112_2.jpg)
+
+```
+输入：root = [1,2,3], targetSum = 5
+输出：false
+```
+
+**示例 3：**
+
+```
+输入：root = [1,2], targetSum = 0
+输出：false
+```
+
+**提示：**
+
+- 树中节点的数目在范围 `[0, 5000]` 内
+- `-1000 <= Node.val <= 1000`
+- `-1000 <= targetSum <= 1000`
+
+**解题思路：**
+
+思路一：BFS
+
+使用两个队列，一个记录广度遍历到当前节点的节点，另一个记录遍历到当前节点的路径和
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(height)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool hasPathSum(TreeNode* root, int targetSum) {
+        if (root == nullptr)
+            return false;
+        
+        queue<TreeNode*> dqNode;
+        queue<int> dqVal;
+        dqNode.push(root);
+        dqVal.push(root->val);
+
+        while (!dqNode.empty())
+        {
+            TreeNode* node = dqNode.front();
+            dqNode.pop();
+            int curSum = dqVal.front();
+            dqVal.pop();
+            if (node->left == nullptr && node->right == nullptr && curSum == targetSum)
+                return true;
+            
+            if (node->left != nullptr)
+                dqNode.push(node->left), dqVal.push(curSum + node->left->val);
+            if (node->right != nullptr)
+                dqNode.push(node->right), dqVal.push(curSum + node->right->val);
+        }
+        return false;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool hasPathSum(TreeNode* root, int targetSum) {
+        if (root == nullptr)
+            return false;
+        
+        if (root->left == nullptr && root->right == nullptr)
+            return targetSum - root->val == 0;
+        return hasPathSum(root->left, targetSum - root->val) || hasPathSum(root->right, targetSum - root->val);
+    }
+};
+```
+
+
+
+
+
 ## 0118. 杨辉三角
 
 ### 题目：
@@ -11804,6 +11914,77 @@ public:
             us.insert(x);
         }
         return false;
+    }
+};
+```
+
+
+
+
+
+## 0226. 翻转二叉树
+
+### 题目：
+
+翻转一棵二叉树。
+
+**示例：**
+
+输入：
+
+```
+	 4
+   /   \
+  2     7
+ / \   / \
+1   3 6   9
+```
+
+输出：
+
+```
+	 4
+   /   \
+  7     2
+ / \   / \
+9   6 3   1
+```
+
+**解题思路：**
+
+递归：
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* invertTree(TreeNode* root) {
+        if (root == nullptr)
+            return root;
+        
+        TreeNode* L = invertTree(root->left);
+        TreeNode* R = invertTree(root->right);
+
+        root->left = R;
+        root->right = L;
+
+        return root;
     }
 };
 ```
