@@ -10776,6 +10776,109 @@ public:
 
 
 
+## 0098. 验证二叉搜索树
+
+### 题目：
+
+给你一个二叉树的根节点 `root` ，判断其是否是一个有效的二叉搜索树。
+
+**有效** 二叉搜索树定义如下：
+
+- 节点的左子树只包含 **小于** 当前节点的数。
+- 节点的右子树只包含 **大于** 当前节点的数。
+- 所有左子树和右子树自身必须也是二叉搜索树。
+
+**示例 1：**
+
+![leetcode_98_1](F:\C++\刷题\Img\leetcode_98_1.jpg)
+
+```
+输入：root = [2,1,3]
+输出：true
+```
+
+**示例 2：**
+
+![leetcode_98_2](F:\C++\刷题\Img\leetcode_98_2.jpg)
+
+```
+输入：root = [5,1,4,null,null,3,6]
+输出：false
+解释：根节点的值是 5 ，但是右子节点的值是 4 。
+```
+
+**提示：**
+
+- 树中节点数目范围在`[1, 10^4]` 内
+- `-2^31 <= Node.val <= 2^31 - 1`
+
+
+
+**解题思路：**
+
+思路一：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：中序遍历
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool isValidBST(TreeNode* root) {
+        return helper(root, LONG_MIN, LONG_MAX);
+    }
+    bool helper(TreeNode* node, long long lower, long long upper)
+    {
+        if (node == nullptr)
+            return true;
+        if (node->val <= lower || node->val >= upper)
+            return false;
+        return helper(node->left, lower, node->val) && helper(node->right, node->val, upper);
+    }
+};
+```
+
+**思路二：**
+
+```c++
+class Solution {
+public:
+    bool isValidBST(TreeNode* root) {
+        stack<TreeNode*> st;
+        long long flag = (long long)INT_MIN - 1;
+        while (!st.empty() || root != nullptr)
+        {
+            while (root != nullptr)
+            {
+                st.push(root);
+                root = root->left;
+            }
+
+            root = st.top(), st.pop();
+            if (root->val <= flag)
+                return false;
+
+            flag = root->val;
+            root = root->right;
+        }
+        return true;
+    }
+};
+```
+
+
+
+
+
 ## 0101. 对称二叉树
 
 ### 题目：
@@ -12118,6 +12221,117 @@ public:
 
 
 
+## 0235. 二叉搜索树的最近公共祖先
+
+### 题目：
+
+给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先。
+
+**百度百科**中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（**一个节点也可以是它自己的祖先**）。”
+
+例如，给定如下二叉搜索树:  root = [6,2,8,0,4,7,9,null,null,3,5]
+
+![leetcode_235](F:\C++\刷题\Img\leetcode_235.png)
+
+**示例 1:**
+
+```
+输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
+输出: 6 
+解释: 节点 2 和节点 8 的最近公共祖先是 6。
+```
+
+**示例 2:**
+
+```
+输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4
+输出: 2
+解释: 节点 2 和节点 4 的最近公共祖先是 2, 因为根据定义最近公共祖先节点可以为节点本身。
+```
+
+**说明:**
+
+- 所有节点的值都是唯一的。
+- `p、q` 为不同节点且均存在于给定的二叉搜索树中。
+
+**解题思路：**
+
+思路一：两次遍历
+
+获得两个结点的路径，从头至尾找到第一个不相同的节点的前一个
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：一次遍历
+
+从根节点出发，若两个节点都在左分支，往左走，若都在右分支，往右走，其他的，返回当前节点
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        vector<TreeNode*> path_p = getPath(root, p);
+        vector<TreeNode*> path_q = getPath(root, q);
+
+        int i = 0;
+        for (; i < path_p.size() && i < path_q.size(); ++i)
+        {
+            if (path_p[i] != path_q[i])
+                break;
+        }
+        return path_p[i - 1];
+    }
+
+    vector<TreeNode*> getPath(TreeNode* root, TreeNode* p)
+    {
+        vector<TreeNode*> path;
+        while (root->val != p->val)
+        {
+            path.push_back(root);
+            if (root->val > p->val)
+                root = root->left;
+            else
+                root = root->right;
+        }
+        path.push_back(root);
+        return path;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        TreeNode* ancestor = root;
+        while (ancestor != NULL)
+        {
+            if (ancestor->val > p->val && ancestor->val > q->val)
+                ancestor = ancestor->left;
+            else if (ancestor->val < p->val && ancestor->val < q->val)
+                ancestor = ancestor->right;
+            else
+                break;
+        }
+        return ancestor;
+    }
+};
+```
+
+
+
+
+
 ## 0242. 有效的字母异位词
 
 ### 题目：
@@ -12584,6 +12798,152 @@ public:
         for (int x = 0; x < m * n; ++x)
             res[x / c][x % c] = mat[x / n][x % n];
         return res;
+    }
+};
+```
+
+
+
+
+
+## 0653. 两数之和 IV - 输入 BST
+
+### 题目：
+
+给定一个二叉搜索树 `root` 和一个目标结果 `k`，如果 BST 中存在两个元素且它们的和等于给定的目标结果，则返回 `true`。
+
+**示例 1：**
+
+![leetcode_653_1](F:\C++\刷题\Img\leetcode_653_1.jpg)
+
+```
+输入: root = [5,3,6,2,4,null,7], k = 9
+输出: true
+```
+
+**示例 2：**
+
+![leetcode_653_2](F:\C++\刷题\Img\leetcode_653_2.jpg)
+
+```
+输入: root = [5,3,6,2,4,null,7], k = 28
+输出: false
+```
+
+**示例 3：**
+
+```
+输入: root = [2,1,3], k = 4
+输出: true
+```
+
+**示例 4：**
+
+```
+输入: root = [2,1,3], k = 1
+输出: false
+```
+
+**示例 5：**
+
+```
+输入: root = [2,1,3], k = 3
+输出: true
+```
+
+**提示:**
+
+- 二叉树的节点个数的范围是  `[1, 10^4]`.
+- `-10^4 <= Node.val <= 10^4`
+- `root` 为二叉搜索树
+- `-10^5 <= k <= 10^5`
+
+
+
+**解题思路：**
+
+思路一：BFS + 数组
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：任意一种遍历 + hash表
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool findTarget(TreeNode* root, int k) {
+        vector<int> v;
+        inorder(root, v);
+        int l = 0, r = v.size() - 1;
+        while (l < r)
+        {
+            if (v[l] + v[r] == k)
+                return true;
+            else if (v[l] + v[r] < k)
+                ++l;
+            else
+                --r;
+        }
+        return false;
+    }
+
+    void inorder(TreeNode* root, vector<int>& res) {
+        if (root == nullptr)
+            return;
+        inorder(root->left, res);
+        res.push_back(root->val);
+        inorder(root->right, res);
+    }
+
+	// 非递归的超时
+    void inorderTraversal(TreeNode* node, vector<int>& res)
+    {
+        stack<TreeNode*> st;
+        while (!st.empty() || node != nullptr)
+        {
+            while (node != nullptr)
+            {
+                st.push(node);
+                node = node->left;
+            }
+            node = st.top(), st.pop();
+            res.push_back(node->val);
+            if (node->right != nullptr)
+                node = node->right;
+        }
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool findTarget(TreeNode* root, int k) {
+        unordered_map<int, TreeNode*> m;
+        stack<TreeNode*> st;
+        st.push(root);
+        while (!st.empty())
+        {
+            TreeNode* node = st.top();
+            st.pop();
+            if (m.count(k - node->val) != 0 && node != m[k - node->val])
+                return true;
+            m.insert(make_pair(node->val, node));
+
+            if (node->left != nullptr) st.push(node->left);
+            if (node->right != nullptr) st.push(node->right);
+        }
+        return false;
     }
 };
 ```
