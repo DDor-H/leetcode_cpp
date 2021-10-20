@@ -9995,6 +9995,16 @@ public:
 
 
 
+## 0015. 三数之和
+
+### 题目：
+
+同Array模块的15题
+
+
+
+
+
 ## 0020. 有效的括号
 
 ### 题目：
@@ -11274,6 +11284,57 @@ public:
 
 
 
+## 0136. 只出现一次的数字
+
+### 题目：
+
+给定一个**非空**整数数组，除了某个元素只出现一次以外，其余每个元素均出现两次。找出那个只出现了一次的元素。
+
+说明：
+
+你的算法应该具有线性时间复杂度。 你可以不使用额外空间来实现吗？
+
+**示例 1:**
+
+```
+输入: [2,2,1]
+输出: 1
+```
+
+**示例 2:**
+
+```
+输入: [4,1,2,1,2]
+输出: 4
+```
+
+**解题思路：**
+
+所有数都异或在一起
+
+时间复杂度：O(n)
+
+空间复杂度：O(1）
+
+**方法：**
+
+```c++
+class Solution {
+public:
+//异或方式
+    int singleNumber(vector<int>& nums) {
+        int tmp = 0;
+        for (const auto& e : nums)
+            tmp ^= e;
+        return tmp;
+    }
+};
+```
+
+
+
+
+
 ## 0141. 环形链表
 
 ### 题目：
@@ -11661,6 +11722,163 @@ public:
 ```
 
 
+
+
+
+## 0169. 多数元素
+
+给定一个大小为 n 的数组，找到其中的多数元素。多数元素是指在数组中出现次数 **大于 ⌊ n/2 ⌋** 的元素。
+
+你可以假设数组是非空的，并且给定的数组总是存在多数元素。
+
+**示例 1：**
+
+```
+输入：[3,2,3]
+输出：3
+```
+
+**示例 2：**
+
+```
+输入：[2,2,1,1,1,2,2]
+输出：2
+```
+
+**进阶：**
+
+- 尝试设计时间复杂度为 O(n)、空间复杂度为 O(1) 的算法解决此问题。
+
+**解题思路：**
+
+思路一：hash表
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：Boyer-Moore 投票算法
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+思路三：排序
+
+时间复杂度：O(nlogn)
+
+空间复杂度：O(logn)
+
+思路四：分治法
+
+时间复杂度：O(nlogn)
+
+空间复杂度：O(logn)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int majorityElement(vector<int>& nums) {
+        unordered_map<int, int> m;
+        for (auto & e : nums)
+        {
+            if (m.count(e) == 0)
+                m.insert(make_pair(e, 1));
+            else
+                ++m[e];
+        }
+        int max_value = INT_MIN;
+        int max_count = INT_MIN;
+        for (auto it = m.begin(); it != m.end(); ++it)
+        {
+            if (it->second > max_count)
+            {
+                max_count = it->second;
+                max_value = it->first;
+            }
+        }
+        return max_value;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int majorityElement(vector<int>& nums) {
+        int max_value = nums[0];
+        int max_count = 1;
+        for (int i = 1; i < nums.size(); ++i)
+        {
+            if (nums[i] == max_value)
+                ++max_count;
+            else
+                --max_count;
+            
+            if (max_count < 0)
+            {
+                max_count = 1;
+                max_value = nums[i];
+            }
+        }
+        return max_value;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    int majorityElement(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
+        return nums[nums.size() / 2];
+    }
+};
+```
+
+**方法四：**
+
+```c++
+class Solution {
+public:
+    int majorityElement(vector<int>& nums) {
+        return majority_element_rec(nums, 0, nums.size() - 1);
+    }
+
+    int majority_element_rec(vector<int>& nums, int lo, int hi) 
+    {
+        if (lo == hi)
+            return nums[lo];
+        int mid = ((lo + hi) >> 1);
+        int left_majority = majority_element_rec(nums, lo, mid);
+        int right_majority = majority_element_rec(nums, mid + 1, hi);
+        if (count_in_range(nums, left_majority, lo, hi) > (hi - lo + 1) / 2)
+            return left_majority;
+        if (count_in_range(nums, right_majority, lo, hi) > (hi - lo + 1) / 2)
+            return right_majority;
+        return -1;
+    }
+
+    int count_in_range(vector<int>& nums, int target, int lo, int hi) 
+    {
+        int count = 0;
+        for (int i = lo; i <= hi; ++i)
+        {
+            if (nums[i] == target)
+                ++count;
+        }
+        return count;
+    }
+};
+```
 
 
 
