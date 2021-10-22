@@ -4295,6 +4295,119 @@ public:
 
 
 
+## 0079. 单词搜索
+
+### 题目：
+
+给定一个 `m x n` 二维字符网格 `board` 和一个字符串单词 `word` 。如果 `word` 存在于网格中，返回 `true` ；否则，返回 `false` 。
+
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
+
+**示例 1：**
+
+![leetcode_79_1](F:\C++\刷题\Img\leetcode_79_1.jpg)
+
+```
+输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCCED"
+输出：true
+```
+
+**示例 2：**
+
+![leetcode_79_2](F:\C++\刷题\Img\leetcode_79_2.jpg)
+
+```
+输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "SEE"
+输出：true
+```
+
+**示例 3：**
+
+![leetcode_79_3](F:\C++\刷题\Img\leetcode_79_3.jpg)
+
+```
+输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCB"
+输出：false
+```
+
+**提示：**
+
+- `m == board.length`
+- `n = board[i].length`
+- `1 <= m, n <= 6`
+- `1 <= word.length <= 15`
+- `board` 和 `word` 仅由大小写英文字母组成
+
+
+
+**解题思路：**
+
+递归 + 回溯
+
+时间复杂度：O(mn *  3 ^ len)
+
+空间复杂度：O(mn)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    bool exist(vector<vector<char>>& board, string word) {
+        int m = board.size();
+        int n = board[0].size();
+        vector<vector<bool>> visited(m, vector<bool>(n, false));
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (check(board, visited, i, j, word, 0))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    bool check(vector<vector<char>>& board, vector<vector<bool>>& visited, int i, int j, string& word, int idx)
+    {
+        if (word[idx] != board[i][j])
+            return false;
+        else if (idx == word.length() - 1)
+            return true;
+        
+        visited[i][j] = true;
+        vector<pair<int, int>> directions{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        bool result = false;
+        for (const auto & dir : directions)
+        {
+            int newi = i + dir.first;
+            int newj = j + dir.second;
+            if (newi >= 0 && newi < board.size() && newj >= 0 && newj < board[0].size())
+            {
+                if (!visited[newi][newj] && check(board, visited, newi, newj, word, idx + 1))
+                {
+                    /*
+                    bool flag = check(board, visited, newi, newj, word, idx + 1);
+                    if (flag) {
+                        result = true;
+                        break;
+                    }
+                    */
+                    result = true;
+                    break;
+                }
+            }
+        }
+        visited[i][j] = false;
+        return result;
+    }
+};
+```
+
+
+
+
+
 ## 0084. 柱状图中最大的矩形
 
 ### 题目：
@@ -10389,6 +10502,16 @@ public:
 
 
 
+## 0048. 旋转图像
+
+### 题目：
+
+同Array模块的48题
+
+
+
+
+
 ## 0053. 最大子序和
 
 ### 题目：
@@ -10404,6 +10527,16 @@ public:
 ### 题目：
 
 同Array模块的56题
+
+
+
+
+
+## 0059. 螺旋矩阵Ⅱ
+
+### 题目：
+
+同Array模块的59题
 
 
 
@@ -11289,6 +11422,16 @@ public:
 ### 题目：
 
 同动态规划模块118题
+
+
+
+
+
+## 0119. 杨辉三角Ⅱ
+
+### 题目：
+
+同动态规划模块119题
 
 
 
