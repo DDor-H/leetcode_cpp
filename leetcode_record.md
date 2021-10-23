@@ -12713,6 +12713,154 @@ public:
 
 
 
+## 0240. 搜索二维矩阵Ⅱ
+
+### 题目：
+
+编写一个高效的算法来搜索 `m x n` 矩阵 `matrix` 中的一个目标值 `target` 。该矩阵具有以下特性：
+
+- 每行的元素从左到右升序排列。
+- 每列的元素从上到下升序排列。
+
+**示例 1：**
+
+![leetcode_240](F:\C++\刷题\Img\leetcode_240.jpg)
+
+```
+输入：matrix = [[1,4,7,11,15],[2,5,8,12,19],[3,6,9,16,22],[10,13,14,17,24],[18,21,23,26,30]], target = 5
+输出：true
+```
+
+**示例 2：**
+
+![leetcode_240_1](F:\C++\刷题\Img\leetcode_240_1.jpg)
+
+```
+输入：matrix = [[1,4,7,11,15],[2,5,8,12,19],[3,6,9,16,22],[10,13,14,17,24],[18,21,23,26,30]], target = 20
+输出：false
+```
+
+**提示：**
+
+- `m == matrix.length`
+- `n == matrix[i].length`
+- `1 <= n, m <= 300`
+- `-10^9 <= matrix[i][j] <= 10^9`
+- 每行的所有元素从左到右升序排列
+- 每列的所有元素从上到下升序排列
+- `-10^9 <= target <= 10^9`
+
+
+
+**解题思路：**
+
+思路一：暴力解法
+
+时间复杂度：O(mn)
+
+空间复杂度：O(1)
+
+思路二：二分查找法
+
+时间复杂度：O(mlogn)
+
+空间复杂度：O(1)
+
+思路三：Z字形查找法
+
+越界就表示未查到
+
+时间复杂度：O(n + m)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        int m = matrix.size();
+        int n = matrix[0].size();
+
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (matrix[i][j] == target)
+                    return true;
+            }
+        }
+        return false;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        int m = matrix.size();
+        int n = matrix[0].size();
+
+        for (int i = 0; i < m; ++i)
+        {
+            if (binFind(matrix[i], target))
+                return true;
+        }
+        return false;
+    }
+
+    bool binFind(vector<int>& v, int target)
+    {
+        return _binFind(v, target, 0, v.size() - 1);
+    }
+
+    bool _binFind(vector<int>& v, int target, int left, int right)
+    {
+        if (left > right)
+            return false;
+        int mid = ((left + right) >> 1);
+        if (v[mid] == target)
+            return true;
+        else if (v[mid] > target)
+            return _binFind(v, target, left, mid - 1);
+        else
+            return _binFind(v, target, mid + 1, right);
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        int m = matrix.size();
+        int n = matrix[0].size();
+
+        int i = 0, j = n - 1;
+        while (i < m && j >= 0)
+        {
+            if (matrix[i][j] == target)
+                return true;
+            else if (matrix[i][j] > target)
+                --j;
+            else
+                ++i;
+        }
+        return false;
+    }
+};
+```
+
+
+
+
+
 ## 0242. 有效的字母异位词
 
 ### 题目：
@@ -13105,6 +13253,126 @@ public:
                 return i;
         }
         return -1;
+    }
+};
+```
+
+
+
+
+
+## 0435. 无重叠区间
+
+### 题目：
+
+给定一个区间的集合，找到需要移除区间的最小数量，使剩余区间互不重叠。
+
+**注意:**
+
+1. 可以认为区间的终点总是大于它的起点。
+2. 区间 [1,2] 和 [2,3] 的边界相互“接触”，但没有相互重叠。
+
+**示例 1:**
+
+```
+输入: [ [1,2], [2,3], [3,4], [1,3] ]
+
+输出: 1
+
+解释: 移除 [1,3] 后，剩下的区间没有重叠。
+```
+
+**示例 2:**
+
+```
+输入: [ [1,2], [1,2], [1,2] ]
+
+输出: 2
+
+解释: 你需要移除两个 [1,2] 来使剩下的区间没有重叠。
+```
+
+**示例 3:**
+
+```
+输入: [ [1,2], [2,3] ]
+
+输出: 0
+
+解释: 你不需要移除任何区间，因为它们已经是无重叠的了。
+```
+
+**解题思路：**
+
+思路一：
+
+[动态规划](https://leetcode-cn.com/problems/non-overlapping-intervals/solution/wu-zhong-die-qu-jian-by-leetcode-solutio-cpsb/)
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n)
+
+思路二：
+
+[贪心算法](https://leetcode-cn.com/problems/non-overlapping-intervals/solution/wu-zhong-die-qu-jian-by-leetcode-solutio-cpsb/)
+
+时间复杂度：O(nlogn)  排序的
+
+空间复杂度：O(logn)  排序的
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int eraseOverlapIntervals(vector<vector<int>>& intervals) {
+        if (intervals.empty())
+            return 0;
+        sort(intervals.begin(), intervals.end(), [](const auto& u, const auto& v){
+            return u[0] < v[0];
+        });
+
+        int n = intervals.size();
+        vector<int> bp(n, 1);
+        for (int i = 1; i < n; ++i)
+        {
+            for (int j = 0; j < i; ++j)
+            {
+                if (intervals[j][1] <= intervals[i][0])
+                {
+                    bp[i] = max(bp[i], bp[j] + 1);
+                }
+            }
+        }
+        return n - *max_element(bp.begin(), bp.end());
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int eraseOverlapIntervals(vector<vector<int>>& intervals) {
+        if (intervals.empty())
+            return 0;
+        sort(intervals.begin(), intervals.end(), [](const auto& u, const auto& v){
+            return u[1] < v[1];
+        });
+
+        int n = intervals.size();
+        int end = INT_MIN;
+        int ans = 0;
+        for (int i = 0; i < n; ++i)
+        {
+            if (intervals[i][0] >= end)
+            {
+                end = intervals[i][1];
+                ++ans;
+            }
+        }
+        return n - ans;
     }
 };
 ```
