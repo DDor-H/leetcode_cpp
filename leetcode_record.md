@@ -12713,6 +12713,55 @@ public:
 
 
 
+## 0238. 除自身以外数组的乘积
+
+### 题目：
+
+给你一个长度为 `n` 的整数数组 `nums`，其中 `n > 1`，返回输出数组 `output` ，其中 `output[i]` 等于 `nums` 中除 `nums[i]` 之外其余各元素的乘积。
+
+**示例:**
+
+```
+输入: [1,2,3,4]
+输出: [24,12,8,6]
+```
+
+
+**提示**：题目数据保证数组之中任意元素的全部前缀元素和后缀（甚至是整个数组）的乘积都在 32 位整数范围内。
+
+说明: 请不要使用除法，且在 O(n) 时间复杂度内完成此题。
+
+**解题思路：**
+
+[左右前后缀之积](https://leetcode-cn.com/problems/product-of-array-except-self/solution/chu-zi-shen-yi-wai-shu-zu-de-cheng-ji-by-leetcode-/)
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+```c++
+class Solution {
+public:
+    vector<int> productExceptSelf(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> ans(n, 1);
+        int left = 1, right = 1;
+        for (int i = 1; i < n; ++i)
+        {
+            left *= nums[i - 1];
+            ans[i] *= left;
+            right *= nums[n - i];
+            ans[n - i - 1] *= right;
+        }
+        return ans;
+    }
+};
+```
+
+
+
+
+
 ## 0240. 搜索二维矩阵Ⅱ
 
 ### 题目：
@@ -12948,6 +12997,172 @@ public:
         }
 
         return true;
+    }
+};
+```
+
+
+
+
+
+## 0334. 递增的三元子序列
+
+### 题目：
+
+给你一个整数数组 `nums` ，判断这个数组中是否存在长度为 `3` 的递增子序列。
+
+如果存在这样的三元组下标 `(i, j, k)` 且满足 `i < j < k` ，使得 `nums[i] < nums[j] < nums[k]` ，返回 `true` ；否则，返回 `false` 。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [1,2,3,4,5]
+输出：true
+解释：任何 i < j < k 的三元组都满足题意
+```
+
+**示例 2：**
+
+```
+输入：nums = [5,4,3,2,1]
+输出：false
+解释：不存在满足题意的三元组
+```
+
+**示例 3：**
+
+```
+输入：nums = [2,1,5,0,4,6]
+输出：true
+解释：三元组 (3, 4, 5) 满足题意，因为 nums[3] == 0 < nums[4] == 4 < nums[5] == 6
+```
+
+**提示：**
+
+- `1 <= nums.length <= 10^5`
+- `-2^31 <= nums[i] <= 2^31 - 1`
+
+**解题思路：**
+
+思路一：双指针
+
+首先，新建两个变量 `small` 和 `mid` ，分别用来保存题目要我们求的长度为 3 的递增子序列的**最小值**和**中间值**。
+
+接着，我们遍历数组，每遇到一个数字，我们将它和 `small` 和 `mid` 相比：
+
+- 若小于等于 `small` ，则替换 `small`；
+
+- 若小于等于 `mid`，则替换 `mid`；
+
+- 若大于 `mid`，则说明我们找到了长度为 3 的递增数组！
+
+上面的求解过程中有个问题：当已经找到了长度为 2 的递增序列，这时又来了一个比 `small` 还小的数字，为什么可以直接替换 `small` 呢，这样 `small` 和 `mid` 在原数组中并不是按照索引递增的关系呀？
+
+Trick 就在这里了！假如当前的 `small` 和 `mid` 为 [3, 5]，这时又来了个 1。假如我们不将 `small` 替换为 1，那么，当下一个数字是 2，后面再接上一个 3 的时候，我们就没有办法发现这个 [1,2,3] 的递增数组了！也就是说，我们替换最小值，是为了后续能够更好地更新中间值！
+
+另外，即使我们更新了 `small` ，这个 `small` 在 `mid` 后面，没有严格遵守递增顺序，但它隐含着的真相是，`有一个比 small 大比 mid 小的前·最小值出现在 mid 之前`。因此，当后续出现比 mid 大的值的时候，我们一样可以通过当前 `small` 和 `mid` 推断的确存在着长度为 3 的递增序列。 所以，这样的替换并不会干扰我们后续的计算！
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+思路二：双指针 + 可以返回是哪三个
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+思路三：动态规划（超时）
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool increasingTriplet(vector<int>& nums) {
+        int n = nums.size();
+        if (n < 3)
+            return false;
+        int small = INT_MAX, mid = INT_MAX;
+        for (auto& e : nums)
+        {
+            if (e <= small)
+                small = e;
+            else if (e <= mid)
+                mid = e;
+            else
+                return true;
+        }
+        return false;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool increasingTriplet(vector<int>& nums) {
+        int n = nums.size();
+        if (n < 3)
+            return false;
+        int small = nums[0], mid = nums[0];
+        int length = 1;
+        for (int i = 1; i < n; ++i)
+        {
+            if (mid < nums[i])
+            {
+                // small、mid、*
+                if (++length == 3)
+                    return true;
+                mid = nums[i];
+            }
+            else if (small < nums[i])
+                // small、*、mid
+                mid = nums[i];
+            else if (i + 1 < n && nums[i] < nums[i + 1] && nums[i + 1] <= mid)
+            {
+                // 前提是 *、small、mid
+                // 条件 *、* + 1 整体小于 small、mid
+                small = mid = nums[i];
+                length = 1;
+            }
+        }
+        return false;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    bool increasingTriplet(vector<int>& nums) {
+        int n = nums.size();
+        if (n < 3)
+            return false;
+        vector<int> dp(n, 1);
+        for (int i = 1; i < n; ++i)
+        {
+            for (int j = 0; j < i; ++j)
+            {
+                if (nums[j] < nums[i])
+                {
+                    dp[i] = max(dp[i], dp[j] + 1);
+                    if (dp[i] >= 3)
+                        return true;
+                }                    
+            }
+        }
+        return false;
     }
 };
 ```
@@ -13373,6 +13588,138 @@ public:
             }
         }
         return n - ans;
+    }
+};
+```
+
+
+
+
+
+## 0560. 和为K的子数组
+
+### 题目：
+
+给你一个整数数组 `nums` 和一个整数 `k` ，请你统计并返回该数组中和为 `k` 的连续子数组的个数。
+
+**示例 1：**
+
+```
+输入：nums = [1,1,1], k = 2
+输出：2
+```
+
+**示例 2：**
+
+```
+输入：nums = [1,2,3], k = 3
+输出：2
+```
+
+**提示：**
+
+- `1 <= nums.length <= 2 * 10^4`
+- `-1000 <= nums[i] <= 1000`
+- `-10^7 <= k <= 10^7`
+
+
+
+**解题思路：**
+
+思路一：暴力解法
+
+找到所有的连续子序列的和
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(1)
+
+思路二：前缀和
+
+求一个前缀和数组，判断任意两个位置的前缀和是否相差为k
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n)
+
+思路三：hash表 优化 前缀和
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int subarraySum(vector<int>& nums, int k) {
+        int n = nums.size();
+        int count = 0;
+        for (int i = 0; i < n; ++i)
+        {
+            int sum = 0;
+            for (int j = i; j < n; ++j)
+            {
+                sum += nums[j];
+                if (sum == k)
+                    ++count;
+            }
+        }
+        return count;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int subarraySum(vector<int>& nums, int k) {
+        int n = nums.size();
+        if (n == 1)
+            return (k == nums[0] ? 1 : 0);
+        vector<int> preSum(nums);
+        int count = 0;
+        // 计算前缀和
+        for (int i = 1; i < n; ++i)
+            preSum[i] += preSum[i - 1];
+
+        for (int i = 0; i < n; ++i)
+        {
+            if (preSum[i] == k)
+                ++count;
+            for (int j = 0; j < i; ++j)
+            {
+                if (preSum[i] - preSum[j] == k)
+                    ++count;
+            }
+        }
+        return count;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    int subarraySum(vector<int>& nums, int k) {
+        int n = nums.size();
+        unordered_map<int, int> map;
+        map[0] = 1;
+        int count = 0, preSum = 0;
+        for (auto& e : nums)
+        {
+            // 边计算前缀和，边查找是否包含preSum - k的数量
+            preSum += e;
+            if (map.find(preSum - k) != map.end())
+                count += map[preSum - k];
+            ++map[preSum];  // 有负数，可能前缀和会变小
+        }
+        return count;
     }
 };
 ```
