@@ -4408,6 +4408,191 @@ public:
 
 
 
+## 0080. 删除有序数组中的重复项Ⅱ
+
+### 题目：
+
+给你一个有序数组 `nums` ，请你 **原地** 删除重复出现的元素，使每个元素 **最多出现两次** ，返回删除后数组的新长度。
+
+不要使用额外的数组空间，你必须在 **原地 修改输入数组** 并在使用 `O(1)` 额外空间的条件下完成。
+
+**说明：**
+
+为什么返回数值是整数，但输出的答案是数组呢？
+
+请注意，输入数组是以**「引用」**方式传递的，这意味着在函数里修改输入数组对于调用者是可见的。
+
+你可以想象内部操作如下:
+
+```
+// nums 是以“引用”方式传递的。也就是说，不对实参做任何拷贝
+int len = removeDuplicates(nums);
+
+// 在函数里修改输入数组对于调用者是可见的。
+// 根据你的函数返回的长度, 它会打印出数组中 该长度范围内 的所有元素。
+for (int i = 0; i < len; i++) {
+    print(nums[i]);
+}
+```
+
+**示例 1：**
+
+```
+输入：nums = [1,1,1,2,2,3]
+输出：5, nums = [1,1,2,2,3]
+解释：函数应返回新长度 length = 5, 并且原数组的前五个元素被修改为 1, 1, 2, 2, 3 。 不需要考虑数组中超出新长度后面的元素。
+```
+
+**示例 2：**
+
+```
+输入：nums = [0,0,1,1,1,1,2,3,3]
+输出：7, nums = [0,0,1,1,2,3,3]
+解释：函数应返回新长度 length = 7, 并且原数组的前五个元素被修改为 0, 0, 1, 1, 2, 3, 3 。 不需要考虑数组中超出新长度后面的元素。
+```
+
+
+**提示：**
+
+- `1 <= nums.length <= 3 * 10^4`
+- `-10^4 <= nums[i] <= 10^4`
+- `nums` 已按升序排列
+
+**解题思路：**
+
+双指针
+
+快慢指针都从下标 2 开始，如果 right != left - 2，则表示还没累计两个相同字符
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        int n = nums.size();
+        if (n < 3)
+            return n;
+        int left = 2, right = 2;
+        while (right < n)
+        {
+            if (nums[right] != nums[left - 2])
+            {
+                nums[left] = nums[right];
+                ++left;
+            }
+            ++right;
+        }
+        return left;
+    }
+};
+```
+
+
+
+
+
+## 0081. 搜索旋转排序数组Ⅱ
+
+### 题目：
+
+已知存在一个按非降序排列的整数数组 `nums` ，数组中的值不必互不相同。
+
+在传递给函数之前，`nums` 在预先未知的某个下标 `k（0 <= k < nums.length）`上进行了 **旋转** ，使数组变为 `[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]`（下标 **从 0 开始** 计数）。例如， `[0,1,2,4,4,4,5,6,6,7]` 在下标 `5` 处经旋转后可能变为 `[4,5,6,6,7,0,1,2,4,4]` 。
+
+给你 **旋转后** 的数组 `nums` 和一个整数 `target` ，请你编写一个函数来判断给定的目标值是否存在于数组中。如果 `nums` 中存在这个目标值 `target` ，则返回 `true` ，否则返回 `false` 。
+
+**示例 1：**
+
+```
+输入：nums = [2,5,6,0,0,1,2], target = 0
+输出：true
+```
+
+**示例 2：**
+
+```
+输入：nums = [2,5,6,0,0,1,2], target = 3
+输出：false
+```
+
+**提示：**
+
+- `1 <= nums.length <= 5000`
+- `-10^4 <= nums[i] <= 10^4`
+- 题目数据保证 `nums` 在预先未知的某个下标上进行了旋转
+- `-10^4 <= target <= 10^4`
+
+
+
+**解题思路：**
+
+思路一：循环
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+思路二：二分查找法
+
+时间复杂度：O(logn)
+
+空间复杂度：O(1)
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    bool search(vector<int>& nums, int target) {
+        int n = nums.size();
+        if (n == 0)
+            return false;
+        if (n == 1)
+            return nums[0] == target;
+        
+        int left = 0, right = n - 1;
+        while (left <= right)
+        {
+            int mid = ((left + right) >> 1);
+            if (nums[mid] == target)
+                return true;
+
+            if (nums[left] == nums[mid] && nums[mid] == nums[right])
+            {
+                ++left;
+                --right;
+            }
+            else if (nums[mid] >= nums[left])
+            {
+                if (target >= nums[left] && target < nums[mid])
+                    right = mid - 1;
+                else
+                    left = mid + 1;
+            }
+            else
+            {
+                if (target > nums[mid] && target <= nums[right])
+                    left = mid + 1;
+                else
+                    right = mid - 1;
+            }
+        }
+        return false;
+    }
+};
+```
+
+
+
+
+
 ## 0084. 柱状图中最大的矩形
 
 ### 题目：
@@ -13468,6 +13653,169 @@ public:
                 return i;
         }
         return -1;
+    }
+};
+```
+
+
+
+
+
+## 0409. 最长回文串
+
+### 题目：
+
+给定一个包含大写字母和小写字母的字符串，找到通过这些字母构造成的最长的回文串。
+
+在构造过程中，请注意区分大小写。比如 "Aa" 不能当做一个回文字符串。
+
+**注意:**
+假设字符串的长度不会超过 1010。
+
+**示例 1:**
+
+```
+输入:
+"abccccdd"
+
+输出:
+7
+
+解释:
+我们可以构造的最长的回文串是"dccaccd", 它的长度是 7。
+```
+
+**解题思路：**
+
+累加所有偶数数量，再加上奇数 - 1 的数量，若存在奇数，再加 1；
+
+时间复杂度：O(n)
+
+空间复杂度：O(n) 
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int longestPalindrome(string s) {
+        unordered_map<char, int> map;
+        for (auto& e : s)
+            ++map[e];
+        int exist_odd = false;
+        int res = 0;
+        for (auto& e : map)
+        {
+            if (e.second % 2 == 0)
+                res += e.second;
+            else 
+            {
+                res += e.second / 2 * 2;
+                exist_odd = true;
+            }
+        }
+        res += exist_odd ? 1 : 0;
+        return res;
+    }
+};
+```
+
+
+
+
+
+## 0415. 字符串相加
+
+### 题目：
+
+给定两个字符串形式的非负整数 `num1` 和`num2` ，计算它们的和并同样以字符串形式返回。
+
+你不能使用任何內建的用于处理大整数的库（比如 `BigInteger`）， 也不能直接将输入的字符串转换为整数形式。
+
+**示例 1：**
+
+```
+输入：num1 = "11", num2 = "123"
+输出："134"
+```
+
+**示例 2：**
+
+```
+输入：num1 = "456", num2 = "77"
+输出："533"
+```
+
+**示例 3：**
+
+```
+输入：num1 = "0", num2 = "0"
+输出："0"
+```
+
+**提示：**
+
+- `1 <= num1.length, num2.length <= 10^4`
+- `num1` 和`num2` 都只包含数字 `0-9`
+- `num1` 和`num2` 都不包含任何前导零
+
+**解题思路：**
+
+将两个字符串反转，就不用考虑进位错位问题
+
+时间复杂度：O(max(m, n))
+
+空间复杂度：O(1)  
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int AddItem(int a, int b, int& sign)
+    {
+        int sum = a + b + sign;
+        if (sum > 9)
+        {
+            sum -= 10;
+            sign = 1;
+        }
+        else
+            sign = 0;
+        return sum;
+    }
+    //进位问题，所以反转之后就好解决了
+    string addStrings(string num1, string num2) {
+        reverse(num1.begin(), num1.end());
+        reverse(num2.begin(), num2.end());
+        int i, j, sign, sum;
+        i = j = 0;
+        sign = 0;
+        sum = 0;
+        string result;
+        while (i < num1.size() && j < num2.size())
+        {
+            sum = AddItem(num1[i] - '0', num2[j] - '0', sign);
+            result += (sum + '0');
+            ++i;
+            ++j;
+        }
+        while (i < num1.size())
+        {
+            sum = AddItem(num1[i] - '0', 0, sign);
+            result += (sum + '0');
+            ++i;
+        }
+        while (j < num2.size())
+        {
+            sum = AddItem(0, num2[j] - '0', sign);
+            result += (sum + '0');
+            ++j;
+        }
+        if (sign == 1)
+            result += (sign + '0');
+        reverse(result.begin(), result.end());
+        return result;
     }
 };
 ```
