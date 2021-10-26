@@ -13190,6 +13190,83 @@ public:
 
 
 
+## 0290. 单词规律
+
+### 题目：
+
+给定一种规律 pattern 和一个字符串 str ，判断 str 是否遵循相同的规律。
+
+这里的 遵循 指完全匹配，例如， pattern 里的每个字母和字符串 str 中的每个非空单词之间存在着双向连接的对应规律。
+
+示例1:
+
+输入: pattern = "abba", str = "dog cat cat dog"
+输出: true
+示例 2:
+
+输入:pattern = "abba", str = "dog cat cat fish"
+输出: false
+示例 3:
+
+输入: pattern = "aaaa", str = "dog cat cat dog"
+输出: false
+示例 4:
+
+输入: pattern = "abba", str = "dog dog dog dog"
+输出: false
+说明:
+你可以假设 pattern 只包含小写字母， str 包含了由单个空格分隔的小写字母。    
+
+**解题思路：**
+
+使用两个hash表，一个存<string, char>，一个存<char, string>
+
+如果之前出现过这个字符串，检查是否等于当前对应字符
+
+如果之前出现过这个字符，检查是否等于当前对应字符串
+
+时间复杂度：O(n + m)
+
+空间复杂度：O(n + m)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    bool wordPattern(string pattern, string s) {
+        unordered_map<string, char> str2ch;
+        unordered_map<char, string> ch2str;
+        int m = s.length();
+        int i = 0;
+        for (auto& ch : pattern)
+        {
+            // 单词数不够字符数
+            if (i >= m)
+                return false;
+            int j = i;
+            while (j < m && s[j] != ' ')
+                ++j;
+            string str = s.substr(i, j - i);
+            // 如果之前出现过这个字符串，检查是否等于当前对应字符
+            if (str2ch.count(str) && str2ch[str] != ch)
+                return false;
+            // 如果之前出现过这个字符，检查是否等于当前对应字符串
+            if (ch2str.count(ch) && ch2str[ch] != str)
+                return false;
+            str2ch[str] = ch;
+            ch2str[ch] = str;
+            i = j + 1;
+        }
+        return i >= m;  // 最后一个空格符，就会 = ，最后一个非空格符，就会 > 
+    }
+};
+```
+
+
+
+
+
 ## 0334. 递增的三元子序列
 
 ### 题目：
@@ -14618,6 +14695,68 @@ public:
                 return;
             }
         }
+    }
+};
+```
+
+
+
+
+
+## 0763. 划分字母区间
+
+### 题目：
+
+字符串 S 由小写字母组成。我们要把这个字符串划分为尽可能多的片段，同一字母最多出现在一个片段中。返回一个表示每个字符串片段的长度的列表。
+
+**示例：**
+
+```
+输入：S = "ababcbacadefegdehijhklij"
+输出：[9,7,8]
+解释：
+划分结果为 "ababcbaca", "defegde", "hijhklij"。
+每个字母最多出现在一个片段中。
+像 "ababcbacadefegde", "hijhklij" 的划分是错误的，因为划分的片段数较少。
+```
+
+**提示：**
+
+- `S`的长度在`[1, 500]`之间。
+- `S`只包含小写字母 `'a'` 到 `'z'` 。
+
+
+
+**解题思路：**
+
+先用一个数组last[26]更新每个字符在最后一次出现的下标；
+
+再次遍历字符串，记录当前字符的last和前面累计的last的最大值，使用end标记；
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<int> partitionLabels(string s) {
+        int last[26];
+        int n = s.length();
+        for (int i = 0; i < n; ++i)
+            last[s[i] - 'a'] = i;
+        
+        vector<int> strlens;
+        int start = 0, end = 0;
+        for (int i = 0; i < n; ++i)
+        {
+            // 当前字符的last和前面累计的last的最大值
+            end = max(end, last[s[i] - 'a']);
+            if (i == end)
+            {
+                strlens.push_back(end - start + 1);
+                start = end + 1;
+            }
+        }
+        return strlens;
     }
 };
 ```
