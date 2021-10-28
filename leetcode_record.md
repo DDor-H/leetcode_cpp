@@ -10293,6 +10293,16 @@ public:
 
 
 
+## 0005. 最长回文子串
+
+### 题目：
+
+同动态规划模块的5题
+
+
+
+
+
 ## 0015. 三数之和
 
 ### 题目：
@@ -12461,6 +12471,103 @@ public:
                 ++count;
         }
         return count;
+    }
+};
+```
+
+
+
+
+
+## 0187. 重复的DNA序列
+
+### 题目：
+
+所有 DNA 都由一系列缩写为 'A'，'C'，'G' 和 'T' 的核苷酸组成，例如："ACGAATTCCG"。在研究 DNA 时，识别 DNA 中的重复序列有时会对研究非常有帮助。
+
+编写一个函数来找出所有目标子串，目标子串的长度为 10，且在 DNA 字符串 s 中出现次数超过一次。
+
+**示例 1：**
+
+```
+输入：s = "AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"
+输出：["AAAAACCCCC","CCCCCAAAAA"]
+```
+
+**示例 2：**
+
+```
+输入：s = "AAAAAAAAAAAAA"
+输出：["AAAAAAAAAA"]
+```
+
+**提示：**
+
+- `0 <= s.length <= 10^5`
+- `s[i] 为 'A'、'C'、'G' 或 'T'`
+
+
+
+**解题思路：**
+
+思路一：滑动窗口 + hash表
+
+unordered_map<string, int>
+
+时间复杂度：O(nL)
+
+空间复杂度：O(nL)
+
+思路二：滑动窗口 + hash表 + 位运算
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<string> findRepeatedDnaSequences(string s) {
+        const int L = 10;
+        vector<string> ans;
+        unordered_map<string, int> map;
+        for (int i = 0; i < s.size() - L; ++i)
+        {
+            string subs = s.substr(i, L);
+            if (++map[subs] == 2)
+                ans.push_back(subs);
+        }
+        return ans;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    vector<string> findRepeatedDnaSequences(string s) {
+        const int L = 10;
+        if (s.length() <= L)
+            return {};
+        vector<string> ans;
+        unordered_map<char, int> bin = {{'A', 0}, {'C', 1}, {'G', 2}, {'T', 3}};
+        unordered_map<int, int> map;
+        int x = 0;
+
+        for (int i = 0; i < L - 1; ++i)
+            x = (x << 2) | bin[s[i]];
+
+        for (int i = 0; i <= s.size() - L; ++i)
+        {
+            x = ((x << 2) | bin[s[i + L - 1]]) & ((1 << 2 * L) - 1);
+            if (++map[x] == 2)
+                ans.push_back(s.substr(i, L));
+        }
+        return ans;
     }
 };
 ```
