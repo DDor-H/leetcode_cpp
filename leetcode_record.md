@@ -4749,15 +4749,120 @@ public:
 
 
 
+## 0090. 子集Ⅱ
+
+### 题目：
+
+给你一个整数数组 `nums` ，其中可能包含重复元素，请你返回该数组所有可能的子集（幂集）。
+
+解集 **不能** 包含重复的子集。返回的解集中，子集可以按 **任意顺序** 排列。
+
+**示例 1：**
+
+```
+输入：nums = [1,2,2]
+输出：[[],[1],[1,2],[1,2,2],[2],[2,2]]
+```
+
+**示例 2：**
+
+```
+输入：nums = [0]
+输出：[[],[0]]
+```
+
+**提示：**
+
+- `1 <= nums.length <= 10`
+- `-10 <= nums[i] <= 10`
 
 
 
+**解题思路：**
 
+思路一：递归
 
+时间复杂度：O(n * 2^n)
 
+空间复杂度：O(n)
 
+思路二：迭代 + 位运算
 
+时间复杂度：O(n * 2^n)
 
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+        vector<vector<int>> ans;
+        vector<int> t;
+        int n = nums.size();
+        if (n < 1)
+            return ans;
+        sort(nums.begin(), nums.end());
+        _subsetsWithDup(ans, t, false, 0, nums);
+        return ans;
+    }
+
+    void _subsetsWithDup(vector<vector<int>>& ans, vector<int>& t, bool preChoose, int idx, vector<int>& nums)
+    {
+        if (idx == nums.size())
+        {
+            ans.push_back(t);
+            return;
+        }
+        _subsetsWithDup(ans, t, false, idx + 1, nums);
+        if (!preChoose && idx > 0 && nums[idx] == nums[idx - 1])
+            return;
+        t.push_back(nums[idx]);
+        _subsetsWithDup(ans, t, true, idx + 1, nums);
+        t.pop_back();
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+        vector<vector<int>> ans;
+        vector<int> t;
+        int n = nums.size();
+        if (n < 1)
+            return ans;
+        sort(nums.begin(), nums.end());
+        for (int mask = 0; mask < (1 << n); ++mask)
+        {
+            // mask表示 1 - n 位的数字分别使用和不使用
+            t.clear();
+            bool flag = true;
+            for (int i = 0; i < n; ++i)
+            {
+                // 选中 i 位置
+                if (mask & (1 << i))
+                {
+                    // 选中 i ，但没选中 i - 1 且 nums[i] == nums[i - 1]
+                    if (i > 0 && ((mask >> (i - 1) & 1) == 0) && nums[i] == nums[i - 1])
+                    {
+                        flag = false;
+                        break;
+                    }
+                    t.push_back(nums[i]);
+                }
+            }
+            if (flag)
+                ans.push_back(t);
+        }
+        return ans;
+    }
+};
+```
 
 
 
@@ -10293,6 +10398,125 @@ public:
 
 
 
+## 0002. 两数相加
+
+### 题目：
+
+给你两个 **非空** 的链表，表示两个非负的整数。它们每位数字都是按照 **逆序** 的方式存储的，并且每个节点只能存储 **一位** 数字。
+
+请你将两个数相加，并以相同形式返回一个表示和的链表。
+
+你可以假设除了数字 0 之外，这两个数都不会以 0 开头。
+
+**示例1：**
+
+![leetcode_2](F:\C++\刷题\Img\leetcode_2.jpg)
+
+```
+输入：l1 = [2,4,3], l2 = [5,6,4]
+输出：[7,0,8]
+解释：342 + 465 = 807.
+```
+
+**示例 2：**
+
+```
+输入：l1 = [0], l2 = [0]
+输出：[0]
+```
+
+**示例 3：**
+
+```
+输入：l1 = [9,9,9,9,9,9,9], l2 = [9,9,9,9]
+输出：[8,9,9,9,0,0,0,1]
+```
+
+**提示：**
+
+- 每个链表中的节点数在范围 [1, 100] 内
+- 0 <= Node.val <= 9
+- 题目数据保证列表表示的数字不含前导零
+
+
+
+**解题思路：**
+
+挨个加，进位
+
+时间复杂度：O(max(m,n))
+
+空间复杂度：O(1）
+
+**方法：**
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode* ret;
+        ListNode* l;
+        ret = new ListNode(0);
+        l = ret;
+        int temp = 0;
+        bool flag = false;
+        while(l1 != nullptr && l2 != nullptr)
+        {
+            l->next = new ListNode(l1->val + l2->val);
+            l = l->next;
+            l1 = l1->next;
+            l2 = l2->next;
+        }
+
+        while(l1)
+        {
+            l->next = new ListNode(l1->val);
+            l = l->next;
+            l1 = l1->next;
+        }
+
+        while(l2)
+        {
+            l->next = new ListNode(l2->val);
+            l = l->next;
+            l2 = l2->next;
+        }
+
+        l = ret->next;
+
+        while(l)
+        {
+            if (l->val > 9)
+            {
+                l->val -= 10;
+                if(l->next == nullptr)
+                {
+                    l->next = new ListNode(0);
+                }
+                l->next->val += 1;
+            }
+            l = l->next;
+        }
+
+        return ret->next;
+    }
+};
+```
+
+
+
+
+
 ## 0005. 最长回文子串
 
 ### 题目：
@@ -12040,6 +12264,130 @@ public:
             head = head->next;
         }
         return false;
+    }
+};
+```
+
+
+
+
+
+## 0142. 环形链表Ⅱ
+
+### 题目：
+
+给定一个链表，返回链表开始入环的第一个节点。 如果链表无环，则返回 `null`。
+
+为了表示给定链表中的环，我们使用整数 pos 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 pos 是 -1，则在该链表中没有环。**注意，pos 仅仅是用于标识环的情况，并不会作为参数传递到函数中。**
+
+**说明**：不允许修改给定的链表。
+
+**进阶**：
+
+- 你是否可以使用 O(1) 空间解决此题？
+
+
+
+**示例 1：**
+
+![leetcode_142_1](F:\C++\刷题\Img\leetcode_142_1.png)
+
+```
+输入：head = [3,2,0,-4], pos = 1
+输出：返回索引为 1 的链表节点
+解释：链表中有一个环，其尾部连接到第二个节点。
+```
+
+**示例 2：**
+
+![leetcode_142_2](F:\C++\刷题\Img\leetcode_142_2.png)
+
+```
+输入：head = [1,2], pos = 0
+输出：返回索引为 0 的链表节点
+解释：链表中有一个环，其尾部连接到第一个节点。
+```
+
+**示例 3：**
+
+![leetcode_142_3](F:\C++\刷题\Img\leetcode_142_3.png)
+
+```
+输入：head = [1], pos = -1
+输出：返回 null
+解释：链表中没有环。
+```
+
+**提示：**
+
+- 链表中节点的数目范围在范围 `[0, 10^4]` 内
+- `-10^5 <= Node.val <= 10^5`
+- pos 的值为 -1 或者链表中的一个有效索引
+
+
+
+**解题思路：**
+
+思路一：hash表
+
+
+
+思路二：快慢指针
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    ListNode *detectCycle(ListNode *head) {
+        if (head == NULL || head->next == NULL)
+            return NULL;
+        unordered_set<ListNode*> set;
+        ListNode* p = head;
+        while (p != NULL)
+        {
+            if (set.count(p) == 1)
+                return p;
+            else
+                set.insert(p);
+            p = p->next;
+        }
+        return NULL;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    ListNode *detectCycle(ListNode *head) {
+        if (head == NULL || head->next == NULL)
+            return NULL;
+        
+        ListNode* fast = head;
+        ListNode* slow = head;
+        while (fast != NULL)
+        {
+            slow = slow->next;
+            if (fast->next == NULL)
+                return NULL;
+            fast = fast->next->next;
+            if (fast == slow)
+            {
+                ListNode* ptr = head;
+                while (ptr != slow)
+                {
+                    ptr = ptr->next;
+                    slow = slow->next;
+                }
+                return ptr;
+            }
+        }
+        return NULL;
     }
 };
 ```
