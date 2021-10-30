@@ -11218,6 +11218,78 @@ public:
 
 
 
+## 0082. 删除排序链表中的重复元素Ⅱ
+
+### 题目：
+
+存在一个按升序排列的链表，给你这个链表的头节点 `head` ，请你删除链表中所有存在数字重复情况的节点，只保留原始链表中 **没有重复出现** 的数字。
+
+返回同样按升序排列的结果链表。
+
+**示例 1：**
+
+![leetcode_82_1](F:\C++\刷题\Img\leetcode_82_1.jpg)
+
+```
+输入：head = [1,2,3,3,4,4,5]
+输出：[1,2,5]
+```
+
+**示例 2：**
+
+![leetcode_82_2](F:\C++\刷题\Img\leetcode_82_2.jpg)
+
+```
+输入：head = [1,1,1,2,3]
+输出：[2,3]
+```
+
+**提示：**
+
+- 链表中节点数目在范围 `[0, 300]` 内
+- `-100 <= Node.val <= 100`
+- 题目数据保证链表已经按升序排列
+
+**解题思路：**
+
+技巧：ListNode* dummy = new ListNode(0, head);
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    ListNode* deleteDuplicates(ListNode* head) {
+        if (head == nullptr || head->next == nullptr)
+            return head;
+        ListNode* dummy = new ListNode(0, head);
+        ListNode* cur = dummy;
+
+        while (cur->next && cur->next->next)
+        {
+            if (cur->next->val == cur->next->next->val)
+            {
+                int x = cur->next->val;
+                while (cur->next && cur->next->val == x)
+                    cur->next = cur->next->next;
+            }
+            else
+                cur = cur->next;
+        }
+        
+        return dummy->next;
+    }
+};
+```
+
+
+
+
+
 ## 0083. 删除排序链表中的重复元素
 
 ### 题目：
@@ -12668,7 +12740,202 @@ public:
 
 
 
+## 0160. 相交链表
+
+### 题目：
+
+给你两个单链表的头节点 `headA` 和 `headB` ，请你找出并返回两个单链表相交的起始节点。如果两个链表没有交点，返回 `null` 。
+
+图示两个链表在节点 `c1` 开始相交：
+
+![leetcode_160_1](F:\C++\刷题\Img\leetcode_160_1.png)
+
+题目数据 **保证** 整个链式结构中不存在环。
+
+**注意**，函数返回结果后，链表必须 **保持其原始结构** 。
+
+**示例 1：**
+
+![leetcode_160_2](F:\C++\刷题\Img\leetcode_160_2.png)
+
+```
+输入：intersectVal = 8, listA = [4,1,8,4,5], listB = [5,0,1,8,4,5], skipA = 2, skipB = 3
+输出：Intersected at '8'
+解释：相交节点的值为 8 （注意，如果两个链表相交则不能为 0）。
+从各自的表头开始算起，链表 A 为 [4,1,8,4,5]，链表 B 为 [5,0,1,8,4,5]。
+在 A 中，相交节点前有 2 个节点；在 B 中，相交节点前有 3 个节点。
+```
+
+**示例 2：**
+
+![leetcode_160_3](F:\C++\刷题\Img\leetcode_160_3.png)
+
+```
+输入：intersectVal = 2, listA = [0,9,1,2,4], listB = [3,2,4], skipA = 3, skipB = 1
+输出：Intersected at '2'
+解释：相交节点的值为 2 （注意，如果两个链表相交则不能为 0）。
+从各自的表头开始算起，链表 A 为 [0,9,1,2,4]，链表 B 为 [3,2,4]。
+在 A 中，相交节点前有 3 个节点；在 B 中，相交节点前有 1 个节点。
+```
+
+**示例 3：**
+
+![leetcode_160_4](F:\C++\刷题\Img\leetcode_160_4.png)
+
+```
+输入：intersectVal = 0, listA = [2,6,4], listB = [1,5], skipA = 3, skipB = 2
+输出：null
+解释：从各自的表头开始算起，链表 A 为 [2,6,4]，链表 B 为 [1,5]。
+由于这两个链表不相交，所以 intersectVal 必须为 0，而 skipA 和 skipB 可以是任意值。
+这两个链表不相交，因此返回 null 。
+```
+
+**提示：**
+
+- `listA` 中节点数目为 `m`
+- `listB` 中节点数目为 `n`
+- `0 <= m, n <= 3 * 10^4`
+- `1 <= Node.val <= 105`
+- `0 <= skipA <= m`
+- `0 <= skipB <= n`
+- 如果 `listA` 和 `listB` 没有交点，`intersectVal` 为 `0`
+- 如果 `listA` 和 `listB` 有交点，`intersectVal == listA[skipA + 1] == listB[skipB + 1]`
+
+**进阶**：你能否设计一个时间复杂度 `O(n)` 、仅用 `O(1)` 内存的解决方案？
+
+**解题思路：**
+
+思路一：hash表
+
+时间复杂度：O(m+n)
+
+空间复杂度：O(m+n)
+
+思路二：双指针
+
+时间复杂度：O(max(m, n))
+
+空间复杂度：O(1)
+
+思路三：双指针2
+
+思路类似于是否存在循环链表Ⅱ
+
+时间复杂度：O(m+n)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        if (headA == NULL || headB == NULL)
+            return NULL;
+        unordered_set<ListNode*> set;
+        ListNode* pA = headA;
+        ListNode* pB = headB;
+        while (pA != NULL || pB != NULL)
+        {
+            if (pA != NULL)
+            {
+                if (set.count(pA) == 0)
+                {
+                    set.insert(pA);
+                    pA = pA->next;
+                }
+                else
+                    return pA;
+            }
+            if (pB != NULL)
+            {
+                if (set.count(pB) == 0)
+                {
+                    set.insert(pB);
+                    pB = pB->next;
+                }
+                else
+                    return pB;
+            }
+        }
+        return NULL;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        if (headA == NULL || headB == NULL)
+            return NULL;
+        
+        ListNode* pA = headA;
+        ListNode* pB = headB;
+        int lenA = 0;
+        int lenB = 0;
+        while (pA != NULL)
+        {
+            ++lenA;
+            pA = pA->next;
+        }
+        while (pB != NULL)
+        {
+            ++lenB;
+            pB = pB->next;
+        }
+        if (lenA < lenB)
+        {
+            pA = headB;
+            pB = headA;
+        }
+
+        for (int i = 0; i < abs(lenA - lenB); ++i)
+            pA = pA->next;
+
+        while (pA != NULL && pB != NULL)
+        {
+            if (pA == pB)
+                return pA;
+            pA = pA->next;
+            pB = pB->next;
+        }
+        return NULL;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        if (headA == NULL || headB == NULL)
+            return NULL;
+        
+        ListNode* pA = headA;
+        ListNode* pB = headB;
+        while (pA != pB)
+        {
+            pA = pA == NULL ? headB : pA->next;
+            pB = pB == NULL ? headA : pB->next;
+        }
+        return pA;
+    }
+};
+```
+
+
+
+
+
 ## 0169. 多数元素
+
+### 题目：
 
 给定一个大小为 n 的数组，找到其中的多数元素。多数元素是指在数组中出现次数 **大于 ⌊ n/2 ⌋** 的元素。
 
