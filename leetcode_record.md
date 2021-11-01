@@ -10736,6 +10736,106 @@ public:
 
 
 
+## 0024. 两两交换链表中的节点
+
+### 题目：
+
+给定一个链表，两两交换其中相邻的节点，并返回交换后的链表。
+
+**你不能只是单纯的改变节点内部的值**，而是需要实际的进行节点交换。
+
+**示例 1：**
+
+![leetcode_0024](F:\C++\刷题\Img\leetcode_0024.jpg)
+
+```
+输入：head = [1,2,3,4]
+输出：[2,1,4,3]
+```
+
+**示例 2：**
+
+```
+输入：head = []
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：head = [1]
+输出：[1]
+```
+
+**提示：**
+
+- 链表中节点的数目在范围 `[0, 100]` 内
+- `0 <= Node.val <= 100`
+
+**解题思路：**
+
+思路一：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：迭代
+
+使用一个**哑结点**
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        if (head == nullptr || head->next == nullptr)
+            return head;
+
+        ListNode* back = swapPairs(head->next->next);
+        ListNode* tmp = head->next;
+        tmp->next = head;
+        head->next = back;
+        return tmp;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        if (head == nullptr || head->next == nullptr)
+            return head;
+
+        ListNode* res = new ListNode(0, head);
+        ListNode* temp = res;
+        while (temp->next != nullptr && temp->next->next != nullptr)
+        {
+            ListNode* p = temp->next;
+            ListNode* q = temp->next->next;
+            temp->next = q;
+            p->next = q->next;
+            q->next = p;
+            temp = temp->next->next;
+        }
+
+        return res->next;
+    }
+};
+```
+
+
+
 
 
 ## 0036. 有效的数独
@@ -15653,6 +15753,292 @@ public:
                 vm[h].erase(it);
                 return;
             }
+        }
+    }
+};
+```
+
+
+
+
+
+## 0707. 设计链表
+
+### 题目：
+
+设计链表的实现。您可以选择使用单链表或双链表。单链表中的节点应该具有两个属性：`val` 和 `next`。`val` 是当前节点的值，`next` 是指向下一个节点的指针/引用。如果要使用双向链表，则还需要一个属性 `prev` 以指示链表中的上一个节点。假设链表中的所有节点都是 `0-index` 的。
+
+在链表类中实现这些功能：
+
+- `get(index)`：获取链表中第 `index` 个节点的值。如果索引无效，则返回`-1`。
+- `addAtHead(val)`：在链表的第一个元素之前添加一个值为 `val` 的节点。插入后，新节点将成为链表的第一个节点。
+- `addAtTail(val)`：将值为 `val` 的节点追加到链表的最后一个元素。
+- `addAtIndex(index,val)`：在链表中的第 `index` 个节点之前添加值为 `val`  的节点。如果 `index` 等于链表的长度，则该节点将附加到链表的末尾。如果 `index` 大于链表长度，则不会插入节点。如果`index`小于`0`，则在头部插入节点。
+- `deleteAtIndex(index)`：如果索引 `index` 有效，则删除链表中的第 `index` 个节点。
+
+**示例：**
+
+```
+MyLinkedList linkedList = new MyLinkedList();
+linkedList.addAtHead(1);
+linkedList.addAtTail(3);
+linkedList.addAtIndex(1,2);   //链表变为1-> 2-> 3
+linkedList.get(1);            //返回2
+linkedList.deleteAtIndex(1);  //现在链表是1-> 3
+linkedList.get(1);            //返回3
+```
+
+**提示：**
+
+- 所有`val`值都在 `[1, 1000]` 之内。
+- 操作次数将在  `[1, 1000]` 之内。
+- 请不要使用内置的 `LinkedList` 库。
+
+**解题思路：**
+
+注意空节点和只剩一个节点的情况
+
+**方法一：**双向链表
+
+```c++
+class ListNode1 {
+public:
+    int val = 0;
+    ListNode1* next;
+    ListNode1* prev;
+    ListNode1(int v, ListNode1* n = nullptr, ListNode1* p = nullptr) : val(v), next(n), prev(p)
+    {}
+};
+
+
+class MyLinkedList {
+public:
+    ListNode1* root;
+    ListNode1* tail;
+    int size;
+public:
+    MyLinkedList() {
+        root = nullptr;
+        tail = nullptr;
+        size = 0;
+    }
+    
+    int get(int index) {
+        int i = 0;
+        ListNode1* p = root;
+        while (p != nullptr)
+        {
+            if (i++ == index)
+                return p->val;
+            p = p->next;
+        }
+        return -1;
+    }
+    
+    void addAtHead(int val) {
+        ListNode1* head = new ListNode1(val);
+        if (root == nullptr)
+            root = tail = head;
+        else
+        {
+            head->next = root;
+            root->prev = head;
+            root = head;
+        }
+        ++size;
+    }
+    
+    void addAtTail(int val) {
+        ListNode1* rhead = new ListNode1(val);
+        if (tail == nullptr)
+            root = tail = rhead;
+        else
+        {
+            tail->next = rhead;
+            rhead->prev = tail;
+            tail = rhead;
+        }
+        ++size;
+    }
+    
+    void addAtIndex(int index, int val) {
+        if (index > size)
+            return;
+        if (index <= 0)
+        {
+            addAtHead(val);
+            return;
+        }
+        if (index == size)
+        {
+            addAtTail(val);
+            return;
+        }
+
+        ListNode1* p = root;
+        while (index-- > 0)
+            p = p->next;
+        ListNode1* q = new ListNode1(val);
+        q->next = p;
+        q->prev = p->prev;
+        q->next->prev = q;
+        q->prev->next = q;
+        ++size;
+    }
+    
+    void deleteAtIndex(int index) {
+        if (index >= size || index < 0)
+            return;
+        if (size == 1)
+        {
+            delete root;
+            root = tail = nullptr;
+            --size;
+            return;
+        }
+        if (index == 0)
+        {
+            ListNode1* p = root;
+            root = p->next;
+            root->prev = nullptr;
+            delete p;
+            --size;
+            return;
+        }
+        if (index == size - 1)
+        {
+            ListNode1* p = tail;
+            tail = p->prev;
+            tail->next = nullptr;
+            delete p;
+            --size;
+            return;
+        }
+        ListNode1* p = root;
+        while (index-- > 0)
+            p = p->next;
+        p->next->prev = p->prev;
+        p->prev->next = p->next;
+        delete p;
+        --size;
+    }
+};
+```
+
+**方法二：**单向列表
+
+```c++
+// 单链表
+class ListNode1 {
+public:
+    int val = 0;
+    ListNode1* next;
+    ListNode1(int v, ListNode1* n = nullptr) : val(v), next(n)
+    {}
+};
+
+
+class MyLinkedList {
+public:
+    ListNode1* root;
+    int size;
+public:
+    MyLinkedList() {
+        root = nullptr;
+        size = 0;
+    }
+    
+    int get(int index) {
+        int i = 0;
+        ListNode1* p = root;
+        while (p != nullptr)
+        {
+            if (i++ == index)
+                return p->val;
+            p = p->next;
+        }
+        return -1;
+    }
+    
+    void addAtHead(int val) {
+        ListNode1* head = new ListNode1(val);
+        if (root == nullptr)
+            root  = head;
+        else
+        {
+            head->next = root;
+            root = head;
+        }
+        ++size;
+    }
+    
+    void addAtTail(int val) {
+        ListNode1* tail = new ListNode1(val);
+        if (root == nullptr)
+            root  = tail;
+        else
+        {
+            ListNode1* p = root;
+            while (p->next != nullptr)
+                p = p->next;
+            p->next = tail;
+        }
+        ++size;
+    }
+    
+    void addAtIndex(int index, int val) {
+        if (index > size)
+            return;
+        if (index <= 0)
+        {
+            addAtHead(val);
+            return;
+        }
+        if (index == size)
+        {
+            addAtTail(val);
+            return;
+        }
+
+        ListNode1* p = root;
+        while (index-- > 1)
+            p = p->next;
+        ListNode1* q = new ListNode1(val);
+        q->next = p->next;
+        p->next = q;
+        ++size;
+    }
+    
+    void deleteAtIndex(int index) {
+        if (index >= size || index < 0)
+            return;
+        if (size == 1)
+        {
+            delete root;
+            root = nullptr;
+            --size;
+            return;
+        }
+        if (index == 0)
+        {
+            ListNode1* p = root;
+            root = p->next;
+            delete p;
+            --size;
+            return;
+        }
+        ListNode1* p = root;
+        ListNode1* prev = nullptr;
+        while (p != nullptr && index-- > 0)
+        {
+            prev = p;
+            p = p->next;
+        }
+        if (p != nullptr)
+        {
+            prev->next = p->next;
+            delete p;
+            --size;
         }
     }
 };
