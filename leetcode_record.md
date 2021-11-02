@@ -10838,6 +10838,129 @@ public:
 
 
 
+## 0025. K个一组翻转链表
+
+### 题目：
+
+给你一个链表，每 `k` 个节点一组进行翻转，请你返回翻转后的链表。
+
+`k` 是一个正整数，它的值小于或等于链表的长度。
+
+如果节点总数不是 `k` 的整数倍，那么请将最后剩余的节点保持原有顺序。
+
+**进阶：**
+
+- 你可以设计一个只使用常数额外空间的算法来解决此问题吗？
+- **你不能只是单纯的改变节点内部的值**，而是需要实际进行节点交换。
+
+**示例 1：**
+
+![leetcode_25_1](F:\C++\刷题\Img\leetcode_25_1.jpg)
+
+```
+输入：head = [1,2,3,4,5], k = 2
+输出：[2,1,4,3,5]
+```
+
+**示例 2：**
+
+![leetcode_25_2](F:\C++\刷题\Img\leetcode_25_2.jpg)
+
+```
+输入：head = [1,2,3,4,5], k = 3
+输出：[3,2,1,4,5]
+```
+
+**示例 3：**
+
+```
+输入：head = [1,2,3,4,5], k = 1
+输出：[1,2,3,4,5]
+```
+
+**示例 4：**
+
+```
+输入：head = [1], k = 1
+输出：[1]
+```
+
+**提示：**
+
+- 列表中节点的数量在范围 `sz` 内
+- `1 <= sz <= 5000`
+- `0 <= Node.val <= 1000`
+- `1 <= k <= sz`
+
+
+
+**解题思路：**
+
+常规思路
+
+**方法：**
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+
+
+class Solution {
+public:
+    pair<ListNode*, ListNode*> myReverse(ListNode* head, ListNode* tail)
+    {
+        ListNode* prev = tail->next;
+        ListNode* p = head;
+        while (prev != tail)
+        {
+            ListNode* nex = p->next;
+            p->next = prev;
+            prev = p;
+            p = nex;
+        }
+        return {tail, head};
+    }
+
+
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        if (head == nullptr || head->next == nullptr || k == 1)
+            return head;
+        ListNode* dummy = new ListNode(0, head);
+        ListNode* p = dummy;
+        while (p->next != nullptr)
+        {
+            ListNode* start = p->next;
+            ListNode* end = start;
+            for (int i = 0; i < k - 1; ++i)
+            {
+                end = end->next;
+                if (!end)
+                    return dummy->next;
+            }
+
+            ListNode* nex = end->next;
+            tie(start, end) = myReverse(start, end);
+            p->next = start;
+            end->next = nex;
+            p = end;
+        }
+        return dummy->next;
+    }
+};
+```
+
+
+
+
+
 ## 0036. 有效的数独
 
 ### 题目：
@@ -12568,6 +12691,52 @@ public:
 
 
 
+## 0143. 重排链表
+
+### 题目：
+
+给定一个单链表 `L` 的头节点 `head` ，单链表 `L` 表示为：
+
+ `L0 → L1 → … → Ln-1 → Ln` 
+请将其重新排列后变为：
+
+`L0 → Ln → L1 → Ln-1 → L2 → Ln-2 → …`
+
+不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。
+
+**示例 1:**
+
+![leetcode_0143_1](F:\C++\刷题\Img\leetcode_0143_1.png)
+
+```
+输入: head = [1,2,3,4]
+输出: [1,4,2,3]
+```
+
+**示例 2:**
+
+![leetcode_0143_2](F:\C++\刷题\Img\leetcode_0143_2.png)
+
+```
+输入: head = [1,2,3,4,5]
+输出: [1,5,2,4,3]
+```
+
+**提示：**
+
+- 链表的长度范围为 `[1, 5 * 10^4]`
+- `1 <= node.val <= 1000`
+
+
+
+
+
+
+
+
+
+
+
 ## 0144. 二叉树的前序遍历
 
 ### 题目：
@@ -12833,6 +13002,94 @@ public:
         }
         return res;
     }
+};
+```
+
+
+
+
+
+## 0155. 最小栈
+
+### 题目：
+
+设计一个支持 `push` ，`pop` ，`top` 操作，并能在常数时间内检索到最小元素的栈。
+
+- `push(x)` —— 将元素 x 推入栈中。
+- `pop()` —— 删除栈顶的元素。
+- `top()` —— 获取栈顶元素。
+- `getMin()` —— 检索栈中的最小元素。
+
+**示例:**
+
+```
+输入：
+["MinStack","push","push","push","getMin","pop","top","getMin"]
+[[],[-2],[0],[-3],[],[],[],[]]
+
+输出：
+[null,null,null,null,-3,null,0,-2]
+
+解释：
+MinStack minStack = new MinStack();
+minStack.push(-2);
+minStack.push(0);
+minStack.push(-3);
+minStack.getMin();   --> 返回 -3.
+minStack.pop();
+minStack.top();      --> 返回 0.
+minStack.getMin();   --> 返回 -2.
+```
+
+
+提示：
+
+`pop`、`top` 和 `getMin` 操作总是在 **非空栈** 上调用。
+
+**解题思路：**
+
+使用一个栈存数据，再使用一个栈存当前最小值
+
+时间复杂度：O(1)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+class MinStack {
+public:
+    /** initialize your data structure here. */
+    MinStack() {
+
+    }
+    
+    void push(int val) {
+        if (st.empty() || val <= min_st.top())
+        {
+            min_st.push(val);
+        }
+        st.push(val);
+    }
+    
+    void pop() {
+        if (st.top() == min_st.top())
+        {
+            min_st.pop();
+        }
+        st.pop();
+    }
+    
+    int top() {
+        return st.top();
+    }
+    
+    int getMin() {
+        return min_st.top();
+    }
+private:
+    stack<int> st;
+    stack<int> min_st;
 };
 ```
 
@@ -16102,6 +16359,250 @@ public:
             }
         }
         return strlens;
+    }
+};
+```
+
+
+
+
+
+## 1249. 移除无效的括号
+
+### 题目：
+
+给你一个由 `'('、')'` 和小写字母组成的字符串 `s`。
+
+你需要从字符串中删除最少数目的 `'('` 或者 `')'` （可以删除任意位置的括号)，使得剩下的「括号字符串」有效。
+
+请返回任意一个合法字符串。
+
+有效「括号字符串」应当符合以下 **任意一条** 要求：
+
+- 空字符串或只包含小写字母的字符串
+- 可以被写作 `AB`（`A` 连接 `B`）的字符串，其中 `A` 和 `B` 都是有效「括号字符串」
+- 可以被写作 `(A)` 的字符串，其中 `A` 是一个有效的「括号字符串」
+
+**示例 1：**
+
+```
+输入：s = "lee(t(c)o)de)"
+输出："lee(t(c)o)de"
+解释："lee(t(co)de)" , "lee(t(c)ode)" 也是一个可行答案。
+```
+
+**示例 2：**
+
+```
+输入：s = "a)b(c)d"
+输出："ab(c)d"
+```
+
+**示例 3：**
+
+```
+输入：s = "))(("
+输出：""
+解释：空字符串也是有效的
+```
+
+**示例 4：**
+
+```
+输入：s = "(a(b(c)d)"
+输出："a(b(c)d)"
+```
+
+**提示：**
+
+- `1 <= s.length <= 10^5`
+- `s[i]` 可能是 `'('、')'` 或英文小写字母
+
+
+
+**解题思路：**
+
+使用三次循环，第一次从前往后，剔除右括号不符合的，第二次从后往前，剔除左括号不符合的，第三次重新组织字符串；
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    string minRemoveToMakeValid(string s) {
+        string ans;
+        stack<int> st;
+        for (int i = 0; i < s.length(); ++i)
+        {
+            if (s[i] == '(')
+                st.push(s[i]);
+            else if (s[i] == ')')
+            {
+                if (st.empty())
+                    s[i] = '.';
+                else
+                    st.pop();
+            }
+        }
+
+        stack<int> st1;
+        for (int i = s.length() - 1; i >= 0; --i)
+        {
+            if (s[i] == ')')
+                st1.push(s[i]);
+            else if (s[i] == '(')
+            {
+                if (st1.empty())
+                    s[i] = '.';
+                else
+                    st1.pop();
+            }
+        }
+
+        for (int i = 0; i < s.length(); ++i)
+        {
+            if (s[i] != '.')
+                ans += s[i];
+        }
+        return ans;
+    }
+};
+```
+
+
+
+
+
+## 1823. 找出游戏的获胜者
+
+### 题目：
+
+共有 `n` 名小伙伴一起做游戏。小伙伴们围成一圈，按 **顺时针顺序** 从 `1` 到 `n` 编号。确切地说，从第 `i` 名小伙伴顺时针移动一位会到达第 `(i+1)` 名小伙伴的位置，其中 `1 <= i < n` ，从第 `n` 名小伙伴顺时针移动一位会回到第 `1` 名小伙伴的位置。
+
+游戏遵循如下规则：
+
+1. 从第 `1` 名小伙伴所在位置 **开始** 。
+2. 沿着顺时针方向数 `k` 名小伙伴，计数时需要 **包含** 起始时的那位小伙伴。逐个绕圈进行计数，一些小伙伴可能会被数过不止一次。
+3. 你数到的最后一名小伙伴需要离开圈子，并视作输掉游戏。
+4. 如果圈子中仍然有不止一名小伙伴，从刚刚输掉的小伙伴的 **顺时针下一位** 小伙伴 **开始**，回到步骤 `2` 继续执行。
+5. 否则，圈子中最后一名小伙伴赢得游戏。
+
+给你参与游戏的小伙伴总数 `n` ，和一个整数 `k` ，返回游戏的获胜者。
+
+**示例 1：**
+
+![leetcode_1823](F:\C++\刷题\Img\leetcode_1823.png)
+
+```
+输入：n = 5, k = 2
+输出：3
+解释：游戏运行步骤如下：
+
+1. 从小伙伴 1 开始。
+2. 顺时针数 2 名小伙伴，也就是小伙伴 1 和 2 。
+3. 小伙伴 2 离开圈子。下一次从小伙伴 3 开始。
+4. 顺时针数 2 名小伙伴，也就是小伙伴 3 和 4 。
+5. 小伙伴 4 离开圈子。下一次从小伙伴 5 开始。
+6. 顺时针数 2 名小伙伴，也就是小伙伴 5 和 1 。
+7. 小伙伴 1 离开圈子。下一次从小伙伴 3 开始。
+8. 顺时针数 2 名小伙伴，也就是小伙伴 3 和 5 。
+9. 小伙伴 5 离开圈子。只剩下小伙伴 3 。所以小伙伴 3 是游戏的获胜者。
+```
+
+**示例 2：**
+
+```
+输入：n = 6, k = 5
+输出：1
+解释：小伙伴离开圈子的顺序：5、4、6、2、3 。小伙伴 1 是游戏的获胜者。
+```
+
+**提示：**
+
+`1 <= k <= n <= 500`
+
+
+
+**解题思路：**
+
+思路一：暴力解法
+
+思路二：动态规划
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路三：约瑟夫环
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int findTheWinner(int n, int k) {
+        int i = -1;
+        int remain = n;
+        vector<int> v(n, 1);
+        while (remain-- > 1)
+        {
+            int c = 0;
+            while (c < k)
+            {
+                i = (i + 1) % n;
+                if (v[i] == 1)
+                    ++c;
+            }
+            v[i] = 0;
+        }
+
+        for (i = 0; i < n; ++i)
+            if (v[i] == 1)
+                break;
+            
+        return i + 1;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int findTheWinner(int n, int k) {
+        vector<int> v(n + 1, 0);
+        v[1] = 1;
+        for (int i = 2; i <= n; ++i)
+        {
+            // f[i-1] + k即为偏移量，为防止刚好整除的情形导致取模为0，对原值-1后再对模+1.
+            v[i] = ((v[i - 1] + k - 1) % i) + 1;
+        }
+        return v[n];
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    int findTheWinner(int n, int k) {
+        int p = 0;
+        for (int i = 2; i <= n; ++i)
+        {
+            p = (p + k) % i;
+        }
+        return p + 1;
     }
 };
 ```
