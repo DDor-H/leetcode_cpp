@@ -12174,6 +12174,111 @@ public:
 
 
 
+## 0103. 二叉树的锯齿形层序遍历
+
+### 题目：
+
+给定一个二叉树，返回其节点值的锯齿形层序遍历。（即先从左往右，再从右往左进行下一层遍历，以此类推，层与层之间交替进行）。
+
+例如：
+给定二叉树 `[3,9,20,null,null,15,7]`,
+
+```
+	3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回锯齿形层序遍历如下：
+
+```
+[
+  [3],
+  [20,9],
+  [15,7]
+]
+```
+
+
+
+**解题思路：**
+
+基本层序遍历，奇数层顺序，偶数层逆序，使用双端队列
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
+        vector<vector<int>> res;
+        if (!root)
+            return res;
+        
+        int level = 0;
+        deque<TreeNode*> dq;
+        dq.push_back(root);
+
+        while (!dq.empty())
+        {
+            ++level;
+            int level_size = dq.size();
+            vector<int> tmp;
+            if (level % 2 == 1)
+            {
+                while (level_size-- > 0)
+                {
+                    TreeNode* node = dq.front();
+                    dq.pop_front();
+                    tmp.push_back(node->val);
+                    if (node->left)
+                        dq.push_back(node->left);
+                    if (node->right)
+                        dq.push_back(node->right);
+                }
+            }
+            else
+            {
+                while (level_size-- > 0)
+                {
+                    TreeNode* node = dq.back();
+                    dq.pop_back();
+                    tmp.push_back(node->val);
+                    if (node->right)
+                        dq.push_front(node->right);
+                    if (node->left)
+                        dq.push_front(node->left);
+                }
+            }
+            res.push_back(tmp);
+            tmp.clear();
+        }
+        return res;
+    }
+};
+```
+
+
+
+
+
 ## 0104. 二叉树的最大深度
 
 ### 题目：
@@ -12250,6 +12355,210 @@ public:
             ++level;
         }
         return level;
+    }
+};
+```
+
+
+
+
+
+## 0105. 从前序与中序遍历序列构造二叉树
+
+### 题目：
+
+给定一棵树的前序遍历 `preorder` 与中序遍历 `inorder`。请构造二叉树并返回其根节点。
+
+**示例 1:**
+
+![leetcode_105](F:\C++\刷题\Img\leetcode_105.jpg)
+
+```
+Input: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+Output: [3,9,20,null,null,15,7]
+```
+
+**示例 2:**
+
+```
+Input: preorder = [-1], inorder = [-1]
+Output: [-1]
+```
+
+**提示:**
+
+- `1 <= preorder.length <= 3000`
+- `inorder.length == preorder.length`
+- `-3000 <= preorder[i], inorder[i] <= 3000`
+- `preorder` 和 `inorder` 均无重复元素
+- `inorder` 均出现在 `preorder`
+- `preorder` 保证为二叉树的前序遍历序列
+- `inorder` 保证为二叉树的中序遍历序列
+
+
+
+**解题思路：**
+
+思路一：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：迭代
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+private:
+    unordered_map<int, int> map;
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        for (int i = 0; i < inorder.size(); ++i)
+            map[inorder[i]] = i;
+        return _buildTree(preorder, inorder, 0, preorder.size() - 1, 0, inorder.size() - 1);
+    }
+
+    TreeNode* _buildTree(vector<int>& preorder, vector<int>& inorder, int pre_left, int pre_right, int in_left, int in_right) {
+        if (pre_left > pre_right)
+            return nullptr;
+        
+        int i = map[preorder[pre_left]];
+        int left_size = i - in_left;
+
+        TreeNode* root = new TreeNode(preorder[pre_left]);
+        root->left = _buildTree(preorder, inorder, pre_left + 1, pre_left + left_size, in_left, i - 1);
+        root->right = _buildTree(preorder, inorder, pre_left + left_size + 1, pre_right, i + 1, in_right);
+
+        return root;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+private:
+    unordered_map<int, int> map;
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        if (!preorder.size())
+            return nullptr;
+        TreeNode* root = new TreeNode(preorder[0]);
+        stack<TreeNode*> stk;
+        stk.push(root);
+        int inorderIndex = 0;
+        for (int i = 1; i < preorder.size(); ++i)
+        {
+            int preorderVal = preorder[i];
+            TreeNode* node = stk.top();
+            if (node->val != inorder[inorderIndex])
+            {
+                node->left = new TreeNode(preorderVal);
+                stk.push(node->left);
+            }
+            else
+            {
+                while (!stk.empty() && stk.top()->val == inorder[inorderIndex])
+                {
+                    node = stk.top();
+                    stk.pop();
+                    ++inorderIndex;
+                }
+                node->right = new TreeNode(preorderVal);
+                stk.push(node->right);
+            }
+        }
+        return root;
+    }
+};
+```
+
+
+
+
+
+## 0108. 将有序数组转换为二叉搜索树
+
+### 题目：
+
+给你一个整数数组 `nums` ，其中元素已经按 **升序** 排列，请你将其转换为一棵 **高度平衡** 二叉搜索树。
+
+**高度平衡** 二叉树是一棵满足「每个节点的左右两个子树的高度差的绝对值不超过 1 」的二叉树。
+
+**示例 1：**
+
+![leetcode_108_1](F:\C++\刷题\Img\leetcode_108_1.jpg)
+
+```
+输入：nums = [-10,-3,0,5,9]
+输出：[0,-3,9,-10,null,5]
+解释：[0,-10,5,null,-3,null,9] 也将被视为正确答案：
+```
+
+![leetcode_108_2](F:\C++\刷题\Img\leetcode_108_2.jpg)
+
+**示例2：**
+
+![leetcode_108_3](F:\C++\刷题\Img\leetcode_108_3.jpg)
+
+```
+输入：nums = [1,3]
+输出：[3,1]
+解释：[1,3] 和 [3,1] 都是高度平衡二叉搜索树。
+```
+
+**提示：**
+
+- `1 <= nums.length <= 10^4`
+- `-10^4 <= nums[i] <= 10^4`
+- `nums` 按 **严格递增** 顺序排列
+
+
+
+**解题思路：**
+
+​		// 总是选择中间位置左边的数字作为根节点
+​        // int mid = ((left + right) >> 1);
+​        // 总是选择中间位置右边的数字作为根节点
+​        // int mid = ((left + right + 1) >> 1);
+​        // 总是选择中间位置左右随机的数字作为根节点
+​        int mid = ((left + right + rand() % 2) >> 1);
+
+时间复杂度：O(n)
+
+空间复杂度：O(logn)  不考虑返回值的空间，只考虑递归栈的使用
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    TreeNode* sortedArrayToBST(vector<int>& nums) {
+        return _sortedArrayToBST(nums, 0, nums.size() - 1);
+    }
+
+    TreeNode* _sortedArrayToBST(vector<int>& nums, int left, int right) 
+    {
+        if (left > right)
+            return nullptr;
+        // 总是选择中间位置左边的数字作为根节点
+        // int mid = ((left + right) >> 1);
+        // 总是选择中间位置右边的数字作为根节点
+        // int mid = ((left + right + 1) >> 1);
+        // 总是选择中间位置左右随机的数字作为根节点
+        int mid = ((left + right + rand() % 2) >> 1);
+        TreeNode* root = new TreeNode(nums[mid]);
+
+        root->left = _sortedArrayToBST(nums, left, mid - 1);
+        root->right = _sortedArrayToBST(nums, mid + 1, right);
+        return root;
     }
 };
 ```
