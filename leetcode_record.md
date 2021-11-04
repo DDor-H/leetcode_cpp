@@ -12677,6 +12677,158 @@ public:
 
 
 
+## 0113. 路径总和Ⅱ
+
+### 题目：
+
+给你二叉树的根节点 `root` 和一个整数目标和 `targetSum` ，找出所有 **从根节点到叶子节点** 路径总和等于给定目标和的路径。
+
+**叶子节点** 是指没有子节点的节点。
+
+**示例 1：**
+
+![leetcode_113_2](F:\C++\刷题\Img\leetcode_113_2.jpg)
+
+```
+输入：root = [5,4,8,11,null,13,4,7,2,null,null,5,1], targetSum = 22
+输出：[[5,4,11,2],[5,8,4,5]]
+```
+
+**示例 2：**
+
+![leetcode_113_2](F:\C++\刷题\Img\leetcode_113_2.jpg)
+
+```
+输入：root = [1,2,3], targetSum = 5
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：root = [1,2], targetSum = 0
+输出：[]
+```
+
+**提示：**
+
+- 树中节点总数在范围 `[0, 5000]` 内
+- `-1000 <= Node.val <= 1000`
+- `-1000 <= targetSum <= 1000`
+
+
+
+**解题思路：**
+
+思路一：深度遍历
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n)
+
+思路二：广度遍历
+
+使用unordered_map<TreeNode*, TreeNode*> parent;记录路径
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> pathSum(TreeNode* root, int targetSum) {
+        vector<vector<int>> ans;
+        vector<int> path;
+        _pathSum(root, targetSum, ans, path);
+        return ans;
+    }
+
+    void _pathSum(TreeNode* node, int targetSum, vector<vector<int>>& ans, vector<int>& path) 
+    {
+        if (node == nullptr)
+            return;
+
+        path.push_back(node->val);
+        targetSum -= node->val;
+        if (targetSum == 0 && node->left == nullptr && node->right == nullptr)
+            ans.push_back(path);
+
+        _pathSum(node->left, targetSum, ans, path);
+        _pathSum(node->right, targetSum, ans, path);
+        path.pop_back();
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+private:
+    vector<vector<int>> ans;
+    unordered_map<TreeNode*, TreeNode*> parent;
+public:
+    vector<vector<int>> pathSum(TreeNode* root, int targetSum) {
+        if (root == nullptr)
+            return ans;
+
+        queue<TreeNode*> qu;
+        queue<int> qu_sum;
+        qu.push(root);
+        qu_sum.push(0);
+
+        while (!qu.empty())
+        {
+            TreeNode* node = qu.front();
+            qu.pop();
+            int rec = qu_sum.front() + node->val;
+            qu_sum.pop();
+
+            if (node->left == nullptr && node->right == nullptr)
+            {
+                if (rec == targetSum)
+                    getPath(node);
+            }
+            else
+            {
+                if (node->left != nullptr)
+                {
+                    parent[node->left] = node;
+                    qu.push(node->left);
+                    qu_sum.push(rec);
+                }
+                if (node->right != nullptr)
+                {
+                    parent[node->right] = node;
+                    qu.push(node->right);
+                    qu_sum.push(rec);
+                }
+            }
+        }
+        return ans;
+    }
+
+    void getPath(TreeNode* node) 
+    {
+        vector<int> path;
+        while (node != nullptr)
+        {
+            path.push_back(node->val);
+            node = parent[node];
+        }
+        reverse(path.begin(), path.end());
+        ans.push_back(path);
+    }
+};
+```
+
+
+
+
+
 ## 0118. 杨辉三角
 
 ### 题目：
@@ -13847,6 +13999,83 @@ public:
             x = ((x << 2) | bin[s[i + L - 1]]) & ((1 << 2 * L) - 1);
             if (++map[x] == 2)
                 ans.push_back(s.substr(i, L));
+        }
+        return ans;
+    }
+};
+```
+
+
+
+
+
+## 0199. 二叉树的右视图
+
+### 题目：
+
+给定一个二叉树的 **根节点** `root`，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。
+
+**示例 1:**
+
+![leetcode_199](F:\C++\刷题\Img\leetcode_199.jpg)
+
+```
+输入: [1,2,3,null,5,null,4]
+输出: [1,3,4]
+```
+
+**示例 2:**
+
+```
+输入: [1,null,3]
+输出: [1,3]
+```
+
+**示例 3:**
+
+```
+输入: []
+输出: []
+```
+
+**提示:**
+
+- 二叉树的节点个数的范围是 `[0,100]`
+- `-100 <= Node.val <= 100` 
+
+**解题思路：**
+
+层序遍历，从右向左只记录第一个
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        vector<int> ans;
+        if (!root)
+            return ans;
+        queue<TreeNode*> qu;
+        qu.push(root);
+        while (!qu.empty())
+        {
+            int lens = qu.size();
+            for (int i = 0; i < lens; ++i)
+            {
+                TreeNode* node = qu.front();
+                qu.pop();
+                if (i == 0)
+                    ans.push_back(node->val);
+                if (node->right != nullptr)
+                    qu.push(node->right);
+                if (node->left != nullptr)
+                    qu.push(node->left);
+            }
         }
         return ans;
     }
@@ -15638,6 +15867,157 @@ public:
             }
         }
         return n - ans;
+    }
+};
+```
+
+
+
+
+
+## 0450. 删除二叉搜索树中的节点
+
+### 题目：
+
+给定一个二叉搜索树的根节点 `root` 和一个值 `key`，删除二叉搜索树中的 `key` 对应的节点，并保证二叉搜索树的性质不变。返回二叉搜索树（有可能被更新）的根节点的引用。
+
+一般来说，删除节点可分为两个步骤：
+
+- 首先找到需要删除的节点；
+- 如果找到了，删除它。
+
+**示例 1:**
+
+![leetcode_450_1](F:\C++\刷题\Img\leetcode_450_1.jpg)
+
+```
+输入：root = [5,3,6,2,4,null,7], key = 3
+输出：[5,4,6,2,null,null,7]
+解释：给定需要删除的节点值是 3，所以我们首先找到 3 这个节点，然后删除它。
+一个正确的答案是 [5,4,6,2,null,null,7], 如下图所示。
+另一个正确答案是 [5,2,6,null,4,null,7]。
+```
+
+![leetcode_450_2](F:\C++\刷题\Img\leetcode_450_2.jpg)
+
+**示例 2:**
+
+```
+输入: root = [5,3,6,2,4,null,7], key = 0
+输出: [5,3,6,2,4,null,7]
+解释: 二叉树不包含值为 0 的节点
+```
+
+**示例 3:**
+
+```
+输入: root = [], key = 0
+输出: []
+```
+
+**提示:**
+
+- 节点数的范围 `[0, 10^4]`.
+- `-10^5 <= Node.val <= 10^5`
+- 节点值唯一
+- `root` 是合法的二叉搜索树
+- `-10^5 <= key <= 10^5`
+
+
+
+**解题思路：**
+
+思路一：找到要删的节点，若为叶子节点，直接删，否则找到左或者右节点的next点，并复制当前节点，然后递归删除那个next节点；
+
+时间复杂度：O(logN)  
+
+空间复杂度：O(H)  
+
+思路二：找到要删的节点，若为叶子节点，直接删，若左子树为空，返回右子树，若右为空，返回左，若都不为空，随便找一个next节点，并调整结点指向；
+
+![leetcode_450_3](F:\C++\刷题\Img\leetcode_450_3.jpg)
+
+时间复杂度：O(H)  
+
+空间复杂度：O(H)  
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    TreeNode* deleteNode(TreeNode* root, int key) {
+        if (root == nullptr)
+            return nullptr;
+        if (root->val > key)
+            root->left = deleteNode(root->left, key);
+        else if (root->val < key)
+            root->right = deleteNode(root->right, key);
+        else
+        {
+            if (root->left == nullptr && root->right == nullptr)
+                root = nullptr;
+            else
+            {
+                // 这两个条件只能满足一个
+                if (root->left != nullptr)
+                {
+                    root->val = getLeftNextVal(root);
+                    root->left = deleteNode(root->left, root->val);
+                }
+                else if (root->right != nullptr)
+                {
+                    root->val = getRightNextVal(root);
+                    root->right = deleteNode(root->right, root->val);
+                }
+            }
+        }
+        return root;
+    }
+
+    int getRightNextVal(TreeNode* node)  // successor
+    {
+        node = node->right;
+        while (node->left != nullptr) 
+            node = node->left;
+        return node->val;
+    }
+
+    int getLeftNextVal(TreeNode* node)  // predecessor
+    {
+        node = node->left;
+        while (node->right != nullptr) 
+            node = node->right;
+        return node->val;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    TreeNode* deleteNode(TreeNode* root, int key) {
+        if (root == nullptr)
+            return nullptr;
+        if (root->val > key)
+            root->left = deleteNode(root->left, key);
+        else if (root->val < key)
+            root->right = deleteNode(root->right, key);
+        else
+        {
+            if (!root->left)
+                return root->right;
+            if (!root->right)
+                return root->left;
+            TreeNode* node = root->right;
+            while (node->left != nullptr)
+                node = node->left;
+            node->left = root->left;
+            root = root->right;
+        }
+        return root;
     }
 };
 ```
