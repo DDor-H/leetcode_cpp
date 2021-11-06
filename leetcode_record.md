@@ -15125,6 +15125,136 @@ public:
 
 
 
+## 0236. 二叉树的最近公共祖先
+
+### 题目：
+
+给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。
+
+百度百科中最近公共祖先的定义为：“对于有根树 T 的两个节点 p、q，最近公共祖先表示为一个节点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（**一个节点也可以是它自己的祖先**）。”
+
+**示例 1：**
+
+![leetcode_236_1](F:\C++\刷题\Img\leetcode_236_1.png)
+
+```
+输入：root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1
+输出：3
+解释：节点 5 和节点 1 的最近公共祖先是节点 3 。
+```
+
+**示例 2：**
+
+![leetcode_236_2](F:\C++\刷题\Img\leetcode_236_2.png)
+
+```
+输入：root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4
+输出：5
+解释：节点 5 和节点 4 的最近公共祖先是节点 5 。因为根据定义最近公共祖先节点可以为节点本身。
+```
+
+**示例 3：**
+
+```
+输入：root = [1,2], p = 1, q = 2
+输出：1
+```
+
+**提示：**
+
+- 树中节点数目在范围 `[2, 10^5]` 内。
+- `-10^9 <= Node.val <= 10^9`
+- 所有 `Node.val` 互不相同 。
+- `p != q`
+- `p` 和 `q` 均存在于给定的二叉树中。
+
+**解题思路：**
+
+思路一：递归
+
+若当前节点是目标节点，则返回当前节点，否则返回空
+
+若左分支有，则返回左分支返回的
+
+若右分支有，则返回右分支返回的
+
+若左右分支都不为空，则返回当前节点（公共祖先）
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)  递归栈
+
+思路二：记录父节点
+
+先记录所有节点的父节点，然后顺着p一路向上，置为true，再顺着q一路向上，遇到第一个true的就是公共父节点；
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (root == NULL || root == p || root == q)
+            return root;
+        TreeNode* left = lowestCommonAncestor(root->left, p, q);
+        TreeNode* right = lowestCommonAncestor(root->right, p, q);
+        if (left != NULL && right != NULL)
+            return root;
+        return left != NULL ? left : right;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+private:
+    unordered_map<int, TreeNode*> parent;
+    unordered_map<int, bool> vis;
+public:
+    void dfs(TreeNode* root)
+    {
+        if (root->left != NULL)
+        {
+            parent[root->left->val] = root;
+            dfs(root->left);
+        }
+        if (root->right != NULL)
+        {
+            parent[root->right->val] = root;
+            dfs(root->right);
+        }
+    }
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (root == NULL || root == p || root == q)
+            return root;
+        dfs(root);
+        while (p != NULL)
+        {
+            vis[p->val] = true;
+            p = parent[p->val];
+        }
+        while (q != NULL)
+        {
+            if (vis[q->val]) return q;
+            q = parent[q->val];
+        }
+        return NULL;
+    }
+};
+```
+
+
+
+
+
 ## 0238. 除自身以外数组的乘积
 
 ### 题目：
@@ -15486,6 +15616,134 @@ public:
             i = j + 1;
         }
         return i >= m;  // 最后一个空格符，就会 = ，最后一个非空格符，就会 > 
+    }
+};
+```
+
+
+
+
+
+## 0297. 二叉树的序列化与反序列化
+
+### 题目：
+
+序列化是将一个数据结构或者对象转换为连续的比特位的操作，进而可以将转换后的数据存储在一个文件或者内存中，同时也可以通过网络传输到另一个计算机环境，采取相反方式重构得到原数据。
+
+请设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。
+
+**示例 1：**
+
+![leetcode_297](F:\C++\刷题\Img\leetcode_297.jpg)
+
+```
+输入：root = [1,2,3,null,null,4,5]
+输出：[1,2,3,null,null,4,5]
+```
+
+**示例 2：**
+
+```
+输入：root = []
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：root = [1]
+输出：[1]
+```
+
+**示例 4：**
+
+```
+输入：root = [1,2]
+输出：[1,2]
+```
+
+**提示：**
+
+- 树中结点数在范围 `[0, 10^4]` 内
+- `-1000 <= Node.val <= 1000`
+
+**解题思路：**
+
+编码：先序、中序、后续递归
+
+解码：按照 “，”，切分，然后构造树
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+
+class Codec {
+public:
+
+    // Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        string str;
+        _serialize(root, str);
+        return str;
+    }
+    void _serialize(TreeNode* node, string& str)
+    {
+        if (node == NULL)
+            str += "None,";
+        else
+        {
+            str += to_string(node->val) + ",";
+            _serialize(node->left, str);
+            _serialize(node->right, str);
+        }
+    }
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        string str;
+        list<string> dataArr;
+        for (auto& e : data)
+        {
+            if (e == ',')
+            {
+                dataArr.push_back(str);
+                str.clear();
+            }
+            else
+                str.push_back(e);
+        }
+        if (!str.empty())
+        {
+            dataArr.push_back(str);
+            str.clear();
+        }
+        return _deserialize(dataArr);
+    }
+
+    TreeNode* _deserialize(list<string>& dataArr) {
+        if (dataArr.front() == "None")
+        {
+            dataArr.erase(dataArr.begin());
+            return NULL;
+        }
+        TreeNode* root = new TreeNode(stoi(dataArr.front()));
+        dataArr.erase(dataArr.begin());
+        root->left = _deserialize(dataArr);
+        root->right = _deserialize(dataArr);
+        return root;
     }
 };
 ```
