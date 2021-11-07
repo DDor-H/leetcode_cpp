@@ -17687,6 +17687,222 @@ public:
 
 
 
+## 0841. 钥匙和房间
+
+### 题目：
+
+有 `N` 个房间，开始时你位于 `0` 号房间。每个房间有不同的号码：`0，1，2，...，N-1`，并且房间里可能有一些钥匙能使你进入下一个房间。
+
+在形式上，对于每个房间 i 都有一个钥匙列表 `rooms[i]`，每个钥匙 `rooms[i][j]` 由 `[0,1，...，N-1]` 中的一个整数表示，其中 `N = rooms.length`。 钥匙 `rooms[i][j] = v` 可以打开编号为 `v` 的房间。
+
+最初，除 `0` 号房间外的其余所有房间都被锁住。
+
+你可以自由地在房间之间来回走动。
+
+如果能进入每个房间返回 `true`，否则返回 `false`。
+
+**示例 1：**
+
+```
+输入: [[1],[2],[3],[]]
+输出: true
+解释:  
+我们从 0 号房间开始，拿到钥匙 1。
+之后我们去 1 号房间，拿到钥匙 2。
+然后我们去 2 号房间，拿到钥匙 3。
+最后我们去了 3 号房间。
+由于我们能够进入每个房间，我们返回 true。
+```
+
+**示例 2：**
+
+```
+输入：[[1,3],[3,0,1],[2],[0]]
+输出：false
+解释：我们不能进入 2 号房间。
+```
+
+**提示：**
+
+- `1 <= rooms.length <= 1000`
+- `0 <= rooms[i].length <= 1000`
+- 所有房间中的钥匙数量总计不超过 `3000`。
+
+
+
+**解题思路：**
+
+思路一：广度优先
+
+时间复杂度：O(m + n)  其中 n是房间的数量，m是所有房间中的钥匙数量的总数。
+
+空间复杂度：O(n)   其中 n是房间的数量。主要为栈空间的开销。
+
+思路二：深度优先
+
+时间复杂度：O(m + n)  
+
+空间复杂度：O(n)  
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool canVisitAllRooms(vector<vector<int>>& rooms) {
+        int n = rooms.size();
+        vector<bool> vis(n, false);
+        queue<int> qu;
+        vis[0] = true;
+        qu.push(0);
+        int num = 1;
+        while (!qu.empty())
+        {
+            int room_idx = qu.front();
+            qu.pop();
+            for (int i = 0; i < rooms[room_idx].size(); ++i)
+            {
+                if (!vis[rooms[room_idx][i]])
+                {
+                    vis[rooms[room_idx][i]] = true;
+                    qu.push(rooms[room_idx][i]);
+                    ++num;
+                }
+            }
+        }
+        return num == n;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    void dfs(vector<vector<int>>& rooms, int idx, vector<bool>& vis, int& num)
+    {
+        vis[idx] = true;
+        ++num;
+        for (auto& e : rooms[idx])
+        {
+            if (!vis[e])
+                dfs(rooms, e, vis, num);
+        }
+    }
+
+    bool canVisitAllRooms(vector<vector<int>>& rooms) {
+        int n = rooms.size();
+        vector<bool> vis(n, false);
+        int num = 0;
+        dfs(rooms, 0, vis, num);
+        return num == n;
+    }
+};
+```
+
+
+
+
+
+## 0997. 找到小镇的法官
+
+### 题目：
+
+在一个小镇里，按从 `1` 到 `n` 为 `n` 个人进行编号。传言称，这些人中有一个是小镇上的秘密法官。
+
+如果小镇的法官真的存在，那么：
+
+1. 小镇的法官不相信任何人。
+2. 每个人（除了小镇法官外）都信任小镇的法官。
+3. 只有一个人同时满足条件 `1` 和条件 `2` 。
+
+给定数组 `trust`，该数组由信任对 `trust[i] = [a, b]` 组成，表示编号为 `a` 的人信任编号为 `b` 的人。
+
+如果小镇存在秘密法官并且可以确定他的身份，请返回该法官的编号。否则，返回 `-1`。
+
+**示例 1：**
+
+```
+输入：n = 2, trust = [[1,2]]
+输出：2
+```
+
+**示例 2：**
+
+```
+输入：n = 3, trust = [[1,3],[2,3]]
+输出：3
+```
+
+**示例 3：**
+
+```
+输入：n = 3, trust = [[1,3],[2,3],[3,1]]
+输出：-1
+```
+
+**示例 4：**
+
+```
+输入：n = 3, trust = [[1,2],[2,3]]
+输出：-1
+```
+
+**示例 5：**
+
+```
+输入：n = 4, trust = [[1,3],[1,4],[2,3],[2,4],[4,3]]
+输出：3
+```
+
+**提示：**
+
+- `1 <= n <= 1000`
+- `0 <= trust.length <= 10^4`
+- `trust[i].length == 2`
+- `trust[i]` 互不相同
+- `trust[i][0] != trust[i][1]`
+- `1 <= trust[i][0], trust[i][1] <= n`
+
+**解题思路：**
+
+计算每个人的出度入度
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int findJudge(int n, vector<vector<int>>& trust) {
+        if (trust.size() == 0)
+            return n == 1 ? 1 : -1;
+        vector<int> in(n + 1, 0);
+        vector<int> out(n + 1, 0);
+        for (auto& e : trust)
+        {
+            ++in[e[1]];
+            ++out[e[0]];
+        }
+            
+        for (int i = 1; i <= n; ++i)
+        {
+            if (in[i] == n - 1 && out[i] == 0)
+                return i;
+        }
+        return -1;
+    }
+};
+```
+
+
+
+
+
 ## 1249. 移除无效的括号
 
 ### 题目：
@@ -17787,6 +18003,79 @@ public:
         {
             if (s[i] != '.')
                 ans += s[i];
+        }
+        return ans;
+    }
+};
+```
+
+
+
+
+
+## 1557. 可以到达所有点的最小点数目
+
+### 题目：
+
+给你一个 **有向无环图** ， `n` 个节点编号为 `0` 到 `n-1` ，以及一个边数组 `edges` ，其中 `edges[i] = [fromi, toi]` 表示一条从点  `fromi` 到点 `toi` 的有向边。
+
+找到最小的点集使得从这些点出发能到达图中所有点。题目保证解存在且唯一。
+
+你可以以任意顺序返回这些节点编号。
+
+**示例 1：**
+
+![leetcode_1557_1](F:\C++\刷题\Img\leetcode_1557_1.png)
+
+```
+输入：n = 6, edges = [[0,1],[0,2],[2,5],[3,4],[4,2]]
+输出：[0,3]
+解释：从单个节点出发无法到达所有节点。从 0 出发我们可以到达 [0,1,2,5] 。从 3 出发我们可以到达 [3,4,2,5] 。所以我们输出 [0,3] 。
+```
+
+**示例 2：**
+
+![leetcode_1557_2](F:\C++\刷题\Img\leetcode_1557_2.png)
+
+```
+输入：n = 5, edges = [[0,1],[2,1],[3,1],[1,4],[2,4]]
+输出：[0,2,3]
+解释：注意到节点 0，3 和 2 无法从其他节点到达，所以我们必须将它们包含在结果点集中，这些点都能到达节点 1 和 4 。
+```
+
+**提示：**
+
+- `2 <= n <= 10^5`
+- `1 <= edges.length <= min(10^5, n * (n - 1) / 2)`
+- `edges[i].length == 2`
+- `0 <= fromi, toi < n`
+- 所有点对 `(fromi, toi)` 互不相同。
+
+**解题思路：**
+
+寻找入度为0的点
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<int> findSmallestSetOfVertices(int n, vector<vector<int>>& edges) 
+    {
+        vector<int> in(n, 0);
+        vector<int> ans;
+        for (auto& e : edges)
+            ++in[e[1]];
+        for (int i = 0; i < n; ++i)
+        {
+            if (in[i] == 0)
+                ans.push_back(i);
         }
         return ans;
     }
