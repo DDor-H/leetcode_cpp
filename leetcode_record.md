@@ -14566,6 +14566,143 @@ public:
 
 
 
+## 0215. 数组中的第K个最大元素
+
+### 题目：
+
+给定整数数组 `nums` 和整数 `k`，请返回数组中第 `k` 个最大的元素。
+
+请注意，你需要找的是数组排序后的第 `k` 个最大的元素，而不是第 `k` 个不同的元素。
+
+**示例 1:**
+
+```
+输入: [3,2,1,5,6,4] 和 k = 2
+输出: 5
+```
+
+**示例 2:**
+
+```
+输入: [3,2,3,1,2,4,5,5,6] 和 k = 4
+输出: 4
+```
+
+**提示：**
+
+`1 <= k <= nums.length <= 10^4`
+`-10^4 <= nums[i] <= 10^4`
+
+**解题思路：**
+
+思路一：调用API排序、优先队列
+
+时间复杂度：O(nlogn)
+
+空间复杂度：O(logn)
+
+思路二：快速选择排序
+
+时间复杂度：O(n)
+
+空间复杂度：O(logn)
+
+思路三：堆排
+
+时间复杂度：O(nlogn)
+
+空间复杂度：O(logn)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        priority_queue<int> pq(nums.begin(), nums.end());
+        while (--k)
+            pq.pop();
+        return pq.top();
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        srand(time(0));
+        return quicklySelect(nums, 0, nums.size() - 1, nums.size() - k);
+    }
+
+    int quicklySelect(vector<int>& nums, int left, int right, int kth)
+    {
+        int q = randomPartition(nums, left, right);
+        if (q == kth)
+            return nums[q];
+        return q > kth ? quicklySelect(nums, left, q - 1, kth) : quicklySelect(nums, q + 1, right, kth);
+    }
+
+    int randomPartition(vector<int>& nums, int left, int right)
+    {
+        int p = rand() % (right - left + 1) + left;
+        swap(nums[p], nums[right]);
+
+        int x = nums[right], i = left - 1;
+        for (int j = left; j < right; ++j)
+        {
+            if (nums[j] <= x)
+                swap(nums[++i], nums[j]);
+        }
+        swap(nums[i + 1], nums[right]);
+        return i + 1;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        int heapSize = nums.size();
+        buildHeapify(nums, heapSize);
+        for (int i = 0; i < k - 1; ++i)
+        {
+            swap(nums[0], nums[heapSize - 1]);
+            maxHeapify(nums, 0, --heapSize);
+        }
+        return nums[0];
+    }
+
+    void buildHeapify(vector<int>& nums, int heapSize)
+    {
+        for (int i = heapSize / 2; i >= 0; --i)
+            maxHeapify(nums, i, heapSize);
+    }
+    void maxHeapify(vector<int>& nums, int idx, int heapSize)
+    {
+        int left = 2 * idx + 1, right = 2 * idx + 2, largest = idx;
+        if (left < heapSize && nums[left] > nums[largest])
+            largest = left;
+        if (right < heapSize && nums[right] > nums[largest])
+            largest = right;
+        if (largest != idx)
+        {
+            swap(nums[idx], nums[largest]);
+            maxHeapify(nums, largest, heapSize);
+        }
+    }
+};
+```
+
+
+
+
+
 ## 0217. 存在重复元素
 
 ### 题目：
@@ -15910,6 +16047,163 @@ public:
             }
         }
         return false;
+    }
+};
+```
+
+
+
+
+
+## 0347. 前K个高频元素
+
+### 题目：
+
+给你一个整数数组 `nums` 和一个整数 `k` ，请你返回其中出现频率前 `k` 高的元素。你可以按 **任意顺序** 返回答案。
+
+**示例 1:**
+
+```
+输入: nums = [1,1,1,2,2,3], k = 2
+输出: [1,2]
+```
+
+**示例 2:**
+
+```
+输入: nums = [1], k = 1
+输出: [1]
+```
+
+**提示：**
+
+- `1 <= nums.length <= 10^5`
+- `k` 的取值范围是 [1, 数组中不相同的元素的个数]
+- 题目数据保证答案唯一，换句话说，数组中前 `k` 个高频元素的集合是唯一的
+
+**进阶**：你所设计算法的时间复杂度 **必须** 优于 `O(n log n)` ，其中 `n` 是数组大小。
+
+**解题思路：**
+
+思路一：hash表 + API排序
+
+思路二：hash表 + API优先队列
+
+思路三：hash表 + 快速选择排序
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    static bool function(pair<int, int> x, pair<int, int> y)
+    {
+        return (x.second > y.second);
+    }
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        unordered_map<int, int> map;
+        for (int i = 0; i < nums.size(); ++i)
+            ++map[nums[i]];
+        vector<int> v;
+        vector<pair<int, int>> tmp;
+        for (auto& e : map)
+            tmp.push_back(e);
+        sort(tmp.begin(), tmp.end(), function);
+        for (auto e = tmp.begin(); e != tmp.end(); ++e)
+        {
+            if (k-- == 0)
+                break;
+            v.push_back(e->first);
+        }
+            
+        return v;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    static bool function(pair<int, int> x, pair<int, int> y)
+    {
+        return (x.second > y.second);
+    }
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        unordered_map<int, int> map;
+        for (int i = 0; i < nums.size(); ++i)
+            ++map[nums[i]];
+        // 有序优先级队列定义方式
+        priority_queue<pair<int, int>, vector<pair<int, int>>, decltype(&function)> q(function);
+        for (auto& [num, count] : map)
+        {
+            if (q.size() == k)
+            {
+                if (q.top().second < count)
+                {
+                    q.pop();
+                    q.push({num, count});
+                }
+            }
+            else
+                q.push({num, count});
+        }
+        vector<int> v;
+        while (!q.empty())
+        {
+            v.push_back(q.top().first);
+            q.pop();
+        }
+            
+        return v;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+// 快速选择排序
+class Solution {
+public:
+    int randomPartition(vector<pair<int, int>>& tmp, int left, int right)
+    {
+        int p = rand() & (right - left + 1) + left;
+        swap(tmp[p], tmp[right]);
+
+        int x = tmp[right].second, i = left - 1;
+        for (int j = left; j < right; ++j)
+        {
+            if (tmp[j].second <= x)
+                swap(tmp[++i], tmp[j]);
+        }
+        swap(tmp[i + 1], tmp[right]);
+        return i + 1;
+    }
+
+    void mysort(vector<pair<int, int>>& tmp, int left, int right, int k)
+    {
+        int q = randomPartition(tmp, left, right);
+        if (q > k)
+            mysort(tmp, left, q - 1, k);
+        else if (q < k)
+            mysort(tmp, q + 1, right, k);
+    }
+    
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        srand(time(0));
+        unordered_map<int, int> map;
+        for (int i = 0; i < nums.size(); ++i)
+            ++map[nums[i]];
+        vector<int> v;
+        vector<pair<int, int>> tmp;
+        for (auto& e : map)
+            tmp.push_back(e);
+        mysort(tmp, 0, tmp.size() - 1, tmp.size() - k);
+        for (int i = 0; i < k; ++i)
+            v.push_back(tmp[tmp.size() - i - 1].first);
+        return v;
     }
 };
 ```
