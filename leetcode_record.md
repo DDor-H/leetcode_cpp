@@ -16169,7 +16169,7 @@ class Solution {
 public:
     int randomPartition(vector<pair<int, int>>& tmp, int left, int right)
     {
-        int p = rand() & (right - left + 1) + left;
+        int p = rand() % (right - left + 1) + left;
         swap(tmp[p], tmp[right]);
 
         int x = tmp[right].second, i = left - 1;
@@ -16943,6 +16943,132 @@ public:
             root = root->right;
         }
         return root;
+    }
+};
+```
+
+
+
+
+
+## 0451. 根据字符出现频率排序
+
+### 题目：
+
+给定一个字符串，请将字符串里的字符按照出现的频率降序排列。
+
+**示例 1:**
+
+```
+输入:
+"tree"
+
+输出:
+"eert"
+
+解释:
+'e'出现两次，'r'和't'都只出现一次。
+因此'e'必须出现在'r'和't'之前。此外，"eetr"也是一个有效的答案。
+```
+
+**示例 2:**
+
+```
+输入:
+"cccaaa"
+
+输出:
+"cccaaa"
+
+解释:
+'c'和'a'都出现三次。此外，"aaaccc"也是有效的答案。
+注意"cacaca"是不正确的，因为相同的字母必须放在一起。
+```
+
+**示例 3:**
+
+```
+输入:
+"Aabb"
+
+输出:
+"bbAa"
+
+解释:
+此外，"bbaA"也是一个有效的答案，但"Aabb"是不正确的。
+注意'A'和'a'被认为是两种不同的字符。
+```
+
+**解题思路：**
+
+思路一：按照字母频率排序
+
+时间复杂度：O(n + klogk)     遍历字符串O(n)  + 排序 O(klogk)
+
+空间复杂度：O(n + k)  
+
+思路二：桶排序
+
+使用一个桶（vector），下表对应出现的频率，存储的值是对应频率的字符
+
+时间复杂度：O(n + k)  
+
+空间复杂度：O(n + k)  
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    string frequencySort(string s) {
+        if (s.length() <= 1)
+            return s;
+        unordered_map<char, int> map;
+        for (char& e : s)
+            ++map[e];
+        vector<pair<char, int>> tmp;
+        for (auto& e : map)
+            tmp.push_back(e);
+        sort(tmp.begin(), tmp.end(), [](const pair<char, int>& m1, const pair<char, int>& m2){
+            return m1.second > m2.second;
+        });
+        string ret;
+        for (auto& [ch, count] : tmp)
+        {
+            for (int i = 0; i < count; ++i)
+                ret += ch;
+        }
+        return ret;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    string frequencySort(string s) {
+        if (s.length() <= 1)
+            return s;
+        unordered_map<char, int> map;
+        int maxFreq = 0;
+        for (char& e : s)
+            maxFreq = max(maxFreq, ++map[e]);
+        vector<string> buckets(maxFreq + 1);
+        for (auto& e : map)
+            buckets[e.second].push_back(e.first);
+        string ret;
+        for (int i = maxFreq; i > 0; --i)
+        {
+            string& bucket = buckets[i];
+            for (char& e : bucket)
+            {
+                for (int k = 0; k < i; ++k)
+                    ret += e;
+            }
+        }
+        return ret;
     }
 };
 ```
@@ -18091,6 +18217,146 @@ public:
         int num = 0;
         dfs(rooms, 0, vis, num);
         return num == n;
+    }
+};
+```
+
+
+
+
+
+## 0973. 最接近原点的K个点
+
+### 题目：
+
+我们有一个由平面上的点组成的列表 `points`。需要从中找出 K 个距离原点 `(0, 0)` 最近的点。
+
+（这里，平面上两点之间的距离是欧几里德距离。）
+
+你可以按任何顺序返回答案。除了点坐标的顺序之外，答案确保是唯一的。
+
+**示例 1：**
+
+```
+输入：points = [[1,3],[-2,2]], K = 1
+输出：[[-2,2]]
+解释： 
+(1, 3) 和原点之间的距离为 sqrt(10)，
+(-2, 2) 和原点之间的距离为 sqrt(8)，
+由于 sqrt(8) < sqrt(10)，(-2, 2) 离原点更近。
+我们只需要距离原点最近的 K = 1 个点，所以答案就是 [[-2,2]]。
+```
+
+**示例 2：**
+
+```
+输入：points = [[3,3],[5,-1],[-2,4]], K = 2
+输出：[[3,3],[-2,4]]
+（答案 [[-2,4],[3,3]] 也会被接受。）
+```
+
+**提示：**
+
+- `1 <= K <= points.length <= 10000`
+- `-10000 < points[i][0] < 10000`
+- `-10000 < points[i][1] < 10000`
+
+
+
+思路一：API sort
+
+时间复杂度：O(nlogn)  
+
+空间复杂度：O(logn)  
+
+思路二：API  优先队列（堆）
+
+时间复杂度：O(nlogk)  
+
+空间复杂度：O(k)  
+
+思路三：快速选择排序
+
+时间复杂度：O(n)  
+
+空间复杂度：O(logn)  
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
+        sort(points.begin(), points.end(), [](const vector<int>& d1, const vector<int>& d2){
+            return d1[0] * d1[0] + d1[1] * d1[1] < d2[0] * d2[0] + d2[1] * d2[1];
+        });
+        return {points.begin(), points.begin() + k};
+    }
+};
+```
+
+**思路二：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
+        priority_queue<pair<int, int>> q;
+        for (int i = 0; i < k; ++i)
+            q.push({points[i][0] * points[i][0] + points[i][1] * points[i][1], i});
+        for (int i = k; i < points.size(); ++i)
+        {
+            int dis = points[i][0] * points[i][0] + points[i][1] * points[i][1];
+            if (dis < q.top().first)
+            {
+                q.pop();
+                q.push({dis, i});
+            }
+        }
+        vector<vector<int>> ans;
+        while (!q.empty())
+        {
+            ans.push_back(points[q.top().second]);
+            q.pop();
+        }
+            
+        return ans;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    void quickSelectSort(vector<vector<int>>& points, int left, int right, int k)
+    {
+        if (left >= right)
+            return;
+        int p = rand() % (right - left + 1) + left;
+        swap(points[p], points[right]);
+
+        vector<int> x = points[right];
+        int x_dis = x[0] * x[0] + x[1] * x[1];
+        int i = left - 1;
+        for (int j = left; j < right; ++j)
+        {
+            int dis = points[j][0] * points[j][0] + points[j][1] * points[j][1];
+            if (dis <= x_dis)
+                swap(points[++i], points[j]);
+        }
+        ++i;
+        swap(points[i], points[right]);
+
+        if (i > k)
+            quickSelectSort(points, left, i - 1, k);
+        else if (i < k)
+            quickSelectSort(points, i + 1, right, k);
+    }
+    vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
+        quickSelectSort(points, 0, points.size() - 1, k);
+        return {points.begin(), points.begin() + k};
     }
 };
 ```
