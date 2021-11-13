@@ -7359,6 +7359,110 @@ public:
 
 
 
+## 0123. 买卖股票的最佳时机Ⅲ
+
+### 题目：
+
+给定一个数组，它的第 `i` 个元素是一支给定的股票在第 `i` 天的价格。
+
+设计一个算法来计算你所能获取的最大利润。你最多可以完成 **两笔** 交易。
+
+**注意**：你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。
+
+**示例 1:**
+
+```
+输入：prices = [3,3,5,0,0,3,1,4]
+输出：6
+解释：在第 4 天（股票价格 = 0）的时候买入，在第 6 天（股票价格 = 3）的时候卖出，这笔交易所能获得利润 = 3-0 = 3 。
+     随后，在第 7 天（股票价格 = 1）的时候买入，在第 8 天 （股票价格 = 4）的时候卖出，这笔交易所能获得利润 = 4-1 = 3 。
+```
+
+**示例 2：**
+
+```
+输入：prices = [1,2,3,4,5]
+输出：4
+解释：在第 1 天（股票价格 = 1）的时候买入，在第 5 天 （股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。   
+     注意你不能在第 1 天和第 2 天接连购买股票，之后再将它们卖出。   
+     因为这样属于同时参与了多笔交易，你必须在再次购买前出售掉之前的股票。
+```
+
+**示例 3：**
+
+```
+输入：prices = [7,6,4,3,1] 
+输出：0 
+解释：在这个情况下, 没有交易完成, 所以最大利润为 0。
+```
+
+**示例 4：**
+
+```
+输入：prices = [1]
+输出：0
+```
+
+**提示：**
+
+- `1 <= prices.length <= 10^5`
+- `0 <= prices[i] <= 10^5`
+
+**动态规划：**
+
+在任意一天结束之后，会处于以下五个状态中的一种：
+
+- 未进行过任何操作；
+
+- buy1：只进行过一次买操作；
+
+  - 对于 $\textit{buy}_1$而言，在第 i 天我们可以不进行任何操作，保持不变，也可以在未进行任何操作的前提下以 $\textit{prices}[i]$ 的价格买入股票，那么 $\textit{buy}_1$ 的状态转移方程即为：
+
+    $\textit{buy}_1 = \max \{ \textit{buy}_1', -\textit{prices}[i] \}$
+
+- sell1：进行了一次买操作和一次卖操作，即完成了一笔交易；
+
+  - 对于 $\textit{sell}_1$ 而言，在第 i 天我们可以不进行任何操作，保持不变，也可以在只进行过一次买操作的前提下以 $\textit{prices}[i]$ 的价格卖出股票，那么 $\textit{sell}_1$ 的状态转移方程即为：
+
+    $\textit{sell}_1 = \max \{ \textit{sell}_1', \textit{buy}_1' + \textit{prices}[i] \}$
+
+- buy2：在完成了一笔交易的前提下，进行了第二次买操作；
+
+- sell2：完成了全部两笔交易。
+
+  - 同理我们可以得到 $\textit{buy}_2$ 和 $\textit{sell}_2$ 对应的状态转移方程：
+
+    $\begin{aligned} & \textit{buy}_2 = \max \{ \textit{buy}_2', \textit{sell}_1' - \textit{prices}[i] \} \\ & \textit{sell}_2 = \max \{ \textit{sell}_2', \textit{buy}_2' + \textit{prices}[i] \} \end{aligned}$
+
+
+时间复杂度：$O(n)$
+空间复杂度：$O(1)$
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int n = prices.size();
+        if (n <= 1)
+            return 0;
+        int buy1 = -prices[0], sell1 = 0;
+        int buy2 = -prices[0], sell2 = 0;
+        for (int i = 1; i < n; ++i)
+        {
+            buy1 = max(buy1, -prices[i]);
+            sell1 = max(sell1, buy1 + prices[i]);
+            buy2 = max(buy2, sell1 - prices[i]);
+            sell2 = max(sell2, buy2 + prices[i]);
+        }
+        return sell2;
+    }
+};
+```
+
+
+
 
 
 ## 0139. 单词拆分
@@ -7412,7 +7516,6 @@ public:
   - 遍历结束索引 $j$，遍历区间 $[i+1,n+1)$：
     - 若 $dp[i]=True$ 且 $s[i,\cdots,j)$ 在 $wordlist$ 中：$dp[j]=True$。解释：$dp[i]=True$ 说明 $s$ 的前 $i$ 位可以用 $wordDict$ 表示，则 $s[i,\cdots,j)$ 出现在 $wordDict$ 中，说明 $s$ 的前 $j$ 位可以表示。
 - 返回 $dp[n]$
-
 
 时间复杂度：$O(n^{2})$
 空间复杂度：$O(n)$
@@ -19110,6 +19213,131 @@ public:
                 swap(nums[++prev], nums[i]);
             ++i;
         }
+    }
+};
+```
+
+
+
+
+
+## 0344. 反转字符串
+
+### 题目：
+
+编写一个函数，其作用是将输入的字符串反转过来。输入字符串以字符数组 `s` 的形式给出。
+
+不要给另外的数组分配额外的空间，你必须**原地修改输入数组**、使用 `O(1)` 的额外空间解决这一问题。
+
+**示例 1：**
+
+```
+输入：s = ["h","e","l","l","o"]
+输出：["o","l","l","e","h"]
+```
+
+**示例 2：**
+
+```
+输入：s = ["H","a","n","n","a","h"]
+输出：["h","a","n","n","a","H"]
+```
+
+**提示：**
+
+- `1 <= s.length <= 10^5`
+- `s[i]` 都是 `ASCII` 码表中的可打印字符
+
+**解题思路：**
+
+双指针
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    void reverseString(vector<char>& s) {
+        int start = 0, end = s.size() - 1;
+        while (start < end)
+        {
+            char tmp = s[start];
+            s[start] = s[end];
+            s[end] = tmp;
+            ++start;
+            --end;
+        }
+    }
+};
+```
+
+
+
+
+
+## 0557. 反转字符串中的单词Ⅲ
+
+### 题目：
+
+给定一个字符串，你需要反转字符串中每个单词的字符顺序，同时仍保留空格和单词的初始顺序。
+
+**示例：**
+
+```
+输入："Let's take LeetCode contest"
+输出："s'teL ekat edoCteeL tsetnoc"
+```
+
+**提示：**
+
+- 在字符串中，每个单词由单个空格分隔，并且字符串中不会有任何额外的空格。
+
+**解题思路：**
+
+逐段双指针
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    void reverse(string& s, int start, int end)
+    {
+        while (start < end)
+        {
+            char tmp = s[start];
+            s[start] = s[end];
+            s[end] = tmp;
+            ++start;
+            --end;
+        }
+    }
+    string reverseWords(string s) {
+        if (s.size() <= 1)
+            return s;
+        int front = 0, back = 0;
+        while (front < s.size())
+        {
+            back = s.find(' ', front);
+            if (back != string::npos)
+                reverse(s, front, back - 1);
+            else
+            {
+                reverse(s, front, s.size() - 1);
+                break;
+            }
+            front = back + 1;
+        }
+
+        return s;
     }
 };
 ```
