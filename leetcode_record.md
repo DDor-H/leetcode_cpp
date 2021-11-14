@@ -18899,6 +18899,108 @@ public:
 
 
 
+## 0019. 删除链表的倒数第N个节点
+
+### 题目：
+
+给你一个链表，删除链表的倒数第 `n` 个结点，并且返回链表的头结点。
+
+**示例 1：**
+
+![leetcode_19](F:\C++\刷题\Img\leetcode_19.jpg)
+
+```
+输入：head = [1,2,3,4,5], n = 2
+输出：[1,2,3,5]
+```
+
+**示例 2：**
+
+```
+输入：head = [1], n = 1
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：head = [1,2], n = 1
+输出：[1]
+```
+
+**提示：**
+
+- 链表中结点的数目为 sz
+- 1 <= sz <= 30
+- 0 <= Node.val <= 100
+- 1 <= n <= sz
+
+**解题思路：**
+
+思路一：计算链表长度
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+思路二：借助栈
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路三：双指针
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+
+
+**方法：**
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* removeNthFromEnd(ListNode* head, int n) {
+        ListNode* fast = head;
+        ListNode* dumny = new ListNode(0, head);
+        for (int i = 0; i < n; ++i)
+            fast = fast->next;
+        ListNode* slow = dumny;
+        while (fast)
+        {
+            fast = fast->next;
+            slow = slow->next;
+        }
+        slow->next = slow->next->next;
+        head = dumny->next;
+        delete dumny;
+        return head;
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
 ## 0035. 搜索插入位置
 
 ### 题目：
@@ -19394,6 +19496,91 @@ public:
                 left = mid + 1;
         }
         return -1;
+    }
+};
+```
+
+
+
+
+
+## 0876. 链表的中间节点
+
+### 题目：
+
+给定一个头结点为 `head` 的非空单链表，返回链表的中间结点。
+
+如果有两个中间结点，则返回第二个中间结点。
+
+**示例 1：**
+
+```
+输入：[1,2,3,4,5]
+输出：此列表中的结点 3 (序列化形式：[3,4,5])
+返回的结点值为 3 。 (测评系统对该结点序列化表述是 [3,4,5])。
+注意，我们返回了一个 ListNode 类型的对象 ans，这样：
+ans.val = 3, ans.next.val = 4, ans.next.next.val = 5, 以及 ans.next.next.next = NULL.
+```
+
+**示例 2：**
+
+```
+输入：[1,2,3,4,5,6]
+输出：此列表中的结点 4 (序列化形式：[4,5,6])
+由于该列表有两个中间结点，值分别为 3 和 4，我们返回第二个结点。
+```
+
+**提示：**
+
+- 给定链表的结点数介于 1 和 100 之间。
+
+
+**解题思路：**
+
+思路一：数组
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：单指针
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+思路三：双指针
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法：**
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* middleNode(ListNode* head) {
+        if (head->next == nullptr)
+            return head;
+        ListNode* slow = head;
+        ListNode* fast = head;
+        while (fast != nullptr && fast->next != nullptr)
+        {
+            fast = fast->next->next;
+            slow = slow->next;
+        }
+        return slow;
     }
 };
 ```
