@@ -18899,6 +18899,114 @@ public:
 
 
 
+## 0003. 无重复字符的最长字串
+
+### 题目：
+
+给定一个字符串 `s` ，请你找出其中不含有重复字符的 **最长子串** 的长度。
+
+**示例 1:**
+
+```
+输入: s = "abcabcbb"
+输出: 3 
+解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。
+```
+
+**示例 2:**
+
+```
+输入: s = "bbbbb"
+输出: 1
+解释: 因为无重复字符的最长子串是 "b"，所以其长度为 1。
+```
+
+**示例 3:**
+
+```
+输入: s = "pwwkew"
+输出: 3
+解释: 因为无重复字符的最长子串是 "wke"，所以其长度为 3。
+     请注意，你的答案必须是 子串 的长度，"pwke" 是一个子序列，不是子串。
+```
+
+**示例 4:**
+
+```
+输入: s = ""
+输出: 0
+```
+
+**提示：**
+
+- `0 <= s.length <= 5 * 10^4`
+- `s` 由英文字母、数字、符号和空格组成
+
+**解题思路：**
+
+使用队列或者集合都可以，空间换时间，暂存一份没有重复字符的拷贝
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+#include <algorithm>
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        int len = s.length();
+        if (len <= 1)
+            return len;
+        unordered_set<char> set;
+        int maxLen = 0, left = 0;
+        for (int i = 0; i < len; ++i)
+        {
+            while (set.find(s[i]) != set.end())
+                set.erase(s[left++]);
+            maxLen = max(maxLen, i - left + 1);
+            set.insert(s[i]);
+        }
+        return maxLen;
+    }
+/*
+    int lengthOfLongestSubstring(string s) {
+        if(s.size() == 0)
+        {
+            return 0;
+        }
+        int maxLength = 1;
+
+        deque<char> d;  //（时多，空少）或者用map（时少，空多）
+        d.push_back(s[0]);
+
+        for(int i = 1; i < s.size(); ++i)
+        {
+            while (count(d.begin(), d.end(), s[i]) != 0)
+            {
+                d.pop_front();
+            }
+
+            d.push_back(s[i]);
+
+            if(d.size() > maxLength)
+            {
+                maxLength = d.size();
+            }
+            
+        }
+        
+        return maxLength;
+    }*/
+};
+```
+
+
+
+
+
 ## 0019. 删除链表的倒数第N个节点
 
 ### 题目：
@@ -19440,6 +19548,163 @@ public:
         }
 
         return s;
+    }
+};
+```
+
+
+
+
+
+## 0567. 字符串的排列
+
+### 题目：
+
+给你两个字符串 `s1` 和 `s2` ，写一个函数来判断 `s2` 是否包含 `s1` 的排列。如果是，返回 `true` ；否则，返回 `false` 。
+
+换句话说，**s1** 的排列之一是 **s2** 的 **子串** 。
+
+**示例 1：**
+
+```
+输入：s1 = "ab" s2 = "eidbaooo"
+输出：true
+解释：s2 包含 s1 的排列之一 ("ba").
+```
+
+**示例 2：**
+
+```
+输入：s1= "ab" s2 = "eidboaoo"
+输出：false
+```
+
+**提示：**
+
+- `1 <= s1.length, s2.length <= 10^4`
+- `s1` 和 `s2` 仅包含小写字母
+
+**解题思路：**
+
+思路一：滑动窗口
+
+每次进一个 y ，出一个 x，并判断cnt1 是否 等于 cnt2
+
+改进，使用diff记录不同位置处的数量，并只使用一个数组
+
+时间复杂度：O*(*n*+*m+∣Σ∣)   ∣Σ∣为字符集数量  ∣Σ∣ = 26
+
+空间复杂度：O(∣Σ∣)
+
+思路二：双指针
+
+使用一个数组，先让是
+
+使得数组对应位置为负，若s2的当前位置字符使得数组对应位置为正，则说明s1不中包含此字符，则需右移left指针
+
+时间复杂度：O*(*n*+*m+∣Σ∣)   ∣Σ∣为字符集数量  ∣Σ∣ = 26
+
+空间复杂度：O(∣Σ∣)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool checkInclusion(string s1, string s2) {
+        int m = s1.length(), n = s2.length();
+        if (m > n)
+            return false;
+        vector<int> cnt(26);
+        for (int i = 0; i < m; ++i)
+        {
+            --cnt[s1[i] - 'a'];
+            ++cnt[s2[i] - 'a'];
+        }
+        int diff = 0;
+        for (auto& ch : cnt)
+        {
+            if (ch != 0)
+                ++diff;
+        }
+        if (diff == 0)
+            return true;
+        
+        for (int i = m; i < n; ++i)
+        {
+            int x = s2[i - m] - 'a', y = s2[i] - 'a';
+            if (x == y)
+                continue;
+            if (cnt[y] == 0) // 添加前若为0，则说明加入后就不同了
+                ++diff;
+            ++cnt[y];  
+            if (cnt[y] == 0) // 添加后为0，则说明加入后相同
+                --diff;
+            if (cnt[x] == 0)
+                ++diff;
+            --cnt[x];
+            if (cnt[x] == 0)
+                --diff;
+
+            if (diff == 0)
+                return true;
+        }
+        return false;
+    }
+
+    /*
+    bool checkInclusion(string s1, string s2) {
+        int m = s1.length(), n = s2.length();
+        if (m > n)
+            return false;
+        vector<int> cnt1(26), cnt2(26);
+        for (int i = 0; i < m; ++i)
+        {
+            ++cnt1[s1[i] - 'a'];
+            ++cnt2[s2[i] - 'a'];
+        }
+        if (cnt1 == cnt2)
+            return true;
+        for (int i = m; i < n; ++i)
+        {
+            ++cnt2[s2[i] - 'a'];
+            --cnt2[s2[i - m] - 'a'];
+
+            if (cnt1 == cnt2)
+                return true;
+        }
+        return false;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool checkInclusion(string s1, string s2) {
+        int m = s1.length(), n = s2.length();
+        if (m > n)
+            return false;
+
+        vector<int> cnt(26);
+        for (int i = 0; i < m; ++i)
+            --cnt[s1[i] - 'a'];
+        int left = 0;
+        for (int right = 0; right < n; ++right)
+        {
+            int x = s2[right] - 'a';
+            ++cnt[x];
+            while (cnt[x] > 0)
+            {
+                --cnt[s2[left] - 'a'];
+                ++left;
+            }
+            if (right - left + 1 == m)
+                return true;
+        }
+        return false;
     }
 };
 ```
