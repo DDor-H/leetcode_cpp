@@ -19119,6 +19119,127 @@ public:
 
 
 
+## 0116. 填充每个结点的下一个右侧结点指针
+
+### 题目：
+
+给定一个 **完美二叉树** ，其所有叶子节点都在同一层，每个父节点都有两个子节点。二叉树定义如下：
+
+```
+struct Node {
+  int val;
+  Node *left;
+  Node *right;
+  Node *next;
+}
+```
+
+填充它的每个 `next` 指针，让这个指针指向其下一个右侧节点。如果找不到下一个右侧节点，则将 `next` 指针设置为 `NULL`。
+
+初始状态下，所有 `next` 指针都被设置为 `NULL`。
+
+**进阶：**
+
+- 你只能使用常量级额外空间。
+- 使用递归解题也符合要求，本题中递归程序占用的栈空间不算做额外的空间复杂度。
+
+**示例：**
+
+![leetcode_116](F:\C++\刷题\Img\leetcode_116.png)
+
+```
+输入：root = [1,2,3,4,5,6,7]
+输出：[1,#,2,3,#,4,5,6,7,#]
+解释：给定二叉树如图 A 所示，你的函数应该填充它的每个 next 指针，以指向其下一个右侧节点，如图 B 所示。序列化的输出按层序遍历排列，同一层节点由 next 指针连接，'#' 标志着每一层的结束。
+```
+
+**提示：**
+
+- 树中节点的数量少于 `4096`
+- `-1000 <= node.val <= 1000`
+
+**解题思路：**
+
+思路一：层序遍历
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：利用next指针
+
+```c++
+head->left->next = head->right;
+if (head->next != NULL)
+	head->right->next = head->next->left;
+```
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    Node* connect(Node* root) {
+        if (root == NULL)
+            return root;
+        queue<Node*> q;
+        q.push(root);
+        while (!q.empty())
+        {
+            int levelSize = q.size();
+            Node* prev = NULL;
+            while (levelSize-- > 0)
+            {
+                Node* node = q.front();
+                q.pop();
+                if (prev != NULL)
+                    prev->next = node;
+                prev = node;
+                if (node->left != NULL)
+                    q.push(node->left);
+                if (node->right != NULL)
+                    q.push(node->right);
+            }
+        }
+        return root;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    Node* connect(Node* root) {
+        if (root == NULL)
+            return root;
+        Node* leftmost = root;
+        while (leftmost->left != NULL)
+        {
+            Node* head = leftmost;
+            while (head != NULL)
+            {
+                head->left->next = head->right;
+                if (head->next != NULL)
+                    head->right->next = head->next->left;
+                head = head->next;
+            }
+            leftmost = leftmost->left;
+        }
+        return root;
+    }
+};
+```
+
+
+
+
+
 ## 0167. 两数之和Ⅱ - 输入有序数组
 
 ### 题目：
@@ -19705,6 +19826,122 @@ public:
                 return true;
         }
         return false;
+    }
+};
+```
+
+
+
+
+
+## 0617. 合并二叉树
+
+给定两个二叉树，想象当你将它们中的一个覆盖到另一个上时，两个二叉树的一些节点便会重叠。
+
+你需要将他们合并为一个新的二叉树。合并的规则是如果两个节点重叠，那么将他们的值相加作为节点合并后的新值，否则**不为** NULL 的节点将直接作为新二叉树的节点。
+
+**示例 1:**
+
+```
+输入: 
+		Tree 1                     Tree 2                  
+          1                         2                             
+         / \                       / \                            
+        3   2                     1   3                        
+       /                           \   \                      
+      5                             4   7                  
+输出: 
+合并后的树:
+	     3
+	    / \
+	   4   5
+	  / \   \ 
+	 5   4   7
+```
+
+**注意:** 合并必须从两个树的根节点开始。
+
+**解题思路：**
+
+思路一：深度优先（递归）
+
+时间复杂度：min(m, n)
+
+空间复杂度：min(m, n)
+
+思路二：广度优先
+
+时间复杂度：min(m, n)
+
+空间复杂度：min(m, n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    TreeNode* mergeTrees(TreeNode* root1, TreeNode* root2) {
+        if (root1 == nullptr)
+            return root2;
+        if (root2 == nullptr)
+            return root1;
+        TreeNode* node = new TreeNode(root1->val + root2->val);
+        node->left = mergeTrees(root1->left, root2->left);
+        node->right = mergeTrees(root1->right, root2->right);
+        return node;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    TreeNode* mergeTrees(TreeNode* root1, TreeNode* root2) {
+        if (root1 == nullptr)
+            return root2;
+        if (root2 == nullptr)
+            return root1;
+        TreeNode* root = new TreeNode(root1->val + root2->val);
+        queue<TreeNode*> q;
+        queue<TreeNode*> q1;
+        queue<TreeNode*> q2;
+        q.push(root);
+        q1.push(root1);
+        q2.push(root2);
+        while (!q1.empty() && !q2.empty())
+        {
+            TreeNode* node = q.front(), *nodel = q1.front(), *noder = q2.front();
+            q.pop(), q1.pop(), q2.pop();
+            TreeNode* left1 = nodel->left, *left2 = noder->left, *right1 = nodel->right, *right2 = noder->right;
+            if (left1 != nullptr && left2 != nullptr)
+            {
+                TreeNode* left = new TreeNode(left1->val + left2->val);
+                node->left = left;
+                q.push(left);
+                q1.push(left1);
+                q2.push(left2);
+            }
+            else if (left1 != nullptr)
+                node->left = left1;
+            else if (left2 != nullptr)
+                node->left = left2;
+
+            if (right1 != nullptr && right2 != nullptr)
+            {
+                TreeNode* right = new TreeNode(right1->val + right2->val);
+                node->right = right;
+                q.push(right);
+                q1.push(right1);
+                q2.push(right2);
+            }
+            else if (right1 != nullptr)
+                node->right = right1;
+            else if (right2 != nullptr)
+                node->right = right2;
+        }
+        return root;
     }
 };
 ```
