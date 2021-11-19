@@ -19119,6 +19119,14 @@ public:
 
 
 
+## 0021. 合并两个有序链表
+
+### 题目：
+
+同数据结构模块21题
+
+
+
 ## 0116. 填充每个结点的下一个右侧结点指针
 
 ### 题目：
@@ -19433,6 +19441,16 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0206. 反转链表
+
+### 题目：
+
+同数据结构模块206题
 
 
 
@@ -20547,4 +20565,111 @@ public:
 
 
 
+
+## 0994. 腐烂的橘子
+
+### 题目：
+
+在给定的网格中，每个单元格可以有以下三个值之一：
+
+- 值 0 代表空单元格；
+
+- 值 1 代表新鲜橘子；
+
+- 值 2 代表腐烂的橘子。
+
+每分钟，任何与腐烂的橘子（在 4 个正方向上）相邻的新鲜橘子都会腐烂。
+
+返回直到单元格中没有新鲜橘子为止所必须经过的最小分钟数。如果不可能，返回 -1。
+
+**示例 1：**
+
+![leetcode_994](F:\C++\刷题\Img\leetcode_994.png)
+
+```
+输入：[[2,1,1],[1,1,0],[0,1,1]]
+输出：4
+```
+
+**示例 2：**
+
+```
+输入：[[2,1,1],[0,1,1],[1,0,1]]
+输出：-1
+解释：左下角的橘子（第 2 行， 第 0 列）永远不会腐烂，因为腐烂只会发生在 4 个正向上。
+```
+
+**示例 3：**
+
+```
+输入：[[0,2]]
+输出：0
+解释：因为 0 分钟时已经没有新鲜橘子了，所以答案就是 0 。
+```
+
+**提示：**
+
+- `1 <= grid.length <= 10`
+- `1 <= grid[0].length <= 10`
+- `grid[i][j] 仅为 0、1 或 2`
+
+**解题思路：**
+
+多源广度优先遍历问题
+
+时间复杂度：O(mn)
+
+空间复杂度：O(mn)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int orangesRotting(vector<vector<int>>& grid) {
+        int cnt = 0, ans = 0;
+        int m = grid.size(), n = grid[0].size();
+        vector<vector<int>> dis(m, vector<int>(n, -1));
+        int dx[4] = {0, 1, 0, -1};
+        int dy[4] = {1, 0, -1, 0};
+        queue<pair<int, int>> qu;
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (grid[i][j] == 2)
+                {
+                    qu.push({i, j});
+                    dis[i][j] = 0;
+                }
+                else if (grid[i][j] == 1)
+                    cnt += 1;
+            }
+        }
+        while (!qu.empty())
+        {
+            pair<int, int> x = qu.front();
+            qu.pop();
+            for (int i = 0; i < 4; ++i)
+            {
+                int tx = x.first + dx[i];
+                int ty = x.second + dy[i];
+                // 新坐标不在范围内、坏橘子点、-1点（第一次访问非坏点都是-1，后面再次遇到访问过的 1 点，就会跳过）
+                if (tx < 0 || tx >= m || ty < 0 || ty >= n || !grid[tx][ty] || ~dis[tx][ty])
+                    continue;
+                dis[tx][ty] = dis[x.first][x.second] + 1;
+                qu.push({tx, ty});
+                if (grid[tx][ty] == 1)
+                {
+                    cnt -= 1;
+                    ans = dis[tx][ty];
+                    if (!cnt)
+                        break;
+                }
+            }
+        }
+        return cnt == 0 ? ans : -1;
+    }
+};
+```
 
