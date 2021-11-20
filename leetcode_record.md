@@ -19105,6 +19105,12 @@ public:
 
 
 
+## 0021. 合并两个有序链表
+
+### 题目：
+
+同数据结构模块21题
+
 
 
 
@@ -19119,11 +19125,23 @@ public:
 
 
 
-## 0021. 合并两个有序链表
+## 0046. 全排列
 
 ### 题目：
 
-同数据结构模块21题
+同数据结构模块46题
+
+
+
+
+
+## 0077. 组合
+
+### 题目：
+
+同Array模块77题
+
+
 
 
 
@@ -19620,6 +19638,143 @@ public:
             ++start;
             --end;
         }
+    }
+};
+```
+
+
+
+
+
+## 0542. 01矩阵
+
+### 题目：
+
+给定一个由 0 和 1 组成的矩阵 `mat` ，请输出一个大小相同的矩阵，其中每一个格子是 `mat` 中对应位置元素到最近的 0 的距离。
+
+两个相邻元素间的距离为 1 。
+
+**示例 1：**
+
+![leetcode_542](F:\C++\刷题\Img\leetcode_542.png)
+
+```
+输入：mat = [[0,0,0],[0,1,0],[0,0,0]]
+输出：[[0,0,0],[0,1,0],[0,0,0]]
+```
+
+**示例 2：**
+
+![leetcode_542_1](F:\C++\刷题\Img\leetcode_542_1.png)
+
+```
+输入：mat = [[0,0,0],[0,1,0],[1,1,1]]
+输出：[[0,0,0],[0,1,0],[1,2,1]]
+```
+
+**提示：**
+
+- `m == mat.length
+- `n == mat[i].length`
+- `1 <= m, n <= 10^4`
+- `1 <= m * n <= 10^4`
+- `mat[i][j] is either 0 or 1.`
+- mat 中至少有一个 0 
+
+**解题思路：**
+
+思路一：多元广度优先遍历
+
+时间复杂度：O(mn)
+
+空间复杂度：O(mn)
+
+思路二：动态规划
+
+时间复杂度：O(mn)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> updateMatrix(vector<vector<int>>& mat) {
+        int m = mat.size(), n = mat[0].size();
+        vector<vector<int>> dis(m, vector<int>(n, -1));
+        queue<pair<int, int>> Q;
+        int dx[4] = {0, 1, 0, -1};
+        int dy[4] = {1, 0, -1, 0};
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (mat[i][j] == 0)
+                {
+                    Q.push({i, j});
+                    dis[i][j] = 0;
+                }
+            }
+        }
+
+        while (!Q.empty())
+        {
+            pair<int, int> x = Q.front(); Q.pop();
+            for (int i = 0; i < 4; ++i)
+            {
+                int tx = x.first + dx[i];
+                int ty = x.second + dy[i];
+                if (tx < 0 || tx >= m || ty < 0 || ty >= n || !mat[tx][ty] || ~dis[tx][ty])
+                    continue;
+                dis[tx][ty] = dis[x.first][x.second] + 1;
+                Q.push({tx, ty});
+            }
+        }
+        return dis;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> updateMatrix(vector<vector<int>>& mat) {
+        int m = mat.size(), n = mat[0].size();
+        vector<vector<int>> dis(m, vector<int>(n, INT_MAX / 2));
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (mat[i][j] == 0)
+                    dis[i][j] = 0;
+            }
+        }
+
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (i - 1 >= 0)
+                    dis[i][j] = min(dis[i][j], dis[i - 1][j] + 1);
+                if (j - 1 >= 0)
+                    dis[i][j] = min(dis[i][j], dis[i][j - 1] + 1);
+            }
+        }
+        for (int i = m - 1; i >= 0; --i)
+        {
+            for (int j = n - 1; j >= 0; --j)
+            {
+                if (i + 1 < m)
+                    dis[i][j] = min(dis[i][j], dis[i + 1][j] + 1);
+                if (j + 1 < n)
+                    dis[i][j] = min(dis[i][j], dis[i][j + 1] + 1);
+            }
+        }
+
+        return dis;
     }
 };
 ```
@@ -20327,6 +20482,118 @@ public:
             }
         }
         return image;
+    }
+};
+```
+
+
+
+
+
+## 0784. 字母大小写全排列
+
+### 题目：
+
+给定一个字符串S，通过将字符串S中的每个字母转变大小写，我们可以获得一个新的字符串。返回所有可能得到的字符串集合。
+
+**示例：**
+
+```
+输入：S = "a1b2"
+输出：["a1b2", "a1B2", "A1b2", "A1B2"]
+
+输入：S = "3z4"
+输出：["3z4", "3Z4"]
+
+输入：S = "12345"
+输出：["12345"]
+```
+
+**提示：**
+
+- S 的长度不超过12。
+- S 仅由数字和字母组成。
+
+**解题思路：**
+
+思路一：递归
+
+思路二：迭代
+
+依次遍历每一个字符，若为数字，直接添加到当前ans每一个字符串的最后面，若为字母，则将当前ans扩大至两倍，再将当前字母添加至前一半字符串最后，转换后的大小写添加到后一半
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<string> letterCasePermutation(string s) {
+        vector<string> ans;
+        if (s.length() == 0)
+            return ans;
+        _letterCasePermutation(s, ans, 0);
+        return ans;
+    }
+
+    void _letterCasePermutation(string s, vector<string>& ans, int idx) {
+        if (idx == s.length())
+        {
+            ans.push_back(s);
+            return;
+        }
+        if (s[idx] >= 65 && s[idx] <= 90)
+        {
+            s[idx] += 32;
+            _letterCasePermutation(s, ans, idx + 1);
+            s[idx] -= 32;
+        }
+        if (s[idx] >= 97 && s[idx] <= 122)
+        {
+            s[idx] -= 32;
+            _letterCasePermutation(s, ans, idx + 1);
+            s[idx] += 32;
+        }
+        _letterCasePermutation(s, ans, idx + 1);
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    vector<string> letterCasePermutation(string s) {
+        vector<string> ans;
+        if (s.length() == 0)
+            return ans;
+        ans.push_back("");
+        for (int i = 0; i < s.length(); ++i)
+        {
+            int n = ans.size();
+            if (s[i] >= 48 && s[i] <= 57)
+            {
+                for (int j = 0; j < n; ++j)
+                    ans[j] += s[i];
+            }
+            if (s[i] >= 65 && s[i] <= 90)
+            {
+                for (int j = 0; j < n; ++j)
+                {
+                    ans.push_back(ans[j] + (char)(s[i] + 32));
+                    ans[j] += s[i];
+                }
+            }
+            if (s[i] >= 97 && s[i] <= 122)
+            {
+                for (int j = 0; j < n; ++j)
+                {
+                    ans.push_back(ans[j] + (char)(s[i] - 32));
+                    ans[j] += s[i];
+                }
+            }
+        }
+        return ans;
     }
 };
 ```
