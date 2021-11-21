@@ -19007,6 +19007,133 @@ public:
 
 
 
+## 0006. Z字形变换
+
+### 题目：
+
+将一个给定字符串 `s` 根据给定的行数 `numRows` ，以从上往下、从左到右进行 `Z` 字形排列。
+
+比如输入字符串为 `"PAYPALISHIRING"` 行数为 `3` 时，排列如下：
+
+```
+P   A   H   N
+A P L S I I G
+Y   I   R
+```
+
+之后，你的输出需要从左往右逐行读取，产生出一个新的字符串，比如：`"PAHNAPLSIIGYIR"`。
+
+请你实现这个将字符串进行指定行数变换的函数：
+
+`string convert(string s, int numRows);`
+
+**示例 1：**
+
+```
+输入：s = "PAYPALISHIRING", numRows = 3
+输出："PAHNAPLSIIGYIR"
+示例 2：
+输入：s = "PAYPALISHIRING", numRows = 4
+输出："PINALSIGYAHRPI"
+解释：
+P     I    N
+A   L S  I G
+Y A   H R
+P     I
+```
+
+**示例 3：**
+
+```
+输入：s = "A", numRows = 1
+输出："A"
+```
+
+**提示：**
+
+- `1 <= s.length <= 1000`
+- `s` 由英文字母（小写和大写）、`','` 和 `'.'` 组成
+- `1 <= numRows <= 1000`
+
+**解题思路：**
+
+思路一：按行排序，到头了就转方向
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：
+
+首先访问 行 `0` 中的所有字符，接着访问 行 `1`，然后 行 `2`，依此类推...
+
+对于所有整数 `k`，
+
+- 行 `0` 中的字符位于索引 $k \; (2 \cdot \text{numRows} - 2)$ 处;
+- 行 $\text{numRows}-1$ 中的字符位于索引 $k \; (2 \cdot \text{numRows} - 2) + \text{numRows} - 1$ 处;
+- 内部的 行 $i$ 中的字符位于索引 $k \; (2 \cdot \text{numRows}-2)+i$ 以及 $(k+1)(2 \cdot \text{numRows}-2)- i$处;
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    string convert(string s, int numRows) {
+        if (numRows == 1) return s;
+
+        vector<string> ans(min(numRows, int(s.length())));
+        int curRow = 0;
+        bool isDown = false;
+
+        for (auto& ch : s)
+        {
+            ans[curRow] += ch;
+            if (curRow == 0 || curRow == numRows - 1) isDown = !isDown;
+            curRow += isDown ? 1 : -1;
+        }
+
+        string res = "";
+        for (auto& str : ans)
+            res += str;
+        return res;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    string convert(string s, int numRows) {
+        if (numRows == 1) return s;
+
+        string ret;
+        int n = s.length();
+        int cycleLen = 2 * numRows - 2;
+
+        for (int i = 0; i < numRows; ++i)
+        {
+            for (int j = 0; i + j < n; j += cycleLen)
+            {
+                ret += s[i + j];
+                if (i != 0 && i != numRows - 1 && j + cycleLen - i < n)
+                    ret += s[j + cycleLen - i];
+            }
+        }
+        return ret;
+    }
+};
+```
+
+
+
+
+
 ## 0019. 删除链表的倒数第N个节点
 
 ### 题目：
@@ -19130,6 +19257,16 @@ public:
 ### 题目：
 
 同数据结构模块46题
+
+
+
+
+
+## 0070. 爬楼梯
+
+### 题目：
+
+同动态规划模块70题
 
 
 
@@ -19261,6 +19398,16 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0120. 三角形最小路径和
+
+### 题目：
+
+同动态规划模块120题
 
 
 
@@ -19459,6 +19606,16 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0198. 打家劫舍
+
+### 题目：
+
+同动态规划模块198题
 
 
 
