@@ -19479,6 +19479,16 @@ public:
 
 
 
+## 0015. 盛水最多的容器
+
+### 题目：
+
+同Array模块15题
+
+
+
+
+
 ## 0012. 整数转罗马数字
 
 ### 题目：
@@ -19600,6 +19610,16 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0015. 三数之和
+
+### 题目：
+
+同Array模块15题
 
 
 
@@ -19778,6 +19798,16 @@ public:
 ### 题目：
 
 同Array模块77题
+
+
+
+
+
+## 0082. 删除排序链表中的重复元素
+
+### 题目：
+
+同数据结构模块82题
 
 
 
@@ -20586,6 +20616,82 @@ public:
 
 
 
+## 0209. 长度最小的子数组
+
+### 题目：
+
+给定一个含有 `n` 个正整数的数组和一个正整数 `target` 。
+
+找出该数组中满足其和 `≥ target` 的长度最小的 **连续子数组** `[numsl, numsl+1, ..., numsr-1, numsr]` ，并返回其长度。如果不存在符合条件的子数组，返回 `0` 。
+
+**示例 1：**
+
+```
+输入：target = 7, nums = [2,3,1,2,4,3]
+输出：2
+解释：子数组 [4,3] 是该条件下的长度最小的子数组。
+```
+
+**示例 2：**
+
+```
+输入：target = 4, nums = [1,4,4]
+输出：1
+```
+
+**示例 3：**
+
+```
+输入：target = 11, nums = [1,1,1,1,1,1,1,1]
+输出：0
+```
+
+**提示：**
+
+- `1 <= target <= 10^9`
+- `1 <= nums.length <= 10^5`
+- `1 <= nums[i] <= 10^5`
+
+**进阶：**
+
+如果你已经实现 `O(n)` 时间复杂度的解法, 请尝试设计一个 `O(n log(n))` 时间复杂度的解法。
+
+**解题思路：**
+
+数组前缀和
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int minSubArrayLen(int target, vector<int>& nums) {
+        int lens = nums.size();
+        vector<int> prefix(lens + 1, 0);
+        for (int i = 0; i < lens; ++i)
+            prefix[i + 1] = prefix[i] + nums[i];
+        int min_idx = -1, max_len = INT_MAX;
+        for (int i = 1; i < prefix.size(); ++i)
+        {
+            for (int j = i; j < prefix.size(); ++j)
+            {
+                if (prefix[j] - prefix[j - i] >= target)
+                    return i;
+            }
+        }
+        return 0;
+    }
+};
+```
+
+
+
+
+
 ## 0231. 2的幂
 
 ### 题目：
@@ -20891,6 +20997,155 @@ public:
             ++start;
             --end;
         }
+    }
+};
+```
+
+
+
+
+
+## 0438. 找到字符串中所有字母异位词
+
+### 题目：
+
+给定两个字符串 `s` 和 `p`，找到 `s` 中所有 `p` 的 **异位词** 的子串，返回这些子串的起始索引。不考虑答案输出的顺序。
+
+**异位词** 指由相同字母重排列形成的字符串（包括相同的字符串）。
+
+**示例 1:**
+
+```
+输入: s = "cbaebabacd", p = "abc"
+输出: [0,6]
+解释:
+起始索引等于 0 的子串是 "cba", 它是 "abc" 的异位词。
+起始索引等于 6 的子串是 "bac", 它是 "abc" 的异位词。
+```
+
+ **示例 2:**
+
+```
+输入: s = "abab", p = "ab"
+输出: [0,1,2]
+解释:
+起始索引等于 0 的子串是 "ab", 它是 "ab" 的异位词。
+起始索引等于 1 的子串是 "ba", 它是 "ab" 的异位词。
+起始索引等于 2 的子串是 "ab", 它是 "ab" 的异位词。
+```
+
+**提示:**
+
+- `1 <= s.length, p.length <= 3 * 10^4`
+- `s` 和 `p` 仅包含小写字母
+
+**解题思路：**
+
+思路一：字串排序比较
+
+思路二：滑动窗口，数组统计字符个数
+
+思路三：滑动窗口优化
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<int> findAnagrams(string s, string p) {
+        int lens = s.length(), lenp = p.length();
+        vector<int> ans;
+        sort(p.begin(), p.end());
+        for (int i = 0; i <= lens - lenp; ++i)
+        {
+            string subs = s.substr(i, lenp);
+            sort(subs.begin(), subs.end());
+            if (subs == p)
+                ans.push_back(i);
+        }
+        return ans;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    vector<int> findAnagrams(string s, string p) {
+        int lens = s.length(), lenp = p.length();
+        vector<int> ans;
+        if (lens < lenp) return ans;
+        
+        vector<int> s_count(26, 0);
+        vector<int> p_count(26, 0);
+
+        for (int i = 0; i < lenp; ++i)
+        {
+            ++p_count[p[i] - 'a'];
+            ++s_count[s[i] - 'a'];
+        }
+        if (p_count == s_count)
+            ans.push_back(0);
+        
+        for (int i = lenp; i < lens; ++i)
+        {
+            --s_count[s[i - lenp] - 'a'];
+            ++s_count[s[i] - 'a'];
+
+            if (s_count == p_count)
+                ans.push_back(i - lenp + 1);
+        }
+        return ans;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+class Solution {
+public:
+    vector<int> findAnagrams(string s, string p) {
+        int lens = s.length(), lenp = p.length();
+        vector<int> ans;
+        if (lens < lenp) return ans;
+        
+        vector<int> count(26, 0);
+
+        for (int i = 0; i < lenp; ++i)
+        {
+            --count[p[i] - 'a'];
+            ++count[s[i] - 'a'];
+        }
+        int diff = 0;
+        for (int i = 0; i < 26; ++i)
+        {
+            if (count[i] != 0)
+                ++diff;
+        }
+        if (diff == 0)
+            ans.push_back(0);
+        
+        for (int i = lenp; i < lens; ++i)
+        {
+            if (count[s[i] - 'a'] == -1)
+                --diff;
+            else if (count[s[i] - 'a'] == 0)
+                ++diff;
+            ++count[s[i] - 'a'];
+
+            if (count[s[i - lenp] - 'a'] == 1)
+                --diff;
+            else if (count[s[i - lenp] - 'a'] == 0)
+                ++diff;
+            --count[s[i - lenp] - 'a'];
+
+            if (diff == 0)
+                ans.push_back(i - lenp + 1);
+        }
+        return ans;
     }
 };
 ```
@@ -21621,6 +21876,110 @@ public:
 
 
 
+## 0713. 乘积小于K的子数组
+
+### 题目：
+
+给定一个正整数数组 `nums`和整数 `k` 。
+
+请找出该数组内乘积小于 `k` 的连续的子数组的个数。
+
+**示例 1:**
+
+```
+输入: nums = [10,5,2,6], k = 100
+输出: 8
+解释: 8个乘积小于100的子数组分别为: [10], [5], [2], [6], [10,5], [5,2], [2,6], [5,2,6]。
+需要注意的是 [10,5,2] 并不是乘积小于100的子数组。
+```
+
+**示例 2:**
+
+```
+输入: nums = [1,2,3], k = 0
+输出: 0
+```
+
+**提示:** 
+
+- `1 <= nums.length <= 3 * 10^4`
+- `1 <= nums[i] <= 1000`
+- `0 <= k <= 10^6`
+
+**解题思路：**
+
+思路一：将累乘 通过取对数 转化为 累加 然后通过前缀和数组记录
+
+时间复杂度：O(nlogn)
+
+空间复杂度：O(n)
+
+思路二：双指针，超过了就除掉最左边的数
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    int numSubarrayProductLessThanK(vector<int>& nums, int k) {
+        if (k == 0) return 0;
+
+        double logk = log(k);
+        int lens = nums.size();
+        vector<double> prefix(lens + 1, 0.0);
+        for (int i = 0; i < lens; ++i)
+            prefix[i + 1] = prefix[i] + log(nums[i]);
+        int ans = 0;
+
+        int lenpre = prefix.size();
+        for (int i = 0; i < lenpre; ++i)
+        {
+            int lo = i + 1, hi = lenpre;
+            while (lo < hi)
+            {
+                int mid = lo + (hi - lo) / 2;
+                if (prefix[mid] - prefix[i] < + logk - 1e-9)
+                    lo = mid + 1;
+                else
+                    hi = mid;
+            }
+            ans += lo - i - 1;
+        }
+        
+        return ans;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    int numSubarrayProductLessThanK(vector<int>& nums, int k) {
+        if (k <= 1) return 0;
+
+        int ans = 0, left = 0, prod = 1;
+        for (int right = 0; right < nums.size(); ++right)
+        {
+            prod *= nums[right];
+            while (prod >= k)
+                prod /= nums[left++];
+            ans += right - left + 1;
+        }
+        return ans;
+    }
+};
+```
+
+
+
+
+
 ## 0733. 图像渲染
 
 ### 题目：
@@ -21855,6 +22214,148 @@ public:
 
 
 
+## 0844. 比较含退格的字符串
+
+### 题目：
+
+给定 `s` 和 `t` 两个字符串，当它们分别被输入到空白的文本编辑器后，请你判断二者是否相等。`#` 代表退格字符。
+
+如果相等，返回 `true` ；否则，返回 `false` 。
+
+**注意**：如果对空文本输入退格字符，文本继续为空。
+
+**示例 1：**
+
+```
+输入：s = "ab#c", t = "ad#c"
+输出：true
+解释：S 和 T 都会变成 “ac”。
+```
+
+**示例 2：**
+
+```
+输入：s = "ab##", t = "c#d#"
+输出：true
+解释：s 和 t 都会变成 “”。
+```
+
+**示例 3：**
+
+```
+输入：s = "a##c", t = "#a#c"
+输出：true
+解释：s 和 t 都会变成 “c”。
+```
+
+**示例 4：**
+
+```
+输入：s = "a#c", t = "b"
+输出：false
+解释：s 会变成 “c”，但 t 仍然是 “b”。
+```
+
+**提示：**
+
+- `1 <= s.length, t.length <= 200`
+- `s` 和 `t` 只含有小写字母以及字符 `'#'`
+
+**进阶：**
+
+你可以用 `O(N)` 的时间复杂度和 `O(1)` 的空间复杂度解决该问题吗？
+
+**解题思路：**
+
+思路一：借助栈
+
+时间复杂度：O(M+N)
+
+空间复杂度：O(M+N)
+
+思路二：双指针
+
+时间复杂度：O(M+N)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    bool backspaceCompare(string s, string t) {
+        return build(s) == build(t);
+    }
+
+    stack<char> build(string s)
+    {
+        stack<char> stk;
+        for (int i = 0; i < s.length(); ++i)
+        {
+            if (s[i] != '#')
+                stk.push(s[i]);
+            else
+            {
+                if (!stk.empty())
+                    stk.pop();
+            }
+        }
+        return stk;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+class Solution {
+public:
+    bool backspaceCompare(string s, string t) {
+        int i = s.length() - 1, j = t.length() - 1;
+        int count_i = 0, count_j = 0;
+        while (i >= 0 || j >= 0)
+        {
+            while (i >= 0)
+            {
+                if (s[i] == '#')
+                    --i, ++count_i;
+                else if (count_i > 0)
+                    --i, --count_i;
+                else
+                    break;
+            }
+            while (j >= 0)
+            {
+                if (t[j] == '#')
+                    --j, ++count_j;
+                else if (count_j > 0)
+                    --j, --count_j;
+                else
+                    break;
+            }
+            
+            if (i >= 0 && j >= 0)
+            {
+                if (s[i] != t[j])
+                    return false;
+            }
+            else
+            {
+                if (i >= 0 || j >= 0)
+                    return false;
+            }
+            --i, --j;
+        }
+        return true;
+    }
+};
+```
+
+
+
+
+
 ## 0876. 链表的中间节点
 
 ### 题目：
@@ -22076,6 +22577,93 @@ public:
                 ans.push_back(nums[j] * nums[j]);
                 ++j;
             }
+        }
+        return ans;
+    }
+};
+```
+
+
+
+
+
+## 0986. 区间列表的交集
+
+### 题目：
+
+给定两个由一些 **闭区间** 组成的列表，`firstList` 和 `secondList` ，其中 `firstList[i] = [starti, endi]` 而 `secondList[j] = [startj, endj]` 。每个区间列表都是成对 **不相交** 的，并且 **已经排序** 。
+
+返回这 **两个区间列表的交集** 。
+
+形式上，**闭区间** `[a, b]`（其中 `a <= b`）表示实数 `x` 的集合，而 `a <= x <= b` 。
+
+两个闭区间的 **交集** 是一组实数，要么为空集，要么为闭区间。例如，`[1, 3]` 和 `[2, 4]` 的交集为 `[2, 3]` 。
+
+**示例 1：**
+
+![leetcode_986](F:\C++\刷题\Img\leetcode_986.png)
+
+```
+输入：firstList = [[0,2],[5,10],[13,23],[24,25]], secondList = [[1,5],[8,12],[15,24],[25,26]]
+输出：[[1,2],[5,5],[8,10],[15,23],[24,24],[25,25]]
+```
+
+**示例 2：**
+
+```
+输入：firstList = [[1,3],[5,9]], secondList = []
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：firstList = [], secondList = [[4,8],[10,12]]
+输出：[]
+```
+
+**示例 4：**
+
+```
+输入：firstList = [[1,7]], secondList = [[3,10]]
+输出：[[3,7]]
+```
+
+**提示：**
+
+- `0 <= firstList.length, secondList.length <= 1000`
+- `firstList.length + secondList.length >= 1`
+- `0 <= starti < endi <= 10^9`
+- `endi < starti+1`
+- `0 <= startj < endj <= 10^9`
+- `endj < startj+1`
+
+**解题思路：**
+
+双指针合并
+
+时间复杂度：O(M+N)
+
+空间复杂度：O(1)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> intervalIntersection(vector<vector<int>>& firstList, vector<vector<int>>& secondList) {
+        int len1 = firstList.size(), len2 = secondList.size();
+        vector<vector<int>> ans;
+        for (int i = 0, j = 0; i < len1 && j < len2;)
+        {
+            int lo = max(firstList[i][0], secondList[j][0]);
+            int ho = min(firstList[i][1], secondList[j][1]);
+            if (lo <= ho)
+                ans.push_back({lo, ho});
+            if (firstList[i][1] < secondList[j][1])
+                ++i;
+            else
+                ++j;
         }
         return ans;
     }
