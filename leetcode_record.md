@@ -19934,6 +19934,113 @@ public:
 
 
 
+## 0117. 填充每个结点的下一个右侧结点指针Ⅱ
+
+### 题目：
+
+给定一个二叉树
+
+```
+struct Node {
+  int val;
+  Node *left;
+  Node *right;
+  Node *next;
+}
+```
+
+填充它的每个 `next` 指针，让这个指针指向其下一个右侧节点。如果找不到下一个右侧节点，则将 `next` 指针设置为 `NULL`。
+
+初始状态下，所有 `next` 指针都被设置为 `NULL`。
+
+**进阶：**
+
+- 你只能使用常量级额外空间。
+- 使用递归解题也符合要求，本题中递归程序占用的栈空间不算做额外的空间复杂度。
+
+**示例：**
+
+![leetcode_117](F:\C++\刷题\Img\leetcode_117.png)
+
+```
+输入：root = [1,2,3,4,5,null,7]
+输出：[1,#,2,3,#,4,5,7,#]
+解释：给定二叉树如图 A 所示，你的函数应该填充它的每个 next 指针，以指向其下一个右侧节点，如图 B 所示。序列化输出按层序遍历顺序（由 next 指针连接），'#' 表示每层的末尾。
+```
+
+**提示：**
+
+- 树中的节点数小于 `6000`
+- `-100 <= node.val <= 100`
+
+**解题思路：**
+
+思路一：层序遍历（同116题）
+
+思路二：使用上一层的next指针
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法：**
+
+```c++
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    Node* left;
+    Node* right;
+    Node* next;
+
+    Node() : val(0), left(NULL), right(NULL), next(NULL) {}
+
+    Node(int _val) : val(_val), left(NULL), right(NULL), next(NULL) {}
+
+    Node(int _val, Node* _left, Node* _right, Node* _next)
+        : val(_val), left(_left), right(_right), next(_next) {}
+};
+*/
+
+class Solution {
+public:
+    Node* connect(Node* root) {
+        if (root == NULL)
+            return root;
+        Node* start = root;
+        while (start != NULL)
+        {
+            Node* last = NULL, * nextStart = NULL;
+            for (Node* p = start; p != NULL; p = p->next)
+            {
+                if (p->left)
+                    handle(last, p->left, nextStart);
+                if (p->right)
+                    handle(last, p->right, nextStart);
+            }
+            start = nextStart;
+        }
+        return root;
+    }
+
+    void handle(Node*& last, Node*& p, Node*& nextStart)
+    {
+        if (last != NULL)
+            last->next = p;
+
+        if (nextStart == NULL)
+            nextStart = p;
+        last = p;
+    }
+};
+```
+
+
+
+
+
 ## 0120. 三角形最小路径和
 
 ### 题目：
@@ -20603,6 +20710,149 @@ public:
 同动态规划模块198题
 
 
+
+
+
+## 0200. 岛屿数量
+
+### 题目：
+
+给你一个由 `'1'`（陆地）和 `'0'`（水）组成的的二维网格，请你计算网格中岛屿的数量。
+
+岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
+
+此外，你可以假设该网格的四条边均被水包围。
+
+**示例 1：**
+
+```
+输入：grid = [
+  ["1","1","1","1","0"],
+  ["1","1","0","1","0"],
+  ["1","1","0","0","0"],
+  ["0","0","0","0","0"]
+]
+输出：1
+```
+
+**示例 2：**
+
+```
+输入：grid = [
+  ["1","1","0","0","0"],
+  ["1","1","0","0","0"],
+  ["0","0","1","0","0"],
+  ["0","0","0","1","1"]
+]
+输出：3
+```
+
+**提示：**
+
+- `m == grid.length`
+- `n == grid[i].length`
+- `1 <= m, n <= 300`
+- `grid[i][j] 的值为 '0' 或 '1'`
+
+**解题思路：**
+
+思路一：深度优先，递归和非递归
+
+时间复杂度：O(mn)
+
+空间复杂度：O(mn)
+
+思路二：广度优先，深度优先的非递归的栈换成队列
+
+时间复杂度：O(mn)
+
+空间复杂度：O(mn)
+
+**方法一：**
+
+```c++
+// 深度优先遍历 使用栈
+// 把栈换成队列即广度优先遍历
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int m = grid.size(), n = grid[0].size();
+        vector<vector<bool>> vis(m, vector<bool>(n, false));
+        int count = 0;
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (grid[i][j] == '1' && !vis[i][j])
+                {
+                    visGrid(grid, vis, i, j);
+                    ++count;
+                }
+            }
+        }
+        return count;
+    }
+    void visGrid(vector<vector<char>>& grid, vector<vector<bool>>& vis, int i, int j)
+    {
+        int dx[4] = {0, 1, 0, -1};
+        int dy[4] = {1, 0, -1, 0};
+
+        stack<pair<int, int>> stk;
+        stk.push({i, j});
+        while (!stk.empty())
+        {
+            pair<int, int> cpos = stk.top();
+            stk.pop();
+            vis[cpos.first][cpos.second] = true;
+            for (int k = 0; k < 4; ++k)
+            {
+                int tx = cpos.first + dx[k];
+                int ty = cpos.second + dy[k];
+                if (tx >= 0 && tx < grid.size() && ty >= 0 && ty < grid[0].size() && grid[tx][ty] == '1' && !vis[tx][ty])
+                    stk.push({tx, ty});
+            }
+        }
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 深度优先遍历 递归
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int m = grid.size(), n = grid[0].size();
+        vector<vector<bool>> vis(m, vector<bool>(n, false));
+        int count = 0;
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (grid[i][j] == '1' && !vis[i][j])
+                {
+                    visGrid(grid, vis, i, j);
+                    ++count;
+                }
+            }
+        }
+        return count;
+    }
+    void visGrid(vector<vector<char>>& grid, vector<vector<bool>>& vis, int i, int j)
+    {
+        vis[i][j] = true;
+        if (i - 1 >= 0 && grid[i - 1][j] == '1' && !vis[i - 1][j]) // 上
+            visGrid(grid, vis, i - 1, j);
+        if (i + 1 < grid.size() && grid[i + 1][j] == '1' && !vis[i + 1][j]) // 下
+            visGrid(grid, vis, i + 1, j);
+        if (j - 1 >= 0 && grid[i][j - 1] == '1' && !vis[i][j - 1]) // 左
+            visGrid(grid, vis, i, j - 1);
+        if (j + 1 < grid[0].size() && grid[i][j + 1] == '1' && !vis[i][j + 1]) // 右
+            visGrid(grid, vis, i, j + 1);
+    }
+};
+```
 
 
 
@@ -21291,6 +21541,133 @@ public:
 
 
 
+## 0547. 省份数量
+
+### 题目：
+
+有 `n` 个城市，其中一些彼此相连，另一些没有相连。如果城市 `a` 与城市 `b` 直接相连，且城市 `b` 与城市 `c` 直接相连，那么城市 `a` 与城市 `c` 间接相连。
+
+**省份** 是一组直接或间接相连的城市，组内不含其他没有相连的城市。
+
+给你一个 `n x n` 的矩阵 `isConnected` ，其中 `isConnected[i][j] = 1` 表示第 `i` 个城市和第 `j` 个城市直接相连，而 `isConnected[i][j] = 0` 表示二者不直接相连。
+
+返回矩阵中 **省份** 的数量。
+
+**示例 1：**
+
+![leetcode_547_1](F:\C++\刷题\Img\leetcode_547_1.jpg)
+
+```
+输入：isConnected = [[1,1,0],[1,1,0],[0,0,1]]
+输出：2
+```
+
+**示例 2：**
+
+![leetcode_547_2](F:\C++\刷题\Img\leetcode_547_2.jpg)
+
+```
+输入：isConnected = [[1,0,0],[0,1,0],[0,0,1]]
+输出：3
+```
+
+**提示：**
+
+- `1 <= n <= 200`
+- `n == isConnected.length`
+- `n == isConnected[i].length`
+- `isConnected[i][j] 为 1 或 0`
+- `isConnected[i][i] == 1`
+- `isConnected[i][j] == isConnected[j][i]`
+
+**解题思路：**
+
+思路一：深度广度优先（同200题）
+
+思路二：并查集
+
+**方法：**
+
+```c++
+class UnionFindSet {
+public:
+    UnionFindSet(int lens)
+    {
+        parent = vector<int>(lens, -1);
+        rank = vector<int>(lens, 0);
+        set_nums = 0;
+    }
+
+    int find(int x)
+    {
+        int x_root = x;
+        while (parent[x_root] != -1)
+        {
+            x_root = parent[x];
+            x = x_root;
+        }
+
+        return x_root;
+    }
+
+    bool merge(int x, int y)
+    {
+        int x_root = find(x);
+        int y_root = find(y);
+
+        if (x_root == y_root)
+            return false;
+        
+        if (rank[x_root] > rank[y_root])
+            parent[y_root] = x_root;
+        else if (rank[y_root] > rank[x_root])
+            parent[x_root] = y_root;
+        else
+        {
+            parent[y_root] = x_root;
+            ++rank[x_root];
+        }
+        return true;
+    }
+
+    int count_set_nums()
+    {
+        for (int i = 0; i < parent.size(); ++i)
+        {
+            if (parent[i] == -1)
+                ++set_nums;
+        }
+        return set_nums;
+    }
+
+private:
+    vector<int> parent;
+    vector<int> rank;
+    int set_nums;
+};
+
+class Solution {
+public:
+    int findCircleNum(vector<vector<int>>& isConnected) {
+        int n = isConnected.size();
+        UnionFindSet ufs = UnionFindSet(n);
+        for (int i = 0; i < n; ++i)
+        {
+            for (int j = i + 1; j < n; ++j)
+            {
+                if (isConnected[i][j] == 1)
+                    ufs.merge(i, j);
+            }
+        }
+        return ufs.count_set_nums();
+    }
+};
+```
+
+
+
+
+
 ## 0557. 反转字符串中的单词Ⅲ
 
 ### 题目：
@@ -21515,7 +21892,182 @@ public:
 
 
 
+## 0572. 另一棵树的子树
+
+### 题目：
+
+给你两棵二叉树 `root` 和 `subRoot` 。检验 `root` 中是否包含和 `subRoot` 具有相同结构和节点值的子树。如果存在，返回 `true` ；否则，返回 `false` 。
+
+二叉树 `tree` 的一棵子树包括 `tree` 的某个节点和这个节点的所有后代节点。`tree` 也可以看做它自身的一棵子树。
+
+**示例 1：**
+
+![leetcode_572](F:\C++\刷题\Img\leetcode_572.jpg)
+
+```
+输入：root = [3,4,5,1,2], subRoot = [4,1,2]
+输出：true
+```
+
+**示例 2：**
+
+![leetcode_572_1](F:\C++\刷题\Img\leetcode_572_1.jpg)
+
+```
+输入：root = [3,4,5,1,2,null,null,null,null,0], subRoot = [4,1,2]
+输出：false
+```
+
+**提示：**
+
+`root` 树上的节点数量范围是 `[1, 2000]`
+`subRoot` 树上的节点数量范围是 `[1, 1000]`
+`-10^4 <= root.val <= 10^4`
+`-10^4 <= subRoot.val <= 10^4`
+
+**解题思路：**
+
+思路一：深度递归暴力法
+
+思路二：先序遍历 + 填充NULL（针对不完全二叉树） + KMP子串查找
+
+**方法一：**
+
+```c++
+ // dfs
+class Solution {
+public:
+    bool isSubtree(TreeNode* root, TreeNode* subRoot) {
+        return dfs(root, subRoot);
+    }
+
+    bool dfs(TreeNode* o, TreeNode* t)
+    {
+        if (!o)
+            return false;
+        return check(o, t) || dfs(o->left, t) || dfs(o->right, t);
+    }
+
+    bool check(TreeNode* o, TreeNode* t)
+    {
+        if (!o && !t)
+            return true;
+        if ((!o && t) || (o && !t) || (o->val != t->val))
+            return false;
+        return check(o->left, t->left) && check(o->right, t->right);
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 先序遍历 + 填充NULL + KMP
+class Solution {
+public:
+    bool isSubtree(TreeNode* root, TreeNode* subRoot) {
+        int maxVal = INT_MIN;
+        getMaxElement(root, maxVal);
+        getMaxElement(subRoot, maxVal);
+        int lNULL = maxVal + 1;
+        int rNULL = maxVal + 2;
+
+        vector<int> sOrder, tOrder;
+        preOrder(root, sOrder, lNULL, rNULL);
+        preOrder(subRoot, tOrder, lNULL, rNULL);
+
+        int m = sOrder.size(), n = tOrder.size();
+        vector<int> prefix(n, 0);
+        prefix_table(tOrder, prefix);
+
+        return kmp(sOrder, tOrder, prefix);
+        
+    }
+    void getMaxElement(TreeNode* root, int& maxVal)
+    {
+        if (!root)
+            return;
+        maxVal = max(root->val, maxVal);
+        getMaxElement(root->left, maxVal);
+        getMaxElement(root->right, maxVal);
+    }
+
+    void preOrder(TreeNode* root, vector<int>& order, int lNULL, int rNULL)
+    {
+        if (!root)
+            return;
+        order.push_back(root->val);
+        if (root->left)
+            preOrder(root->left, order, lNULL, rNULL);
+        else
+            order.push_back(lNULL);
+        if (root->right)
+            preOrder(root->right, order, lNULL, rNULL);
+        else
+            order.push_back(rNULL);
+    }
+
+    void prefix_table(vector<int>& pattern, vector<int>& prefix)
+    {
+        int len = 0, n = pattern.size();
+        prefix[0] = 0;
+        int i = 1;
+        while (i < n)
+        {
+            if (pattern[i] == pattern[len])
+            {
+                ++len;
+                prefix[i] = len;
+                ++i;
+            }
+            else
+            {
+                if (len > 0)
+                    len = prefix[len - 1];
+                else
+                {
+                    prefix[i] = len;
+                    ++i;
+                }
+            }
+        }
+        // 前后缀表 后移一位 首位填充 -1
+        for (int j = n - 1; j > 0; --j)
+            prefix[j] = prefix[j - 1];
+        prefix[0] = -1;
+    }
+
+    bool kmp(vector<int>& sOrder, vector<int>& tOrder, vector<int>& prefix)
+    {
+        int m = sOrder.size(), n = tOrder.size();
+        int i = 0, j = 0;
+        while (i < m)
+        {
+            if (sOrder[i] == tOrder[j])
+            {
+                if (j == n - 1)
+                    return true;
+                ++i, ++j;
+            }
+            else
+            {
+                j = prefix[j];
+                if (j == -1)
+                    ++i, ++j;
+            }
+        } 
+        return false;
+    }
+};
+```
+
+ 
+
+
+
 ## 0617. 合并二叉树
+
+### 题目：
 
 给定两个二叉树，想象当你将它们中的一个覆盖到另一个上时，两个二叉树的一些节点便会重叠。
 
