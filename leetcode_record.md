@@ -19625,6 +19625,87 @@ public:
 
 
 
+## 0017. 电话号码的字母组成
+
+### 题目：
+
+给定一个仅包含数字 `2-9` 的字符串，返回所有它能表示的字母组合。答案可以按 **任意顺序** 返回。
+
+给出数字到字母的映射如下（与电话按键相同）。注意 1 不对应任何字母。
+
+![leetcode_17](F:\C++\刷题\Img\leetcode_17.png)
+
+**示例 1：**
+
+```
+输入：digits = "23"
+输出：["ad","ae","af","bd","be","bf","cd","ce","cf"]
+```
+
+**示例 2：**
+
+```
+输入：digits = ""
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：digits = "2"
+输出：["a","b","c"]
+```
+
+**提示：**
+
+- `0 <= digits.length <= 4`
+- `digits[i]` 是范围 `['2', '9']` 的一个数字。
+
+
+
+**解题思路：**
+
+回溯法
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<string> letterCombinations(string digits) {
+        int lens = digits.length();
+        if (lens == 0)
+            return vector<string>();
+        vector<string> letters = {"abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        vector<string> ans;
+        string subs = "";
+        _letterCombinations(digits, letters, ans, subs, 0);
+        return ans;
+    }
+
+    void _letterCombinations(string& digits, vector<string>& letters, vector<string>& ans, string& subs, int i)
+    {
+        if (i == digits.length())
+        {
+            ans.push_back(subs);
+            return;
+        }
+        int posi = digits[i] - '0' - 2;
+        int lens = letters[posi].length();
+        for (int j = 0; j < lens; ++j)
+        {
+            subs += letters[posi][j];
+            _letterCombinations(digits, letters, ans, subs, i + 1);
+            subs.pop_back();
+        }
+    }
+};
+```
+
+
+
+
+
 ## 0019. 删除链表的倒数第N个节点
 
 ### 题目：
@@ -19733,6 +19814,16 @@ public:
 
 
 
+## 0022. 括号生成
+
+### 题目：
+
+同动态规划模块22题
+
+
+
+
+
 ## 0033. 搜索旋转排序数组
 
 ### 题目：
@@ -19763,11 +19854,41 @@ public:
 
 
 
+## 0039. 组合总和
+
+### 题目：
+
+同Array模块39题
+
+
+
+
+
+## 0040. 组合总和Ⅱ
+
+### 题目：
+
+同Array模块40题
+
+
+
+
+
 ## 0046. 全排列
 
 ### 题目：
 
 同数据结构模块46题
+
+
+
+
+
+## 0047. 全排列Ⅱ
+
+### 题目：
+
+同数据结构模块47题
 
 
 
@@ -19803,11 +19924,41 @@ public:
 
 
 
+## 0078. 子集
+
+### 题目：
+
+同Array模块78题
+
+
+
+
+
+## 0079. 单词搜索
+
+### 题目：
+
+同Array模块79题
+
+
+
+
+
 ## 0082. 删除排序链表中的重复元素
 
 ### 题目：
 
 同数据结构模块82题
+
+
+
+
+
+## 0090. 子集Ⅱ
+
+### 题目：
+
+同Array模块90题
 
 
 
@@ -20048,6 +20199,164 @@ public:
 同动态规划模块120题
 
 
+
+
+
+## 0130. 被围绕的区域
+
+### 题目：
+
+给你一个 `m x n` 的矩阵 `board` ，由若干字符 `'X'` 和 `'O'` ，找到所有被 `'X'` 围绕的区域，并将这些区域里所有的 `'O'` 用 `'X'` 填充。
+
+**示例 1：**
+
+![leetcode_130](F:\C++\刷题\Img\leetcode_130.jpg)
+
+```
+输入：board = [["X","X","X","X"],["X","O","O","X"],["X","X","O","X"],["X","O","X","X"]]
+输出：[["X","X","X","X"],["X","X","X","X"],["X","X","X","X"],["X","O","X","X"]]
+解释：被围绕的区间不会存在于边界上，换句话说，任何边界上的 'O' 都不会被填充为 'X'。 任何不在边界上，或不与边界上的 'O' 相连的 'O' 最终都会被填充为 'X'。如果两个元素在水平或垂直方向相邻，则称它们是“相连”的。
+```
+
+**示例 2：**
+
+```
+输入：board = [["X"]]
+输出：[["X"]]
+```
+
+**提示：**
+
+- `m == board.length`
+- `n == board[i].length`
+- `1 <= m, n <= 200`
+- `board[i][j] 为 'X' 或 'O'`
+
+
+
+**解题思路：**
+
+先将和边沿部分的’O'和与这个直接或间接挨着的'O'置为'A'，然后对换
+
+思路一：深度优先
+
+时间复杂度：O(m*n)
+
+空间复杂度：O(m*n)
+
+思路二：广度优先
+
+时间复杂度：O(m*n)
+
+空间复杂度：O(m*n)
+
+**方法一：**
+
+```
+class Solution {
+public:
+    void solve(vector<vector<char>>& board) {
+        int m = board.size(), n = board[0].size();
+
+        for (int i = 0; i < m; ++i)
+        {
+            dfs(board, i, 0);
+            dfs(board, i, n - 1);
+        }
+        for (int i = 0; i < n; ++i)
+        {
+            dfs(board, 0, i);
+            dfs(board, m - 1, i);
+        }
+
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (board[i][j] == 'A')
+                    board[i][j] = 'O';
+                else if (board[i][j] == 'O')
+                    board[i][j] = 'X';
+            }
+        }
+    }
+    void dfs(vector<vector<char>>& board, int x, int y)
+    {
+        if (x < 0 || x >= board.size() || y < 0 || y >= board[0].size() || board[x][y] != 'O')
+            return;
+        board[x][y] = 'A';
+        dfs(board, x + 1, y);
+        dfs(board, x - 1, y);
+        dfs(board, x, y + 1);
+        dfs(board, x, y - 1);
+    }
+};
+```
+
+**方法二：**
+
+```
+class Solution {
+public:
+    void solve(vector<vector<char>>& board) {
+        int m = board.size(), n = board[0].size();
+
+        for (int i = 0; i < m; ++i)
+        {
+            if (board[i][0] == 'O')
+                bfs(board, i, 0);
+            if (board[i][n - 1] == 'O')
+                bfs(board, i, n - 1);
+        }
+        for (int i = 0; i < n; ++i)
+        {
+            if (board[0][i] == 'O')
+                bfs(board, 0, i);
+            if (board[m - 1][i] == 'O')
+                bfs(board, m - 1, i);
+        }
+
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (board[i][j] == 'A')
+                    board[i][j] = 'O';
+                else if (board[i][j] == 'O')
+                    board[i][j] = 'X';
+            }
+        }
+    }
+    void bfs(vector<vector<char>>& board, int x, int y)
+    {
+        board[x][y] = 'A';
+        int dx[4] = {0, 1, 0, -1};
+        int dy[4] = {1, 0, -1, 0};
+        queue<pair<int, int>> q;
+        q.push({x, y});
+        int m = board.size(), n = board[0].size();
+
+        while (!q.empty())
+        {
+            pair<int, int> pos = q.front();
+            q.pop();
+            for (int i = 0; i < 4; ++i)
+            {
+                for (int j = 0; j < 4; ++j)
+                {
+                    int tx = pos.first + dx[i];
+                    int ty = pos.second + dy[i];
+                    if (tx >= 0 && tx < m && ty >= 0 && ty < n && board[tx][ty] == 'O')
+                    {
+                        board[tx][ty] = 'A';
+                        q.push({tx, ty});
+                    }
+                }
+            }
+        }
+    }
+};
+```
 
 
 
@@ -22766,6 +23075,109 @@ public:
 
 
 
+## 0797. 所有可能的路径
+
+### 题目：
+
+给你一个有 `n` 个节点的 **有向无环图（DAG）**，请你找出所有从节点 `0` 到节点 `n-1` 的路径并输出（**不要求按特定顺序**）
+
+二维数组的第 `i` 个数组中的单元都表示有向图中 `i` 号节点所能到达的下一些节点，空就是没有下一个结点了。
+
+译者注：有向图是有方向的，即规定了 `a→b` 你就不能从 `b→a` 。
+
+**示例 1：**
+
+![leetcode_797_1](F:\C++\刷题\Img\leetcode_797_1.jpg)
+
+```
+输入：graph = [[1,2],[3],[3],[]]
+输出：[[0,1,3],[0,2,3]]
+解释：有两条路径 0 -> 1 -> 3 和 0 -> 2 -> 3
+```
+
+**示例 2：**
+
+![leetcode_797_2](F:\C++\刷题\Img\leetcode_797_2.jpg)
+
+```
+输入：graph = [[4,3,1],[3,2,4],[3],[4],[]]
+输出：[[0,4],[0,3,4],[0,1,3,4],[0,1,2,3,4],[0,1,4]]
+```
+
+**示例 3：**
+
+```
+输入：graph = [[1],[]]
+输出：[[0,1]]
+```
+
+**示例 4：**
+
+```
+输入：graph = [[1,2,3],[2],[3],[]]
+输出：[[0,1,2,3],[0,2,3],[0,3]]
+```
+
+**示例 5：**
+
+```
+输入：graph = [[1,3],[2],[3],[]]
+输出：[[0,1,2,3],[0,3]]
+```
+
+**提示：**
+
+- `n == graph.length`
+- `2 <= n <= 15`
+- `0 <= graph[i][j] < n`
+- `graph[i][j] != i`（即，不存在自环）
+- `graph[i]` 中的所有元素 **互不相同**
+- 保证输入为 **有向无环图（DAG）**
+
+
+
+**解题思路：**
+
+深度优先：主要是看懂题
+
+时间复杂度：O(n*2^n)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> allPathsSourceTarget(vector<vector<int>>& graph) {
+        vector<int> stk;
+        vector<vector<int>> ans;
+        stk.push_back(0);
+        _dfs(graph, ans, stk, 0);
+        return ans;
+    }
+    void _dfs(vector<vector<int>>& graph, vector<vector<int>>& ans, vector<int>& stk, int x)
+    {
+        if (x == graph.size() - 1)
+        {
+            ans.push_back(stk);
+            return;
+        }
+
+        for (auto& y : graph[x])
+        {
+            stk.push_back(y);
+            _dfs(graph, ans, stk, y);
+            stk.pop_back();
+        }
+    }
+};
+```
+
+
+
+
+
 ## 0844. 比较含退格的字符串
 
 ### 题目：
@@ -23329,6 +23741,114 @@ public:
             }
         }
         return cnt == 0 ? ans : -1;
+    }
+};
+```
+
+
+
+
+
+## 1091. 二进制矩阵中的最短路径
+
+### 题目：
+
+给你一个 `n x n` 的二进制矩阵 `grid` 中，返回矩阵中最短 **畅通路径** 的长度。如果不存在这样的路径，返回 `-1` 。
+
+二进制矩阵中的 畅通路径 是一条从 **左上角** 单元格（即，`(0, 0)`）到 右下角 单元格（即，`(n - 1, n - 1)`）的路径，该路径同时满足下述要求：
+
+- 路径途经的所有单元格都的值都是 `0` 。
+- 路径中所有相邻的单元格应当在 **8 个方向之一** 上连通（即，相邻两单元之间彼此不同且共享一条边或者一个角）。
+
+**畅通路径的长度** 是该路径途经的单元格总数。
+
+**示例 1：**
+
+![leetcode_1091_1](F:\C++\刷题\Img\leetcode_1091_1.png)
+
+```
+输入：grid = [[0,1],[1,0]]
+输出：2
+```
+
+**示例 2：**
+
+![leetcode_1091_2](F:\C++\刷题\Img\leetcode_1091_2.png)
+
+```
+输入：grid = [[0,0,0],[1,1,0],[1,1,0]]
+输出：4
+```
+
+**示例 3：**
+
+```
+输入：grid = [[1,0,0],[1,1,0],[1,1,0]]
+输出：-1
+```
+
+**提示：**
+
+- `n == grid.length`
+- `n == grid[i].length`
+- `1 <= n <= 100`
+- `grid[i][j]` 为 `0` 或 `1`
+
+**解题思路：**
+
+广度优先遍历，一层一层往外走，走到右下角刚好步数
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int shortestPathBinaryMatrix(vector<vector<int>>& grid) {
+        int n = grid.size();
+        if (grid[0][0] == 1 || grid[n - 1][n - 1] == 1)
+            return -1;
+        vector<vector<bool>> vis(n, vector<bool>(n, false));
+        queue<pair<int, int>> q;
+        q.push({ 0, 0 });
+        vis[0][0] = true;
+        int dx[8] = { 0, 1, 0, -1, 1, 1, -1, -1 };
+        int dy[8] = { 1, 0, -1, 0, 1, -1, -1, 1 };
+        int ans = 0;
+
+        int zero_nums = 0;
+        for (int i = 0; i < n; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (grid[i][j] == 0)
+                    ++zero_nums;
+            }
+        }
+
+        while (!q.empty())
+        {
+            ++ans;
+            int level_count = q.size();
+            while (level_count-- > 0)
+            {
+                pair<int, int> pos = q.front();
+                q.pop();
+                if (pos.first == n - 1 && pos.second == n - 1)
+                    return ans;
+                --zero_nums;
+                for (int i = 0; i < 8; ++i)
+                {
+                    int tx = pos.first + dx[i];
+                    int ty = pos.second + dy[i];
+                    if (tx >= 0 && tx < n && ty >= 0 && ty < n && grid[tx][ty] == 0 && !vis[tx][ty])
+                    {
+                        vis[tx][ty] = true;
+                        q.push({ tx, ty });
+                    }
+                }
+            }
+        }
+        return zero_nums > 0 ? -1 : ans;
     }
 };
 ```
