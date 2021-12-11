@@ -5161,7 +5161,330 @@ public:
 
 
 
+## 0204. 计数质数
 
+### 题目：
+
+统计所有小于非负整数 `n` 的质数的数量。
+
+**示例 1：**
+
+```
+输入：n = 10
+输出：4
+解释：小于 10 的质数一共有 4 个, 它们是 2, 3, 5, 7 。
+```
+
+**示例 2：**
+
+```
+输入：n = 0
+输出：0
+```
+
+**示例 3：**
+
+```
+输入：n = 1
+输出：0
+```
+
+**提示：**
+
+- `0 <= n <= 5 * 10^6`
+
+**解题思路：**
+
+思路一：暴力解法
+
+时间复杂度：$O(n\sqrt{n})$
+
+空间复杂度：O(1)
+
+思路二：筛选法
+
+时间复杂度：O(nloglogn)
+
+空间复杂度：O(n)
+
+
+
+**方法一：**
+
+```c++
+// 暴力解法（超时）
+class Solution {
+public:
+    int countPrimes(int n) {
+        if (n <= 2)
+            return 0;
+        int ans = 0;
+        for (int i = 2; i < n; ++i)
+            ans += isPrime(i);
+        return ans;
+    }
+    int isPrime(int x)
+    {
+        for (int i = 2; i * i <= x; ++i)
+            if (x % i == 0)
+                return 0;
+        return 1;
+    }
+};
+```
+
+**方法二：**
+
+```
+// 筛除法
+class Solution {
+public:
+    int countPrimes(int n) {
+        if (n <= 2)
+            return 0;
+        int ans = 0;
+        vector<int> isPrime(n, 1);
+        for (int i = 2; i < n; ++i)
+        {
+            ans += isPrime[i];
+            if ((long long)i * i < n)
+            {
+                for (int j = i * i; j < n; j += i)
+                    isPrime[j] = 0;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+
+
+
+
+## 0212. 单词搜索Ⅱ
+
+### 题目：
+
+给定一个 `m x n` 二维字符网格 `board` 和一个单词（字符串）列表 `words`，找出所有同时在二维网格和字典中出现的单词。
+
+单词必须按照字母顺序，通过 **相邻的单元格** 内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母在一个单词中不允许被重复使用。
+
+**示例 1：**
+
+![leetcode_212_1](F:\C++\刷题\Img\leetcode_212_1.jpg)
+
+```
+输入：board = [["o","a","a","n"],["e","t","a","e"],["i","h","k","r"],["i","f","l","v"]], words = ["oath","pea","eat","rain"]
+输出：["eat","oath"]
+```
+
+**示例 2：**
+
+![leetcode_212_2](F:\C++\刷题\Img\leetcode_212_2.jpg)
+
+```
+输入：board = [["a","b"],["c","d"]], words = ["abcb"]
+输出：[]
+```
+
+**提示：**
+
+- `m == board.length`
+- `n == board[i].length`
+- `1 <= m, n <= 12`
+- `board[i][j]` 是一个小写英文字母
+- `1 <= words.length <= 3 * 10^4`
+- `1 <= words[i].length <= 10`
+- `words[i]` 由小写英文字母组成
+- `words` 中的所有字符串互不相同
+
+**解题思路：**
+
+使用一个字典树，先存下所有单词列表的单词，然后再board中查找每一个字符及连接字符，是否在字典树中存在。
+
+**方法：**
+
+```c++
+// 回溯 + 字典树
+class Trie
+{
+public:
+    string word;
+    unordered_map<char, Trie*> children;
+    Trie()
+    {
+        this->word = "";
+    }
+    void insert(string& word)
+    {
+        Trie* node = this;
+        for (auto& ch : word)
+        {
+            if (node->children.count(ch) == 0)
+                node->children[ch] = new Trie();
+            node = node->children[ch];
+        }
+        node->word = word;
+    }
+};
+
+class Solution {
+private:
+    vector<vector<int>> dirs;
+public:
+    Solution() {
+        dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    }
+    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+        Trie* root = new Trie();
+        set<string> res;
+        vector<string> ans;
+        for (auto& word : words)
+            root->insert(word);
+        
+        int m = board.size(), n = board[0].size();
+        for (int i = 0; i < m; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+                dfs(board, words, root, i, j, res);
+        }
+
+        for (auto& word : res)
+            ans.push_back(word);
+        return ans;
+    }
+
+    void dfs(vector<vector<char>>& board, vector<string>& words, Trie* root, int x, int y, set<string>& res)
+    {
+        char ch = board[x][y];
+        if (root->children.count(ch) == 0)
+            return;
+
+        root = root->children[ch];
+        if (root->word.size() > 0)
+            res.insert(root->word);
+        
+        board[x][y] = '#';
+        int m = board.size(), n = board[0].size();
+        for (int i = 0; i < 4; ++i)
+        {
+            int tx = x + dirs[i][0];
+            int ty = y + dirs[i][1];
+            if (tx >= 0 && tx < m && ty >= 0 && ty < n && board[tx][ty] != '#')
+                dfs(board, words, root, tx, ty, res);
+        }
+        board[x][y] = ch;
+    }
+};
+```
+
+
+
+
+
+## 0692. 前K个高频单词
+
+### 题目：
+
+给一非空的单词列表，返回前 `k` 个出现次数最多的单词。
+
+返回的答案应该按单词出现频率由高到低排序。如果不同的单词有相同出现频率，按字母顺序排序。
+
+**示例 1：**
+
+```
+输入: ["i", "love", "leetcode", "i", "love", "coding"], k = 2
+输出: ["i", "love"]
+解析: "i" 和 "love" 为出现次数最多的两个单词，均为2次。
+    注意，按字母顺序 "i" 在 "love" 之前。
+```
+
+**示例 2：**
+
+```
+输入: ["the", "day", "is", "sunny", "the", "the", "the", "sunny", "is", "is"], k = 4
+输出: ["the", "is", "sunny", "day"]
+解析: "the", "is", "sunny" 和 "day" 是出现次数最多的四个单词，
+    出现次数依次为 4, 3, 2 和 1 次。
+```
+
+
+注意：
+
+1. 假定 k 总为有效值， 1 ≤ k ≤ 集合元素数。
+2. 输入的单词均由小写字母组成。
+
+**扩展练习：**
+
+尝试以 `O(n log k)` 时间复杂度和 `O(n)` 空间复杂度解决。
+
+
+
+**解题思路：**
+
+思路一：排序hash表
+
+思路二：优先队列
+
+**方法一：**
+
+```c++
+// hash表排序
+class Solution {
+public:
+    vector<string> topKFrequent(vector<string>& words, int k) {
+        unordered_map<string, int> um;
+        for (auto& word : words)
+            ++um[word];
+        vector<pair<string, int>> tmp;
+        for (auto& e : um)
+            tmp.push_back(e);
+        sort(tmp.begin(), tmp.end(), [](pair<string, int>& p1, pair<string, int>& p2)->bool {
+            if (p1.second == p2.second)
+            {
+                return p1.first < p2.first;
+            }
+            return p1.second > p2.second;
+        });
+        vector<string> ans;
+        for (int i = 0; i < k; ++i)
+            ans.push_back(tmp[i].first);
+        return ans;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 优先队列
+class Solution {
+public:
+    vector<string> topKFrequent(vector<string>& words, int k) {
+        unordered_map<string, int> um;
+        for (auto& word : words)
+            ++um[word];
+        auto cmp = [](pair<string, int>& p1, pair<string, int>& p2)->bool {
+            return p1.second == p2.second ? p1.first < p2.first : p1.second > p2.second;
+        };
+        priority_queue<pair<string, int>, vector<pair<string, int>>, decltype(cmp)> pq(cmp);
+        for (auto& p : um)
+        {
+            pq.push(p);
+            if (pq.size() > k)
+                pq.pop();
+        }
+        vector<string> ans(k);
+        for (int i = k - 1; i >= 0; --i)
+        {
+            ans[i] = pq.top().first;
+            pq.pop();
+        }
+        return ans;
+    }
+};
+```
 
 
 
@@ -7469,6 +7792,8 @@ public:
 
 **解题思路：**
 
+贪心法
+
 思路一：自后往前
 
 方法等同于 1014 题，记录当前右边最大值，依次向前遍历，找到差值最大的一组，并记录；
@@ -7915,6 +8240,194 @@ public:
 ```
 
 
+
+
+
+## 0174. 地下城游戏
+
+### 题目：
+
+一些恶魔抓住了公主（**P**）并将她关在了地下城的右下角。地下城是由 `M x N` 个房间组成的二维网格。我们英勇的骑士（**K**）最初被安置在左上角的房间里，他必须穿过地下城并通过对抗恶魔来拯救公主。
+
+骑士的初始健康点数为一个正整数。如果他的健康点数在某一时刻降至 0 或以下，他会立即死亡。
+
+有些房间由恶魔守卫，因此骑士在进入这些房间时会失去健康点数（若房间里的值为负整数，则表示骑士将损失健康点数）；其他房间要么是空的（房间里的值为 0），要么包含增加骑士健康点数的魔法球（若房间里的值为正整数，则表示骑士将增加健康点数）。
+
+为了尽快到达公主，骑士决定每次只向右或向下移动一步。
+
+**编写一个函数来计算确保骑士能够拯救到公主所需的最低初始健康点数。**
+
+例如，考虑到如下布局的地下城，如果骑士遵循最佳路径 `右 -> 右 -> 下 -> 下`，则骑士的初始健康点数至少为 **7**。
+
+| -2（K） |   -3    |      3      |
+| :-----: | :-----: | :---------: |
+| **-5**  | **-10** |    **1**    |
+| **10**  | **30**  | **-5（P）** |
+
+**说明:**
+
+- 骑士的健康点数没有上限。
+- 任何房间都可能对骑士的健康点数造成威胁，也可能增加骑士的健康点数，包括骑士进入的左上角房间以及公主被监禁的右下角房间。
+
+**解题思路：**
+
+动态规划
+
+从左上往右下走，需要同时记录到达当前点所需的最小初始值，和到达当前点获得最大生命值
+
+从右下往左上走，只需要记录当前点到达终点所需的最小生命值（至少为1）。
+
+时间复杂度：O(N×M)
+
+空间复杂度：O(N×M)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    int calculateMinimumHP(vector<vector<int>>& dungeon) {
+        int m = dungeon.size(), n = dungeon[0].size();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, INT_MAX));
+        // dp[m - 1][n - 1]为终点，但到达终点并扣完血量后必须活着
+        // 即至少还需要 1 点血
+        // 所以 这两个无效值需初始化为 1
+        // 且到达终点前至少需要有dp[m - 1][n - 1] = min(dp[m][n - 1], dp[m - 1][n]) - dungeon[m - 1][n - 1];
+        dp[m][n - 1] = 1, dp[m - 1][n] = 1;
+        for (int i = m - 1; i >= 0; --i)
+        {
+            for (int j = n - 1; j >= 0; --j)
+            {
+                int minn = min(dp[i + 1][j], dp[i][j + 1]);
+                dp[i][j] = max(minn - dungeon[i][j], 1);
+            }
+        }
+        return dp[0][0];
+    }
+};
+```
+
+
+
+
+
+## 0188. 买卖股票的最佳时机Ⅳ
+
+### 题目：
+
+给定一个整数数组 `prices` ，它的第 `i` 个元素 `prices[i]` 是一支给定的股票在第 `i` 天的价格。
+
+设计一个算法来计算你所能获取的最大利润。你最多可以完成 **k** 笔交易。
+
+**注意**：你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。
+
+**示例 1：**
+
+```
+输入：k = 2, prices = [2,4,1]
+输出：2
+解释：在第 1 天 (股票价格 = 2) 的时候买入，在第 2 天 (股票价格 = 4) 的时候卖出，这笔交易所能获得利润 = 4-2 = 2 。
+```
+
+**示例 2：**
+
+```
+输入：k = 2, prices = [3,2,6,5,0,3]
+输出：7
+解释：在第 2 天 (股票价格 = 2) 的时候买入，在第 3 天 (股票价格 = 6) 的时候卖出, 这笔交易所能获得利润 = 6-2 = 4 。
+     随后，在第 5 天 (股票价格 = 0) 的时候买入，在第 6 天 (股票价格 = 3) 的时候卖出, 这笔交易所能获得利润 = 3-0 = 3 。
+```
+
+**提示：**
+
+`0 <= k <= 100`
+`0 <= prices.length <= 1000`
+`0 <= prices[i] <= 1000`
+
+**解题思路：**
+
+动态规划
+
+我们用 $\textit{buy}[i][j]$ 表示对于数组 $\textit{prices}[0..i]$ 中的价格而言，进行恰好 $j$ 笔交易，并且当前手上持有一支股票，这种情况下的最大利润；用 $\textit{sell}[i][j]$ 表示恰好进行 $j$ 笔交易，并且当前手上不持有股票，这种情况下的最大利润。
+
+注意第0天的初始化
+
+**方法：**
+
+```c++
+// 内存优化（使用滚动数组）
+class Solution {
+public:
+    int maxProfit(int k, vector<int>& prices) {
+        int n = prices.size();
+        if (n == 0)
+            return 0;
+        k = min(k, n / 2);
+        vector<int> buy = vector<int>(k + 1);
+        vector<int> sell = vector<int>(k + 1);
+        buy[0] = -prices[0];
+        sell[0] = 0;
+        int small = INT_MIN / 2;
+        for (int i = 1; i <= k; ++i)
+        {
+            buy[i] = small;
+            sell[i] = small;
+        }
+
+        for (int i = 1; i < n; ++i)
+        {
+            buy[0] = max(buy[0], sell[0] - prices[i]);
+            for (int j = k; j >= 1; --j)
+            {
+                buy[j] = max(buy[j], sell[j] - prices[i]);
+                sell[j] = max(sell[j], buy[j - 1] + prices[i]);
+            }
+        }
+        return *max_element(sell.begin(), sell.end());
+    }
+};
+
+/*
+// 动态规划
+class Solution {
+public:
+    int maxProfit(int k, vector<int>& prices) {
+        int n = prices.size();
+        if (n == 0)
+            return 0;
+        k = min(k, n / 2);
+        // 第 i 天，进行了 j 笔交易，且手里还有一只股票
+        vector<vector<int>> buy = vector<vector<int>>(n, vector<int>(k + 1));
+        // 第 i 天，进行了 j 笔交易，且手里没有股票
+        vector<vector<int>> sell = vector<vector<int>>(n, vector<int>(k + 1));
+        buy[0][0] = -prices[0];
+        sell[0][0] = 0;
+        int small = INT_MIN / 2;
+        // 无效值，第0天不可能交易满除0之外的交易次数
+        for (int i = 1; i <= k; ++i)
+        {
+            buy[0][i] = small;
+            sell[0][i] = small;
+        }
+
+        for (int i = 1; i < n; ++i)
+        {
+            buy[i][0] = max(buy[i - 1][0], sell[i - 1][0] - prices[i]);
+            for (int j = 1; j <= k; ++j)
+            {
+                // 今天剩下的利润（手里有股票）：要么是前一天买的buy[i - 1][j]，要么是今天买的sell[i - 1][j] - prices[i]
+                buy[i][j] = max(buy[i - 1][j], sell[i - 1][j] - prices[i]);
+                // 今天剩下的利润（手里没股票）：要么是前一天就没有sell[i - 1][j]，要么是今天卖的buy[i - 1][j - 1] + prices[i]
+                // 今天卖的，卖后一共累积了 j 次交易，所以前一天最多只交易了 j-1 次，因此是buy[i - 1][j - 1]来加。
+                sell[i][j] = max(sell[i - 1][j], buy[i - 1][j - 1] + prices[i]);
+            }
+        }
+        // 最大利润肯定是最后一天手里没股票的次数
+        return *max_element(sell[n - 1].begin(), sell[n - 1].end());
+    }
+};
+*/
+```
 
 
 
@@ -9741,6 +10254,177 @@ public:
             for (int i = coin; i <= amount; ++i)
                 dp[i] += dp[i - coin];
         return dp[amount];
+    }
+};
+```
+
+
+
+
+
+## 0583. 两个字符串的删除操作
+
+### 题目：
+
+给定两个单词 `word1` 和 `word2`，找到使得 `word1` 和 `word2` 相同所需的最小步数，每步可以删除任意一个字符串中的一个字符。
+
+**示例：**
+
+```
+输入: "sea", "eat"
+输出: 2
+解释: 第一步将"sea"变为"ea"，第二步将"eat"变为"ea"
+```
+
+**提示：**
+
+- 给定单词的长度不超过500。
+- 给定单词中的字符只含有小写字母。
+
+**解题思路：**
+
+思路一：最长公共子串
+
+在text2中计算出text1中的最长公共子串长度，然后删除最少次数就是两条字符串删除除过公共串的长度；
+
+思路二：动态规划
+
+假设字符串 $\textit{word}_1$
+
+  和 $\textit{word}_2$  的长度分别为 $m$ 和 $n$，创建 $m+1$ 行 $n+1$ 列的二维数组 $\textit{dp}$，其中 $\textit{dp}[i][j]$ 表示使 $\textit{word}_1[0:i]$ 和 $\textit{word}_2[0:j]$ 相同的最少删除操作次数。
+
+初始化和状态转移方程。
+
+**方法一：**
+
+```c++
+// 动态规划求最长公共子串
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        int m = word1.length(), n = word2.length();
+        vector<int> dp = vector<int>(n + 1, 0);
+        for (int i = 1; i <= m; ++i)
+        {
+            vector<int> tmpDp(n + 1, 0);
+            for (int j = 1; j <= n; ++j)
+            {
+                if (word1[i - 1] == word2[j - 1])
+                    tmpDp[j] = dp[j - 1] + 1;
+                else
+                    tmpDp[j] = max(dp[j], tmpDp[j - 1]);
+            }
+            dp = tmpDp;
+        }
+        return m - dp[n] + n - dp[n];
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 动态规划
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        int m = word1.size(), n = word2.size();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+        for (int i = 1; i <= m; ++i)
+            dp[i][0] = i;
+        for (int j = 1; j <= n; ++j)
+            dp[0][j] = j;
+
+        for (int i = 1; i <= m; ++i)
+        {
+            for (int j = 1; j <= n; ++j)
+            {
+                if (word1[i - 1] == word2[j - 1])
+                    dp[i][j] = dp[i - 1][j - 1];
+                else
+                    dp[i][j] = min(dp[i - 1][j], dp[i][j - 1]) + 1;
+            }
+        }
+        return dp[m][n];
+    }
+};
+```
+
+
+
+
+
+## 0673. 最长递增子序列的个数
+
+### 题目：
+
+给定一个未排序的整数数组，找到最长递增子序列的个数。
+
+**示例 1:**
+
+```
+输入: [1,3,5,4,7]
+输出: 2
+解释: 有两个最长递增子序列，分别是 [1, 3, 4, 7] 和[1, 3, 5, 7]。
+```
+
+**示例 2:**
+
+```
+输入: [2,2,2,2,2]
+输出: 5
+解释: 最长递增子序列的长度是1，并且存在5个子序列的长度为1，因此输出5。
+```
+
+**注意:** 给定的数组长度不超过 2000 并且结果一定是32位有符号整数。
+
+**解题思路：**
+
+动态规划
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+// 动态规划
+class Solution {
+public:
+    int findNumberOfLIS(vector<int>& nums) {
+        int n = nums.size(), maxLen = 0, ans = 0;
+        // dp[i]：表示nums前 i 个序列的最长递增子序列长度
+        // cnt[i]：表示前 i 个序列最长递增子序列的个数
+        // 最长递增子序列的长度变化后，只是前面那些长度的序列长度多了一个，个数没变
+        // 但当新增的一个数字后，最长长度没变，说明前面有一个maxLen - 1的多个序列，则cnt需要累加
+        vector<int> dp(n), cnt(n);
+        for (int i = 0; i < n; ++i)
+        {
+            dp[i] = 1, cnt[i] = 1;
+            for (int j = 0; j < i; ++j)
+            {
+                if (nums[j] < nums[i])
+                {
+                    if (dp[j] + 1 > dp[i])
+                    {
+                        dp[i] = dp[j] + 1;
+                        cnt[i] = cnt[j];
+                    }
+                    else if (dp[j] + 1 == dp[i])
+                        cnt[i] += cnt[j];
+                }
+            }
+
+            if (dp[i] > maxLen)
+            {
+                maxLen = dp[i];
+                ans = cnt[i];
+            }
+            else if (dp[i] == maxLen)
+                ans += cnt[i];
+        }
+        return ans;
     }
 };
 ```
@@ -14946,6 +15630,130 @@ public:
         return newHead;
     }
 };
+```
+
+
+
+
+
+## 0208. 实现Trie（前缀树）
+
+### 题目：
+
+**Trie**（发音类似 "try"）或者说 **前缀树** 是一种树形数据结构，用于高效地存储和检索字符串数据集中的键。这一数据结构有相当多的应用情景，例如自动补完和拼写检查。
+
+请你实现 Trie 类：
+
+- `Trie()` 初始化前缀树对象。
+- `void insert(String word)` 向前缀树中插入字符串 `word` 。
+- `boolean search(String word)` 如果字符串 `word` 在前缀树中，返回 `true`（即，在检索之前已经插入）；否则，返回 `false` 。
+- `boolean startsWith(String prefix)` 如果之前已经插入的字符串 `word` 的前缀之一为 `prefix` ，返回 `true` ；否则，返回 `false` 。
+
+**示例：**
+
+```
+输入
+["Trie", "insert", "search", "search", "startsWith", "insert", "search"]
+[[], ["apple"], ["apple"], ["app"], ["app"], ["app"], ["app"]]
+输出
+[null, null, true, false, true, null, true]
+
+解释
+Trie trie = new Trie();
+trie.insert("apple");
+trie.search("apple");   // 返回 True
+trie.search("app");     // 返回 False
+trie.startsWith("app"); // 返回 True
+trie.insert("app");
+trie.search("app");     // 返回 True
+```
+
+**提示：**
+
+- `1 <= word.length, prefix.length <= 2000`
+- `word` 和 `prefix` 仅由小写英文字母组成
+- `insert`、`search` 和 `startsWith` 调用次数 总计 不超过 `3 * 10^4` 次
+
+**解题思路：**
+
+`Trie`，又称前缀树或字典树，是一棵有根树，其每个节点包含以下字段：
+
+指向子节点的指针数组 children。对于本题而言，数组长度为 26，即小写英文字母的数量。此时 children[0] 对应小写字母 a，children[1] 对应小写字母 b，…，children[25] 对应小写字母 z。
+布尔字段 isEnd，表示该节点是否为字符串的结尾。
+
+**插入字符串**
+
+我们从字典树的根开始，插入字符串。对于当前字符对应的子节点，有两种情况：
+
+子节点存在。沿着指针移动到子节点，继续处理下一个字符。
+子节点不存在。创建一个新的子节点，记录在 children 数组的对应位置上，然后沿着指针移动到子节点，继续搜索下一个字符。
+重复以上步骤，直到处理字符串的最后一个字符，然后将当前节点标记为字符串的结尾。
+
+**查找前缀**
+
+我们从字典树的根开始，查找前缀。对于当前字符对应的子节点，有两种情况：
+
+子节点存在。沿着指针移动到子节点，继续搜索下一个字符。
+子节点不存在。说明字典树中不包含该前缀，返回空指针。
+重复以上步骤，直到返回空指针或搜索完前缀的最后一个字符。
+
+若搜索到了前缀的末尾，就说明字典树中存在该前缀。此外，若前缀末尾对应节点的 isEnd 为真，则说明字典树中存在该字符串。
+
+**方法：**
+
+```c++
+class Trie {
+private:
+    vector<Trie*> children;
+    bool isEnd;
+
+    Trie* _search(string prefix)
+    {
+        Trie* node = this;
+        for (auto& ch : prefix)
+        {
+            ch -= 'a';
+            if (node->children[ch] == nullptr)
+                return nullptr;
+            node = node->children[ch];
+        }
+        return node;
+    }
+public:
+    Trie() {
+        children = vector<Trie*>(26);
+        isEnd = false;
+    }
+    
+    void insert(string word) {
+        Trie* node = this;
+        for (auto& ch : word)
+        {
+            ch -= 'a';
+            if (node->children[ch] == nullptr)
+                node->children[ch] = new Trie();
+            node = node->children[ch];
+        }
+        node->isEnd = true;
+    }
+    
+    bool search(string word) {
+        Trie* node = this->_search(word);
+        return node != nullptr && node->isEnd;
+    }
+    
+    bool startsWith(string prefix) {
+        return this->_search(prefix) != nullptr;
+    }
+};
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * Trie* obj = new Trie();
+ * obj->insert(word);
+ * bool param_2 = obj->search(word);
+ * bool param_3 = obj->startsWith(prefix);
+ */
 ```
 
 
@@ -20287,6 +21095,16 @@ public:
 
 
 
+## 0091. 解码方法
+
+### 题目：
+
+同动态规划模块91题
+
+
+
+
+
 ## 0116. 填充每个结点的下一个右侧结点指针
 
 ### 题目：
@@ -20734,6 +21552,16 @@ public:
 
 
 
+## 0139. 单词拆分
+
+### 题目：
+
+同动态规划模块139题
+
+
+
+
+
 ## 0153. 寻找旋转排序数组中的最小值
 
 ### 题目：
@@ -21018,6 +21846,218 @@ public:
 
 
 
+## 0164. 最大间距
+
+### 题目：
+
+给定一个无序的数组，找出数组在排序之后，相邻元素之间最大的差值。
+
+如果数组元素个数小于 `2`，则返回 `0`。
+
+**示例 1:**
+
+```
+输入: [3,6,9,1]
+输出: 3
+解释: 排序后的数组是 [1,3,6,9], 其中相邻元素 (3,6) 和 (6,9) 之间都存在最大差值 3。
+```
+
+**示例 2:**
+
+```
+输入: [10]
+输出: 0
+解释: 数组元素个数小于 2，因此返回 0。
+```
+
+**说明:**
+
+- 你可以假设数组中所有元素都是非负整数，且数值在 32 位有符号整数范围内。
+- 请尝试在线性时间复杂度和空间复杂度的条件下解决此问题。
+
+**解题思路：**
+
+思路一：基数排序：统计每一位的个数，从后往前排
+
+时间复杂度：O(n + k)
+空间复杂度：O(n + k)
+
+思路二：桶排序
+
+时间复杂度：O(n + k)
+空间复杂度：O(n + k)
+
+思路三：计数排序：空间换时间，使用最大值与最小值差值大小作为空间长度
+
+时间复杂度：O(n + k)
+空间复杂度：O(n + k)
+
+**方法一：**
+
+```c++
+// 基数排序
+class Solution {
+public:
+    int maximumGap(vector<int>& nums) {
+        int n = nums.size();
+        if (n <= 1)
+            return 0;
+        radixsort(nums);
+        int maxSpan = INT_MIN;
+        for (int i = 1; i < n; ++i)
+            maxSpan = max(maxSpan, nums[i] - nums[i - 1]);
+        return maxSpan;
+    }
+
+    void radixsort(vector<int>& nums)
+    {
+        int d = getMaxBit(nums);
+        int n = nums.size();
+        vector<int> tmp = vector<int>(n, 0);
+        vector<int> count = vector<int>(10, 0);
+        int radix = 1;
+        int i, j, k;
+        for (i = 0; i < d; ++i)
+        {
+            for (j = 0; j < 10; ++j)
+                count[j] = 0;
+            for (j = 0; j < n; ++j)
+            {
+                k = (nums[j] / radix) % 10;
+                ++count[k];
+            }
+            for (j = 1; j < 10; ++j)
+                count[j] = count[j] + count[j - 1];
+            for (j = n - 1; j >= 0; --j)
+            {
+                k = (nums[j] / radix) % 10;
+                tmp[count[k] - 1] = nums[j];
+                --count[k];
+            }
+            for (j = 0; j < n; ++j)
+                nums[j] = tmp[j];
+            radix *= 10;
+        }
+    }
+
+    int getMaxBit(vector<int>& nums)
+    {
+        int maxData = INT_MIN;
+        for (auto& e : nums)
+            maxData = max(maxData, e);
+        int count = 0;
+        while (maxData > 0)
+        {
+            ++count;
+            maxData /= 10;
+        }
+        return count;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 桶排序
+class Solution {
+public:
+    int maximumGap(vector<int>& nums) {
+        int n = nums.size();
+        if (n <= 1)
+            return 0;
+        BucketSort(nums);
+        int maxSpan = INT_MIN;
+        for (int i = 1; i < n; ++i)
+            maxSpan = max(maxSpan, nums[i] - nums[i - 1]);
+        return maxSpan;
+    }
+
+    void BucketSort(vector<int>& nums)
+    {
+        int d = getMaxBit(nums);
+        int n = nums.size();
+        vector<list<int>> bucket = vector<list<int>>(10, list<int>());
+        int radix = 1;
+        int i, j, k;
+        for (i = 0; i < d; ++i)
+        {
+            for (j = 0; j < 10; ++j)
+                bucket[j].clear();
+            for (j = 0; j < n; ++j)
+            {
+                k = (nums[j] / radix) % 10;
+                bucket[k].push_back(nums[j]);
+            }
+            int m = 0;
+            for (j = 0; j < 10; ++j)
+            {
+                while (!bucket[j].empty())
+                {
+                    nums[m++] = bucket[j].front();
+                    bucket[j].pop_front();
+                }
+            }
+            
+            radix *= 10;
+        }
+    }
+
+    int getMaxBit(vector<int>& nums)
+    {
+        int maxData = INT_MIN;
+        for (auto& e : nums)
+            maxData = max(maxData, e);
+        int count = 0;
+        while (maxData > 0)
+        {
+            ++count;
+            maxData /= 10;
+        }
+        return count;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+// 计数排序(超时)
+class Solution {
+public:
+    int maximumGap(vector<int>& nums) {
+        int n = nums.size();
+        if (n <= 1)
+            return 0;
+        countSort(nums);
+        int maxSpan = INT_MIN;
+        for (int i = 1; i < n; ++i)
+            maxSpan = max(maxSpan, nums[i] - nums[i - 1]);
+        return maxSpan;
+    }
+
+    void countSort(vector<int>& nums)
+    {
+        int minV = *min_element(nums.begin(), nums.end());
+        int maxV = *max_element(nums.begin(), nums.end());
+        int n = nums.size();
+        int k = maxV - minV + 1;
+        vector<int> count = vector<int>(k, 0);
+        vector<int> tmp = vector<int>(nums.begin(), nums.end());
+        for (int i = 0; i < n; ++i)
+            ++count[nums[i] - minV];
+        for (int i = 1; i < k; ++i)
+            count[i] = count[i] + count[i - 1];
+        for (int i = 0; i < n; ++i)
+            nums[--count[tmp[i] - minV]] = tmp[i];
+    }
+};
+```
+
+
+
+
+
 ## 0167. 两数之和Ⅱ - 输入有序数组
 
 ### 题目：
@@ -21086,6 +22126,16 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0174. 地下城游戏
+
+### 题目：
+
+同动态规划模块174题
 
 
 
@@ -21910,6 +22960,16 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0300. 最长递增子序列
+
+### 题目：
+
+同动态规划模块300题
 
 
 
@@ -22906,6 +23966,16 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0673. 最长递增子序列的个数
+
+### 题目：
+
+同动态规划模块673题
 
 
 
