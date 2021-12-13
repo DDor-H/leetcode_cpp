@@ -5383,6 +5383,106 @@ public:
 
 
 
+## 0216. 组合总和Ⅲ
+
+### 题目：
+
+找出所有相加之和为 **n** 的 **k** 个数的组合。组合中只允许含有 `1 - 9` 的正整数，并且每种组合中不存在重复的数字。
+
+**说明：**
+
+- 所有数字都是正整数。
+
+- 解集不能包含重复的组合。 
+
+**示例 1:**
+
+```
+输入: k = 3, n = 7
+输出: [[1,2,4]]
+```
+
+**示例 2:**
+
+```
+输入: k = 3, n = 9
+输出: [[1,2,6], [1,3,5], [2,3,4]]
+```
+
+**解题思路：**
+
+思路一：递归枚举
+
+思路二：位运算遍历
+
+**方法一：**
+
+```c++
+// 递归组合
+class Solution {
+public:
+    vector<vector<int>> combinationSum3(int k, int n) {
+        vector<int> tmp;
+        vector<vector<int>> ans;
+        _combinationSum3(ans, tmp, 1, n, k);
+        return ans;
+    }
+    
+    void _combinationSum3(vector<vector<int>>& ans, vector<int>& tmp, int idx, int n, int k)
+    {
+        if (n <= 0)
+        {
+            if (n == 0 && tmp.size() == k)
+                ans.push_back(tmp);
+            return;
+        }
+
+        if (idx > 9)
+		    return;
+
+        tmp.push_back(idx);
+        _combinationSum3(ans, tmp, idx + 1, n - idx, k);
+        tmp.pop_back();
+        _combinationSum3(ans, tmp, idx + 1, n, k);
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 位运算
+class Solution {
+public:
+    vector<vector<int>> combinationSum3(int k, int n) {
+        vector<int> tmp;
+        vector<vector<int>> ans;
+        for (int mask = 0; mask < (1 << 9); ++mask)
+            _combinationSum3(ans, tmp, mask, n, k);
+        return ans;
+    }
+    
+    void _combinationSum3(vector<vector<int>>& ans, vector<int>& tmp, int mask, int n, int k)
+    {
+        tmp.clear();
+        for (int i = 0; i < 9; ++i)
+        {
+            if (1 & (mask >> i))
+                tmp.push_back(i + 1);
+        }
+        int sumv = 0;
+        for (auto& e : tmp)
+            sumv += e;
+        if (tmp.size() == k && sumv == n)
+            ans.push_back(tmp);
+    }
+};
+```
+
+
+
+
+
 ## 0692. 前K个高频单词
 
 ### 题目：
@@ -22611,6 +22711,82 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0201. 数字范围按位与
+
+### 题目：
+
+给你两个整数 `left` 和 `right` ，表示区间 `[left, right]` ，返回此区间内所有数字 按位与 的结果（包含 `left` 、`right` 端点）。
+
+**示例 1：**
+
+```
+输入：left = 5, right = 7
+输出：4
+```
+
+**示例 2：**
+
+```
+输入：left = 0, right = 0
+输出：0
+```
+
+**示例 3：**
+
+```
+输入：left = 1, right = 2147483647
+输出：0
+```
+
+**提示：**
+
+- `0 <= left <= right <= 2^31 - 1`
+
+**解题思路：**
+
+求最大前缀和
+
+思路一：位运算
+
+思路二：n & (n - 1)
+
+**方法：**
+
+```c++
+// n & (n - 1)求最大前缀
+class Solution {
+public:
+    int rangeBitwiseAnd(int left, int right) {
+        while (left < right)
+            right &= (right - 1);
+        return right;
+    }
+};
+
+/*
+// 位运算求最大前缀
+class Solution {
+public:
+    int rangeBitwiseAnd(int left, int right) {
+        int shift = 0;
+        while (left < right)
+        {
+            ++shift;
+            left >>= 1;
+            right >>= 1;
+        }
+        return right << shift;
+    }
+};
+*/
+```
+
+
 
 
 
