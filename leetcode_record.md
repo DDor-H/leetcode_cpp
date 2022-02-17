@@ -1273,10 +1273,10 @@ public:
 
 **提示:**
 
-- 1 <= nums.length <= 104
-- -104 <= nums[i] <= 104
+- 1 <= nums.length <= 10^4
+- -10^4 <= nums[i] <= 10^4
 - nums 为无重复元素的升序排列数组
-- -104 <= target <= 104
+- -10^4 <= target <= 10^4
 
 
 
@@ -5475,6 +5475,124 @@ public:
             sumv += e;
         if (tmp.size() == k && sumv == n)
             ans.push_back(tmp);
+    }
+};
+```
+
+
+
+
+
+## 0384. 打乱数组
+
+### 题目：
+
+给你一个整数数组 `nums` ，设计算法来打乱一个没有重复元素的数组。
+
+实现 `Solution class:`
+
+- `Solution(int[] nums)` 使用整数数组 `nums` 初始化对象
+- `int[] reset()` 重设数组到它的初始状态并返回
+- `int[] shuffle()` 返回数组随机打乱后的结果
+
+**示例：**
+
+```
+输入
+["Solution", "shuffle", "reset", "shuffle"]
+[[[1, 2, 3]], [], [], []]
+输出
+[null, [3, 1, 2], [1, 2, 3], [1, 3, 2]]
+
+解释
+Solution solution = new Solution([1, 2, 3]);
+solution.shuffle();    // 打乱数组 [1,2,3] 并返回结果。任何 [1,2,3]的排列返回的概率应该相同。例如，返回 [3, 1, 2]
+solution.reset();      // 重设数组到它的初始状态 [1, 2, 3] 。返回 [1, 2, 3]
+solution.shuffle();    // 随机返回数组 [1, 2, 3] 打乱后的结果。例如，返回 [1, 3, 2]
+```
+
+**提示：**
+
+- `1 <= nums.length <= 200`
+- `-10^6 <= nums[i] <= 10^6`
+- `nums` 中的所有元素都是 唯一的
+- 最多可以调用 `5 * 10^4` 次 `reset` 和 `shuffle`
+
+**解题思路：**
+
+思路一：
+
+使用一个临时数组，从A随机拿一个，并移除此元素，放到B
+
+思路二：
+
+洗牌算法：
+
+i 和 i -> n 之间的一个 j 交换
+
+**方法一：**
+
+```c++
+// 使用辅助数组
+class Solution {
+private:
+    vector<int> nums;
+    vector<int> original;
+public:
+    Solution(vector<int>& nums) {
+        this->nums = nums;
+        this->original.resize(this->nums.size());
+        copy(this->nums.begin(), this->nums.end(), this->original.begin());
+    }
+    
+    vector<int> reset() {
+        copy(this->original.begin(), this->original.end(), this->nums.begin());
+        return this->nums;
+    }
+    
+    vector<int> shuffle() {
+        vector<int> tmp = vector<int>(this->nums.size());
+        copy(this->original.begin(), this->original.end(), tmp.begin());
+        for (int i = 0; i < this->original.size(); ++i)
+        {
+            int j = rand() % (tmp.size());
+            this->nums[i] = tmp[j];
+            tmp.erase(tmp.begin() + j);
+        }
+        return this->nums;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 洗牌算法
+class Solution {
+private:
+    vector<int> nums;
+    vector<int> original;
+public:
+    Solution(vector<int>& nums) {
+        this->nums = nums;
+        this->original.resize(this->nums.size());
+        copy(this->nums.begin(), this->nums.end(), this->original.begin());
+    }
+    
+    vector<int> reset() {
+        copy(this->original.begin(), this->original.end(), this->nums.begin());
+        return this->nums;
+    }
+    
+    vector<int> shuffle() {
+        for (int i = 0; i < this->original.size(); ++i)
+        {
+            // i 和 i - n 之间的一个 j 交换
+            // 也就是 j 有机会放前面
+            int j = i + rand() % (this->nums.size() - i);
+            swap(this->nums[i], this->nums[j]);
+        }
+        return this->nums;
     }
 };
 ```
@@ -13163,6 +13281,123 @@ public:
 
 
 
+## 0100. 相同的树
+
+### 题目：
+
+给你两棵二叉树的根节点 `p` 和 `q` ，编写一个函数来检验这两棵树是否相同。
+
+如果两个树在结构上相同，并且节点具有相同的值，则认为它们是相同的。
+
+**示例 1：**
+
+![leetcode_100_1](F:\C++\刷题\Img\leetcode_100_1.jpg)
+
+```
+输入：p = [1,2,3], q = [1,2,3]
+输出：true
+```
+
+**示例 2：**
+
+![leetcode_100_2](F:\C++\刷题\Img\leetcode_100_2.jpg)
+
+```
+输入：p = [1,2], q = [1,null,2]
+输出：false
+```
+
+**示例 3：**
+
+![leetcode_100_3](F:\C++\刷题\Img\leetcode_100_3.jpg)
+
+```
+输入：p = [1,2,1], q = [1,1,2]
+输出：false
+```
+
+**提示：**
+
+- 两棵树上的节点数目都在范围 `[0, 100]` 内
+- `-10^4 <= Node.val <= 10^4`
+
+**解题思路：**
+
+思路一：深度遍历
+
+时间复杂度：O(min(m,n))  取决于两个子树的节点数
+
+空间复杂度：O(min(m,n))  取决于递归深度
+
+思路二：广度遍历
+
+时间复杂度：O(min(m,n))  取决于两个子树的节点数
+
+空间复杂度：O(min(m,n))  取决于递归深度
+
+**方法一：**
+
+```c++
+ // 深度优先
+class Solution {
+public:
+    bool isSameTree(TreeNode* p, TreeNode* q) {
+        if (p == nullptr && q == nullptr)
+            return true;
+        else if (p == nullptr ^ q == nullptr) // 使用异或更简洁
+            return false;
+        else
+            return (p->val == q->val) && isSameTree(p->left, q->left) && isSameTree(p->right, q->right);
+    }
+};
+```
+
+**方法二：**
+
+```c++
+//广度优先
+class Solution {
+public:
+    bool isSameTree(TreeNode* p, TreeNode* q) {
+        if (p == nullptr && q == nullptr)
+            return true;
+        else if (p == nullptr || q == nullptr)  // 注意简洁性
+            return false;
+        
+        queue<TreeNode*> queue1, queue2;
+        queue1.push(p);
+        queue2.push(q);
+        while (!queue1.empty() && !queue2.empty())
+        {
+            TreeNode* pt = queue1.front();
+            queue1.pop();
+            TreeNode* qt = queue2.front();
+            queue2.pop();
+            if (pt->val != qt->val)
+                return false;
+            TreeNode* pl = pt->left, *pr = pt->right, *ql = qt->left, *qr = qt->right;
+            if ((pl == nullptr ^ ql == nullptr) || (pr == nullptr ^ qr == nullptr))    // 注意简洁性，这里使用异或
+                return false;
+            if (pl != nullptr && ql != nullptr)
+            {
+                queue1.push(pl);
+                queue2.push(ql);
+            }
+            if (pr != nullptr && qr != nullptr)
+            {
+                queue1.push(pr);
+                queue2.push(qr);
+            }
+        }
+        return queue1.empty() && queue2.empty();
+    }
+};
+```
+
+
+
+
+
 ## 0101. 对称二叉树
 
 ### 题目：
@@ -13654,6 +13889,138 @@ public:
 
 
 
+## 0106. 从中序与后序遍历序列构造二叉树
+
+### 题目：
+
+给定两个整数数组 `inorder` 和 `postorder` ，其中 `inorder` 是二叉树的中序遍历， `postorder` 是同一棵树的后序遍历，请你构造并返回这颗 二叉树 。
+
+**示例 1:**
+
+![leetcode_106](F:\C++\刷题\Img\leetcode_106.jpg)
+
+```
+输入：inorder = [9,3,15,20,7], postorder = [9,15,7,20,3]
+输出：[3,9,20,null,null,15,7]
+```
+
+**示例 2:**
+
+```
+输入：inorder = [-1], postorder = [-1]
+输出：[-1]
+```
+
+**提示:**
+
+- `1 <= inorder.length <= 3000`
+- `postorder.length == inorder.length`
+- `-3000 <= inorder[i], postorder[i] <= 3000`
+- `inorder` 和 `postorder` 都由 不同 的值组成
+- `postorder` 中每一个值都在 `inorder` 中
+- `inorder` 保证是树的中序遍历
+- `postorder` 保证是树的后序遍历
+
+
+
+**解题思路：**
+
+思路一：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：迭代
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
+        int m = inorder.size();
+        int n = postorder.size();
+        if (m == 0 || n == 0 || m != n)
+            return nullptr;
+        return _buildTree(inorder, 0, m, postorder, 0, n);
+    }
+
+    TreeNode* _buildTree(vector<int>& inorder, int left1, int right1, vector<int>& postorder, int left2, int right2)
+    {
+        if (left1 >= right1 || left2 >= right2)
+            return nullptr;
+        int key = postorder[right2 - 1];
+        TreeNode* node = new TreeNode(key);
+
+        int index = left1;
+        while (index < right1)
+        {
+            if (inorder[index] == key)
+                break;
+            else
+                ++index;
+        }
+        int leftlen = index - left1;
+        int rightlen = right1 - index - 1;
+        node->left = leftlen == 0 ? nullptr : _buildTree(inorder, left1, left1 + leftlen, postorder, left2, left2 + leftlen);
+        node->right = rightlen == 0 ? nullptr : _buildTree(inorder, index + 1, right1, postorder, left2 + leftlen, right2 - 1);
+
+        return node;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+ //迭代
+class Solution {
+public:
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
+        int m = inorder.size();
+        int n = postorder.size();
+        if (m == 0 || n == 0 || m != n)
+            return nullptr;
+        int inorderIndex = m - 1;
+        TreeNode* root = new TreeNode(postorder[n - 1]);
+        stack<TreeNode*> st;
+        st.push(root);
+
+        for (int i = n - 2; i >= 0; --i)
+        {
+            TreeNode* node = st.top();
+            int postOrderVal = postorder[i];
+            if (node->val != inorder[inorderIndex])
+            {
+                node->right = new TreeNode(postOrderVal);
+                st.push(node->right);
+            }
+            else
+            {
+                while(!st.empty() && st.top()->val == inorder[inorderIndex])
+                {
+                    node = st.top(); // 先换top，最极端情况，没有右分支
+                    st.pop();
+                    --inorderIndex;
+                }
+                node->left = new TreeNode(postOrderVal);
+                st.push(node->left);
+            }
+        }
+        return root;
+    }
+};
+```
+
+
+
+
+
 ## 0108. 将有序数组转换为二叉搜索树
 
 ### 题目：
@@ -13737,7 +14104,111 @@ public:
 
 
 
-## 0112. 路经总和
+## 0110. 平衡二叉树
+
+### 题目：
+
+给定一个二叉树，判断它是否是高度平衡的二叉树。
+
+本题中，一棵高度平衡二叉树定义为：
+
+一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1 。
+
+ 
+
+示例 1：
+
+![leetcode_110_1](F:\C++\刷题\Img\leetcode_110_1.jpg)
+
+```
+输入：root = [3,9,20,null,null,15,7]
+输出：true
+```
+
+**示例 2：**
+
+![leetcode_110_2](F:\C++\刷题\Img\leetcode_110_2.jpg)
+
+```
+输入：root = [1,2,2,3,3,null,null,4,4]
+输出：false
+```
+
+**示例 3：**
+
+```
+输入：root = []
+输出：true
+```
+
+**提示：**
+
+- 树中的节点数在范围 `[0, 5000]` 内
+- `-10^4 <= Node.val <= 10^4`
+
+**解题思路：**
+
+思路一：自顶向下
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(n) 
+
+思路二：自底向上
+
+时间复杂度：O(n)
+
+空间复杂度：O(n) 
+
+**方法一：**
+
+```c++
+ // 自顶向下递归
+class Solution {
+public:
+    bool isBalanced(TreeNode* root) {
+        if (root == nullptr)
+            return true;
+        else
+            return (abs(height(root->left) - height(root->right)) <= 1) && isBalanced(root->left) && isBalanced(root->right);
+    }
+    int height(TreeNode* node)
+    {
+        if (node == nullptr)
+            return 0;
+        else
+            return max(height(node->left), height(node->right)) + 1;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+ // 自底向上递归
+class Solution {
+public:
+    bool isBalanced(TreeNode* root) {
+        return height(root) >= 0;
+    }
+    int height(TreeNode* node)
+    {
+        if (node == nullptr)
+            return 0;
+        int height1 = height(node->left);
+        int height2 = height(node->right);
+        if (height1 == -1 || height2 == -1 || abs(height1 - height2) > 1)
+            return -1;
+        return max(height1, height2) + 1;
+    }
+};
+```
+
+
+
+
+
+## 0112. 路径总和
 
 ### 题目：
 
@@ -14072,6 +14543,147 @@ public:
         for (const auto& e : nums)
             tmp ^= e;
         return tmp;
+    }
+};
+```
+
+
+
+
+
+## 0138. 复制带随机指针的链表
+
+### 题目：
+
+给你一个长度为 `n` 的链表，每个节点包含一个额外增加的随机指针 `random` ，该指针可以指向链表中的任何节点或空节点。
+
+构造这个链表的 `深拷贝`。 深拷贝应该正好由 `n` 个 **全新** 节点组成，其中每个新节点的值都设为其对应的原节点的值。新节点的 `next` 指针和 `random` 指针也都应指向复制链表中的新节点，并使原链表和复制链表中的这些指针能够表示相同的链表状态。**复制链表中的指针都不应指向原链表中的节点** 。
+
+例如，如果原链表中有 `X` 和 `Y` 两个节点，其中 `X.random --> Y` 。那么在复制链表中对应的两个节点 `x` 和 `y` ，同样有 `x.random --> y` 。
+
+返回复制链表的头节点。
+
+用一个由 `n` 个节点组成的链表来表示输入/输出中的链表。每个节点用一个 `[val, random_index]` 表示：
+
+- `val`：一个表示 `Node.val` 的整数。
+- `random_index`：随机指针指向的节点索引（范围从 `0` 到 `n-1`）；如果不指向任何节点，则为  `null` 。
+
+你的代码 **只** 接受原链表的头节点 `head` 作为传入参数。
+
+ 
+
+**示例 1：**
+
+![leetcode_138_1](F:\C++\刷题\Img\leetcode_138_1.png)
+
+```
+输入：head = [[7,null],[13,0],[11,4],[10,2],[1,0]]
+输出：[[7,null],[13,0],[11,4],[10,2],[1,0]]
+```
+
+**示例 2：**
+
+![leetcode_138_2](F:\C++\刷题\Img\leetcode_138_2.png)
+
+```
+输入：head = [[1,1],[2,1]]
+输出：[[1,1],[2,1]]
+```
+
+**示例 3：**
+
+![leetcode_138_3](F:\C++\刷题\Img\leetcode_138_3.png)
+
+```
+输入：head = [[3,null],[3,0],[3,null]]
+输出：[[3,null],[3,0],[3,null]]
+```
+
+**提示：**
+
+- `0 <= n <= 1000`
+- `-10^4 <= Node.val <= 10^4`
+- `Node.random` 为 `null` 或指向链表中的节点。
+
+**解题思路：**
+
+思路一：迭代方式，创建一个map[oldNode, newNode]
+
+若map中节点不存在，就新建，若存在，就指针
+
+时间复杂度：O(N)
+
+空间复杂度：O(N）
+
+
+
+思路二：不用额外空间，三次循环
+
+第一次：让 A - B - C  ---->   A - A - B - B - C - C
+
+第二次，调整random指针
+
+第三次：拆开
+
+时间复杂度：O(N)
+
+空间复杂度：O(1）
+
+**方法一：**
+
+```c++
+// 方法一：回溯+map
+class Solution {
+private:
+    unordered_map<Node*, Node*> catchMap;
+public:
+    Node* copyRandomList(Node* head) {
+        if (head == NULL)
+            return NULL;
+        if (!catchMap.count(head))
+        {
+            Node* headNew = new Node(head->val);
+            catchMap[head] = headNew;
+
+            headNew->next = copyRandomList(head->next);
+            headNew->random = copyRandomList(head->random);
+        }
+        return catchMap[head];
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 方法二：三次循环，迭代方式
+class Solution {
+public:
+    Node* copyRandomList(Node* head) {
+        if (head == NULL)
+            return NULL;
+        
+        for (Node* node = head; node != NULL; node = node->next->next)
+        {
+            Node* nodeNew = new Node(node->val);
+            nodeNew->next = node->next;
+            node->next = nodeNew;
+        }
+        for (Node* node = head; node != NULL; node = node->next->next)
+        {
+            Node* nodeNew = node->next;
+            // 注意这块的node->random->next，需要找到新链表的新节点
+            nodeNew->random = (node->random != NULL) ? node->random->next : NULL; 
+        }
+        Node* headNew = head->next;
+        for (Node* node = head; node != NULL; node = node->next)
+        {
+            Node* nodeNew = node->next;
+            node->next = nodeNew->next;
+            nodeNew->next = (nodeNew->next != NULL) ? nodeNew->next->next : NULL;
+        }
+
+        return headNew;
     }
 };
 ```
@@ -18571,6 +19183,239 @@ public:
         return res;
     }
 };
+```
+
+
+
+
+
+## 0606. 根据二叉树创建字符串
+
+### 题目：
+
+你需要采用前序遍历的方式，将一个二叉树转换成一个由括号和整数组成的字符串。
+
+空节点则用一对空括号 "()" 表示。而且你需要省略所有不影响字符串与原始二叉树之间的一对一映射关系的空括号对。
+
+**示例 1:**
+
+```
+输入: 二叉树: [1,2,3,4]
+       1
+     /   \
+    2     3
+   /    
+  4     
+
+输出: "1(2(4))(3)"
+
+解释: 原本将是“1(2(4)())(3())”，
+在你省略所有不必要的空括号对之后，
+它将是“1(2(4))(3)”。
+```
+
+**示例 2:**
+
+```
+输入: 二叉树: [1,2,3,null,4]
+       1
+     /   \
+    2     3
+     \  
+      4 
+
+输出: "1(2()(4))(3)"
+
+解释: 和第一个示例相似，
+除了我们不能省略第一个对括号来中断输入和输出之间的一对一映射关系。
+```
+
+**解题思路：**
+
+思路一：递归
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：迭代
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+ // 递归
+class Solution {
+public:
+    string tree2str(TreeNode* root) {
+        if (root == nullptr)
+            return "";
+        string strr = tree2str(root->right);
+        string strl = tree2str(root->left);
+        string strroot = to_string(root->val);
+
+        if (strr != "")
+            strroot += "(" + strl + ")" + "(" + strr + ")";
+        else if (strl != "" && strr == "")
+            strroot += "(" + strl + ")";
+
+        return strroot;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 迭代
+class Solution {
+public:
+    string tree2str(TreeNode* root) {
+        if (root == nullptr)
+            return "";
+        stack<TreeNode*> st;
+        st.push(root);
+        set<TreeNode*> se;
+        string strroot = "";
+
+        while (!st.empty())
+        {
+            TreeNode* node = st.top();
+            if (se.count(node) != 0)
+            {
+                st.pop();
+                strroot += ")";
+            }
+            else
+            {
+                se.insert(node);
+                strroot += "(" + node->val;
+                if (node->left == nullptr && node->right != nullptr)
+                    strroot += "()";
+                if (node->right != nullptr)
+                    st.push(node->right);
+                if (node->left != nullptr)
+                    st.push(node->left);
+            }
+        }
+        return strroot;
+    }
+};
+```
+
+
+
+
+
+## 0622. 设计循环队列
+
+### 题目：
+
+设计你的循环队列实现。 循环队列是一种线性数据结构，其操作表现基于 **FIFO**（先进先出）原则并且队尾被连接在队首之后以形成一个循环。它也被称为“环形缓冲器”。
+
+循环队列的一个好处是我们可以利用这个队列之前用过的空间。在一个普通队列里，一旦一个队列满了，我们就不能插入下一个元素，即使在队列前面仍有空间。但是使用循环队列，我们能使用这些空间去存储新的值。
+
+你的实现应该支持如下操作：
+
+`MyCircularQueue(k)`: 构造器，设置队列长度为 `k` 。
+`Front`: 从队首获取元素。如果队列为空，返回 `-1` 。
+`Rear`: 获取队尾元素。如果队列为空，返回 `-1` 。
+`enQueue(value)`: 向循环队列插入一个元素。如果成功插入则返回真。
+`deQueue()`: 从循环队列中删除一个元素。如果成功删除则返回真。
+`isEmpty()`: 检查循环队列是否为空。
+`isFull():` 检查循环队列是否已满。
+
+**示例：**
+
+```
+MyCircularQueue circularQueue = new MyCircularQueue(3); // 设置长度为 3
+circularQueue.enQueue(1);  // 返回 true
+circularQueue.enQueue(2);  // 返回 true
+circularQueue.enQueue(3);  // 返回 true
+circularQueue.enQueue(4);  // 返回 false，队列已满
+circularQueue.Rear();  // 返回 3
+circularQueue.isFull();  // 返回 true
+circularQueue.deQueue();  // 返回 true
+circularQueue.enQueue(4);  // 返回 true
+circularQueue.Rear();  // 返回 4
+```
+
+**提示：**
+
+- 所有的值都在 `0` 至 `1000` 的范围内；
+- 操作数将在 `1` 至 `1000` 的范围内；
+- 请不要使用内置的队列库。
+
+
+
+**方法：**
+
+```c++
+class MyCircularQueue {
+private:
+    vector<int> queueArr;
+    int front, rear;
+    int capacity = 0;
+public:
+    MyCircularQueue(int k) {
+        queueArr = vector<int>(k + 1); // 多留一个空闲单位
+        front = rear = 0;
+        capacity = k + 1;
+    }
+    
+    bool enQueue(int value) {
+        if (isFull())
+            return false;
+        queueArr[rear] = value;
+        rear = (rear + 1) % capacity;
+        return true;
+    }
+    
+    bool deQueue() {
+        if (isEmpty())
+            return false;
+        front = (front + 1) % capacity;
+        return true;
+    }
+    
+    int Front() {
+        if (isEmpty())
+            return -1;
+        return queueArr[front];
+    }
+    
+    int Rear() {
+        if (isEmpty())
+            return -1;
+        return queueArr[(rear + capacity - 1 ) % capacity];
+    }
+    
+    bool isEmpty() {
+        if (rear == front)
+            return true;
+        return false;
+    }
+    
+    bool isFull() {
+        if ((rear + 1) % capacity == front)
+            return true;
+        return false;
+    }
+};
+
+/**
+ * Your MyCircularQueue object will be instantiated and called as such:
+ * MyCircularQueue* obj = new MyCircularQueue(k);
+ * bool param_1 = obj->enQueue(value);
+ * bool param_2 = obj->deQueue();
+ * int param_3 = obj->Front();
+ * int param_4 = obj->Rear();
+ * bool param_5 = obj->isEmpty();
+ * bool param_6 = obj->isFull();
+ */
 ```
 
 
@@ -25517,4 +26362,570 @@ public:
     }
 };
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 剑指Offer
+
+## 03. 数组中重复的数字
+
+### 题目：
+
+找出数组中重复的数字。
+
+
+在一个长度为 n 的数组 nums 里的所有数字都在 0～n-1 的范围内。数组中某些数字是重复的，但不知道有几个数字重复了，也不知道每个数字重复了几次。请找出数组中任意一个重复的数字。
+
+**示例 1：**
+
+```
+输入：
+[2, 3, 1, 0, 2, 5, 3]
+输出：2 或 3 
+```
+
+**限制：**
+
+`2 <= n <= 100000`
+
+**解题思路：**
+
+思路一：排序
+
+时间复杂度：O(nlogn)
+
+空间复杂度：O(1)
+
+思路二：辅助数组（hash表、数组）
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路三：交换
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+// 排序
+class Solution {
+public:
+    int findRepeatNumber(vector<int>& nums) {
+        int len = nums.size();
+        quick_sort(nums, 0, len - 1);
+        int i = 0;
+        for (; i < len - 1; ++i)
+            if (nums[i] == nums[i + 1])
+                break;
+        return nums[i];        
+    }
+
+    void quick_sort(vector<int>& nums, int left, int right)
+    {
+        if (left >= right)
+            return;
+        int p = rand() % (right - left + 1) + left;
+        swap(nums[right], nums[p]);
+        int x = nums[right];
+        int i = left - 1;
+        for (int j = left; j < right; ++j)
+        {
+            if (nums[j] <= x)
+                swap(nums[++i], nums[j]);
+        }
+        swap(nums[++i], nums[right]);
+        quick_sort(nums, left, i - 1);
+        quick_sort(nums, i + 1, right);
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// hash表
+class Solution {
+public:
+    int findRepeatNumber(vector<int>& nums) {
+        int len = nums.size();
+        set<int> tmp;
+        int i = 0;
+        for (; i < len; ++i)
+        {
+            if (tmp.find(nums[i]) != tmp.end())
+                break;
+            else
+                tmp.insert(nums[i]);
+        }
+        return nums[i];        
+    }
+};
+```
+
+**方法三：**
+
+```c++
+// 交换
+class Solution {
+public:
+    int findRepeatNumber(vector<int>& nums) {
+        int len = nums.size();
+        int i = 0;
+        for (; i < len; ++i)
+        {
+            while (nums[i] != i)  // 如果不在他该在的位置，就交换
+            {
+                if (nums[i] == nums[nums[i]])  // 交换前若相等，直接停止
+                    break;
+                swap(nums[i], nums[nums[i]]);
+            }
+            if (nums[i] != i)
+                break;
+        }   
+        return nums[i];
+    }
+};
+```
+
+
+
+
+
+## 04. 二维数组中的查找
+
+### 题目：
+
+在一个 n * m 的二维数组中，每一行都按照从左到右递增的顺序排序，每一列都按照从上到下递增的顺序排序。请完成一个高效的函数，输入这样的一个二维数组和一个整数，判断数组中是否含有该整数。
+
+**示例:**
+
+```
+现有矩阵 matrix 如下：
+
+[
+  [1,   4,  7, 11, 15],
+  [2,   5,  8, 12, 19],
+  [3,   6,  9, 16, 22],
+  [10, 13, 14, 17, 24],
+  [18, 21, 23, 26, 30]
+]
+```
+
+给定 target = 5，返回 `true`。
+
+给定 target = 20，返回 `false`。
+
+**限制：**
+
+`0 <= n <= 1000`
+
+`0 <= m <= 1000`
+
+**解题思路：**
+
+起点从右上角或者左下角开始
+
+时间复杂度：O(m + n)
+
+空间复杂度：O(1)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    bool findNumberIn2DArray(vector<vector<int>>& matrix, int target) {
+        int m = matrix.size();
+        if (m == 0)
+            return false;
+        int n = matrix[0].size();
+        if (n == 0)
+            return false;
+        int i = 0, j = n - 1;
+        while (i < m && j >= 0)
+        {
+            if (matrix[i][j] > target)
+                --j;
+            else if (matrix[i][j] < target)
+                ++i;
+            else
+                return true;
+        }
+        return false;
+    }
+};
+```
+
+
+
+
+
+## 05. 替换空格
+
+### 题目：
+
+请实现一个函数，把字符串 s 中的每个空格替换成"%20"。
+
+**示例 1：**
+
+```
+输入：s = "We are happy."
+输出："We%20are%20happy."
+```
+
+**限制：**
+
+`0 <= s 的长度 <= 10000`
+
+**解题思路：**
+
+从后往前
+
+时间复杂度：O(n) 
+
+空间复杂度：O(1)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    string replaceSpace(string s) {
+        int s_size = s.length();
+        int space_count = 0;
+        for (int i = 0; i < s_size; ++i)
+        {
+            if (s[i] == ' ')
+                ++space_count;
+        }
+        string res;
+        int res_size = s_size + 2 * space_count;
+        res.resize(res_size);
+        for (int i = res_size - 1, j = s_size - 1; i >=0 && j >= 0;)
+        {
+            if (s[j] != ' ')
+                res[i--] = s[j--];
+            else
+            {
+                res[i--] = '0';
+                res[i--] = '2';
+                res[i--] = '%';
+                --j;
+            }
+        }
+        return res;
+    }
+};
+```
+
+
+
+
+
+## 06. 从尾到头打印链表
+
+### 题目：
+
+输入一个链表的头节点，从尾到头反过来返回每个节点的值（用数组返回）。
+
+**示例 1：**
+
+```
+输入：head = [1,3,2]
+输出：[2,3,1]
+```
+
+**限制：**
+
+`0 <= 链表长度 <= 10000`
+
+**解题思路：**
+
+思路一：
+
+使用数组先存正序，再交换
+
+时间复杂度：O(n) 
+
+空间复杂度：O(1)
+
+思路二：使用栈
+
+时间复杂度：O(n) 
+
+空间复杂度：O(n)
+
+思路三：递归
+
+时间复杂度：O(n) 
+
+空间复杂度：O(n)  递归使用的
+
+**方法一：**
+
+```c++
+ // 交换数组
+class Solution {
+public:
+    vector<int> reversePrint(ListNode* head) {
+        vector<int> res;
+        if (head == NULL)
+            return res;
+        while (head != NULL)
+        {
+            res.push_back(head->val);
+            head = head->next;
+        }
+        int i = 0, j = res.size() - 1;
+        while(i < j)
+        {
+            int tmp = res[i];
+            res[i] = res[j];
+            res[j] = tmp;
+            ++i;
+            --j;
+        }
+        return res;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+ // 使用栈
+class Solution {
+public:
+    vector<int> reversePrint(ListNode* head) {
+        vector<int> res;
+        if (head == NULL)
+            return res;
+        stack<int> stk;
+        while (head != NULL)
+        {
+            stk.push(head->val);
+            head = head->next;
+        }
+        while(!stk.empty())
+        {
+            res.push_back(stk.top());
+            stk.pop();
+        }
+        return res;
+    }
+};
+```
+
+**方法三：**
+
+```c++
+ // 递归
+class Solution {
+public:
+    vector<int> reversePrint(ListNode* head) {
+        vector<int> res;
+        if (head == NULL)
+            return res;
+        
+        _reversePrint(head, res);
+        return res;
+    }
+
+    void _reversePrint(ListNode* head, vector<int>& res)
+    {
+        if (head == NULL)
+            return;
+        _reversePrint(head->next, res);
+        res.push_back(head->val);
+    }
+};
+```
+
+
+
+
+
+## 07. 重建二叉树
+
+### 题目：
+
+输入某二叉树的前序遍历和中序遍历的结果，请构建该二叉树并返回其根节点。
+
+假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
+
+ 
+
+**示例 1:**
+
+![剑指offer_07](F:\C++\刷题\Img\剑指offer_07.jpg)
+
+```
+Input: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+Output: [3,9,20,null,null,15,7]
+```
+
+**示例 2:**
+
+```
+Input: preorder = [-1], inorder = [-1]
+Output: [-1]
+```
+
+**限制：**
+
+`0 <= 节点个数 <= 5000`
+
+**解题思路：**
+
+思路一：递归法
+
+时间复杂度：O(n) 
+
+空间复杂度：O(n)
+
+思路二：迭代法
+
+时间复杂度：O(n) 
+
+空间复杂度：O(n)
+
+**方法一：**
+
+```c++
+ // 递归法
+class Solution {
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        int pre_size = preorder.size();
+        int in_size = inorder.size();
+        if (pre_size == 0 || in_size == 0 || pre_size != in_size)
+            return NULL;
+        return _buildTree(preorder, 0, pre_size - 1, inorder, 0, in_size - 1);
+    }
+    TreeNode* _buildTree(vector<int>& preorder, int left1, int right1, vector<int>& inorder, int left2, int right2)
+    {
+        int x = preorder[left1];
+        int pos = left2;
+        while (inorder[pos] != x && pos <= right2)
+            ++pos;
+        if (pos > right2)
+            return NULL; // 异常处理
+        int l_size = pos - left2;
+        int r_size = right2 - pos;
+        TreeNode* node = new TreeNode(x);
+        if (l_size > 0)
+            node->left = _buildTree(preorder, left1 + 1, left1 + l_size, inorder, left2, pos - 1);
+        if (r_size > 0)
+            node->right = _buildTree(preorder, left1 + 1 + l_size, right1 , inorder, pos + 1, right2);
+        return node;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+ // 递归法
+class Solution {
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        int pre_size = preorder.size();
+        int in_size = inorder.size();
+        if (pre_size == 0 || in_size == 0 || pre_size != in_size)
+            return NULL;
+        
+        TreeNode* root = new TreeNode(preorder[0]);
+        int inorderIndex = 0;
+        stack<TreeNode*> stk;
+        stk.push(root);
+        for (int i = 1; i < pre_size; ++i)
+        {
+            int preorderVal = preorder[i];
+            TreeNode* node = stk.top();
+            if (node->val != inorder[inorderIndex])
+            {
+                TreeNode* leftNode = new TreeNode(preorderVal);
+                node->left = leftNode;
+                stk.push(leftNode);
+            }
+            else
+            {
+                while (!stk.empty() && stk.top()->val == inorder[inorderIndex])
+                {
+                    node = stk.top();
+                    stk.pop();
+                    ++inorderIndex;
+                }
+                node->right = new TreeNode(preorderVal);
+                stk.push(node->right);
+            }
+        }
+        return root;
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
 
