@@ -5483,6 +5483,105 @@ public:
 
 
 
+## 0349. 两个数组的交集
+
+### 题目：
+
+给定两个数组 `nums1` 和 `nums2` ，返回 它们的交集 。输出结果中的每个元素一定是 唯一 的。我们可以 **不考虑输出结果的顺序** 。
+
+**示例 1：**
+
+```
+输入：nums1 = [1,2,2,1], nums2 = [2,2]
+输出：[2]
+```
+
+**示例 2：**
+
+```
+输入：nums1 = [4,9,5], nums2 = [9,4,9,8,4]
+输出：[9,4]
+解释：[4,9] 也是可通过的
+```
+
+**提示：**
+
+- 1 <= nums1.length, nums2.length <= 1000
+- 0 <= nums1[i], nums2[i] <= 1000
+
+**解题思路：**
+
+思路一：使用集合，分别存储两个数组的数，再将一个数组的数挨个在另一个数组中查找是否为交集
+
+时间复杂度：O(m + n)
+
+空间复杂度：O(m + n)
+
+思路二：排序+双指针，注意重复相同数字
+
+时间复杂度：O(mlogm + nlogn)
+
+空间复杂度：O(logm + logn)  取决于排序大小
+
+**方法一：**
+
+```c++
+// 方法一：集合
+class Solution {
+public:
+    vector<int> intersection(vector<int>& nums1, vector<int>& nums2) {
+        unordered_set<int> set1, set2;
+        for (auto& e : nums1)
+            set1.insert(e);
+        for (auto& e : nums2)
+            set2.insert(e);
+
+        vector<int> intersec;
+        for (auto& e : set1)
+        {
+            if (set2.count(e) != 0)
+                intersec.push_back(e);
+        }
+        return intersec;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 方法二：排序+ 双指针
+class Solution {
+public:
+    vector<int> intersection(vector<int>& nums1, vector<int>& nums2) {
+        sort(nums1.begin(), nums1.end());
+        sort(nums2.begin(), nums2.end());
+        vector<int> intersec;
+        int i = 0, j = 0, sz1 = nums1.size(), sz2 = nums2.size();
+        while (i < sz1 && j < sz2)
+        {
+            if (nums1[i] < nums2[j])
+                ++i;
+            else if (nums1[i] > nums2[j])
+                ++j;
+            else
+            {
+                // 注意重复相同数字
+                if (intersec.size() == 0 || intersec.back() != nums1[i])
+                    intersec.push_back(nums1[i]);
+                ++i, ++j;
+            }
+        }
+
+        return intersec;
+    }
+};
+```
+
+
+
+
+
 ## 0384. 打乱数组
 
 ### 题目：
@@ -5703,6 +5802,285 @@ public:
     }
 };
 ```
+
+
+
+
+
+## 0884. 两句话中的不常见单词
+
+### 题目：
+
+**句子** 是一串由空格分隔的单词。每个 **单词** 仅由小写字母组成。
+
+如果某个单词在其中一个句子中恰好出现一次，在另一个句子中却 **没有出现** ，那么这个单词就是 **不常见的** 。
+
+给你两个 **句子** `s1` 和 `s2` ，返回所有 **不常用单词** 的列表。返回列表中单词可以按 **任意顺序** 组织。
+
+**示例 1：**
+
+```
+输入：s1 = "this apple is sweet", s2 = "this apple is sour"
+输出：["sweet","sour"]
+```
+
+**示例 2：**
+
+```
+输入：s1 = "apple apple", s2 = "banana"
+输出：["banana"]
+```
+
+**提示：**
+
+- 1 <= s1.length, s2.length <= 200
+- s1 和 s2 由小写英文字母和空格组成
+- s1 和 s2 都不含前导或尾随空格
+- s1 和 s2 中的所有单词间均由单个空格分隔
+
+**解题思路：**
+
+思路一：使用hash表统计两个句子的词频，并取个数为1的
+
+时间复杂度：O(m + n)
+
+空间复杂度：O(m + n)
+
+思路二：字符串匹配
+
+有点问题
+
+输入：
+
+```
+"apple apple" 
+
+"banana"
+```
+
+输出：
+
+```
+["apple","apple","banana"]
+```
+
+预期结果：
+
+```
+["banana"]
+```
+
+
+
+**方法一：**
+
+```c++
+class Solution {
+public:
+    vector<string> uncommonFromSentences(string s1, string s2) {
+        unordered_map<string, int> um;
+        findStringMap(s1, um);
+        findStringMap(s2, um);
+
+        vector<string> ret;
+        for (auto it = um.begin(); it != um.end(); ++it)
+        {
+            if (it->second == 1)
+                ret.push_back(it->first);
+        }
+        return ret;
+    }
+
+    void findStringMap(string s, unordered_map<string, int>& um)
+    {
+        int sz = s.length();
+        int i = 0, j = 0;
+        while (i < sz)
+        {
+            while (j < sz)
+            {
+                if (s[j] == ' ')
+                    break;
+                ++j;
+            }
+            if (i != j)
+            {
+                ++um[s.substr(i, j - i)];
+            }
+            ++j;
+            i = j;
+        }
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 方法二：字符串匹配
+class Solution {
+public:
+    vector<string> uncommonFromSentences(string s1, string s2) {
+        
+        vector<string> ret;
+        findStringMatch(s1, s2, ret);
+        findStringMatch(s2, s1, ret);
+        return ret;
+    }
+
+    bool stringMatch(const string& s, const string& subs)
+    {
+        int sz = s.length(), sub_sz = subs.size();
+        for (int i = 0; i < sz - sub_sz; ++i)
+        {
+            int idx = i;
+            int j = 0;
+            for (; j < sub_sz; ++j)
+            {
+                if (s[idx] == subs[j])
+                    ++idx;
+                else
+                    break;
+            }
+
+            if (j == sub_sz)
+                return true;
+        }
+        return false;
+    }
+
+    void findStringMatch(const string& s1, const string& s2, vector<string>& ret)
+    {
+        int sz = s1.size();
+        int i = 0, j = 0;
+        while (i < sz)
+        {
+            while (j < sz)
+            {
+                if (s1[j] == ' ')
+                    break;
+                ++j;
+            }
+            if (i != j)
+            {
+                string sub_s = s1.substr(i, j - i);
+                if (!stringMatch(s2, sub_s))
+                    ret.push_back(sub_s);
+            }
+            ++j;
+            i = j;
+        }
+    }
+};
+```
+
+
+
+
+
+## 0961. 在长度2N的数组中找出重复N次的元素
+
+### 题目：
+
+给你一个整数数组 nums ，该数组具有以下属性：
+
+- nums.length == 2 * n.
+
+- nums 包含 n + 1 个 **不同的** 元素
+- nums 中恰有一个元素重复 n 次
+
+找出并返回重复了 n 次的那个元素。
+
+**示例 1：**
+
+```
+输入：nums = [1,2,3,3]
+输出：3
+```
+
+**示例 2：**
+
+```
+输入：nums = [2,1,2,5,3,2]
+输出：2
+```
+
+**示例 3：**
+
+```
+输入：nums = [5,1,5,2,5,3,5,4]
+输出：5
+```
+
+
+**提示：**
+
+- 2 <= n <= 5000
+- nums.length == 2 * n
+- 0 <= nums[i] <= 104
+- nums 由 n + 1 个 不同的 元素组成，且其中一个元素恰好重复 n 次
+
+**解题思路：**
+
+思路一：使用map计数
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+思路二：比较法，四个数中，一定会有两个相同，所以只需要将当前数字和后面1.2.3个数字作比较，如果存在相同，则是返回结果；
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+**方法一：**
+
+```c++
+// 方法一：计数法
+class Solution {
+public:
+    int repeatedNTimes(vector<int>& nums) {
+        map<int, int> m;
+        for (auto& e : nums)
+            ++m[e];
+        auto it = m.begin();
+        for (; it != m.end(); ++it)
+        {
+            if (it->second > 1)
+                break;
+        }
+        return it->first;
+    }
+};
+```
+
+**方法二：**
+
+```c++
+// 方法二：比较
+class Solution {
+public:
+    int repeatedNTimes(vector<int>& nums) {
+        int sz = nums.size();
+        for (int i = 1; i <= 3; ++i)
+        {
+            for (int j = 0; j < sz - i; ++j)
+            {
+                if (nums[j] == nums[i + j])
+                    return nums[j];
+            }
+        }
+        return -1;
+    }
+};
+```
+
+
+
+
+
+
 
 
 
@@ -14013,6 +14391,87 @@ public:
             }
         }
         return root;
+    }
+};
+```
+
+
+
+
+
+## 0107. 二叉树的层序遍历Ⅱ
+
+### 题目：
+
+给你二叉树的根节点 `root` ，返回其节点值 **自底向上的层序遍历** 。 （即按从叶子节点所在层到根节点所在的层，逐层从左向右遍历）
+
+**示例 1：**
+
+![img](.\Img\leetcode_107.jpg)
+
+```
+输入：root = [3,9,20,null,null,15,7]
+输出：[[15,7],[9,20],[3]]
+```
+
+**示例 2：**
+
+```
+输入：root = [1]
+输出：[[1]]
+```
+
+**示例 3：**
+
+```
+输入：root = []
+输出：[]
+```
+
+**提示：**
+
+- 树中节点数目在范围 `[0, 2000]` 内
+- `-1000 <= Node.val <= 1000`
+
+**解题思路：**
+
+广度优先，返回前转置vector
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+**方法：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> levelOrderBottom(TreeNode* root) {
+        vector<vector<int>> levelOrder;
+        if (root == nullptr)
+            return levelOrder;
+        queue<TreeNode*> Q;
+        Q.push(root);
+        TreeNode* emptyNode = new TreeNode();
+        while (!Q.empty())
+        {
+            int sz = Q.size();
+            vector<int> level;
+            for (int i = 0; i < sz; ++i)
+            {
+                TreeNode* front_node = Q.front();
+                Q.pop();
+                level.push_back(front_node->val);
+
+                if (front_node->left)
+                    Q.push(front_node->left);
+                if (front_node->right)
+                    Q.push(front_node->right);
+            }
+            levelOrder.push_back(level);
+        }
+        reverse(levelOrder.begin(), levelOrder.end());
+        return levelOrder;
     }
 };
 ```
